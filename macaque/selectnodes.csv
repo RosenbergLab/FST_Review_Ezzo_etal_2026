@@ -1,23 +1,23 @@
 id,x,y,label,color,size,center_x,center_y,FSTcomments
-0,2150,710,V1,black,5,0.0,0.35,Rua25 Mark14 Bar00 Bou90
-1,1895,670,V2,black,5,0.0,0.4,Rua25 Mark14 Bou90
-2,1810,500,V3,black,5,0.0,0.47,Rua25 Bou90
+0,2150,710,V1,black,5,0,0.35,Rua25 Mark14 Bar00 Bou90
+1,1895,670,V2,black,5,0,0.4,Rua25 Mark14 Bou90
+2,1810,500,V3,black,5,0,0.47,Rua25 Bou90
 3,1900,380,V3A,blue,5,0.05,0.5,Rua25 Bou90
 4,1670,760,V4,green,5,-0.025,0.6,Rua25 Mark14 Fel97 Bar00 Ung08 Bou90
 5,1550,935,VOT/TEO,green,5,-0.05,0.65,Mark14
-6,1575,690,V4t,black,5,-0.025,0.7,Bou90
-7,1540,580,MT,black,5,0.025,0.7,Mark14 Bou90
-8,1450,500,MSTm,black,5,0.025,0.8,Bou90
+6,1575,690,V4t,blue,5,-0.025,0.7,Bou90
+7,1540,580,MT,blue,5,0.025,0.7,Mark14 Bou90
+8,1450,500,MSTm,blue,5,0.025,0.8,Bou90
 9,1400,670,FST,black,5,-0.025,0.8,
 10,1465,995,PITv,green,5,-0.12,0.9,Fel97 Bou90
-11,1400,850,PITd,red,5,-0.1,0.9,Rua25 Mark14 Bou90
-12,1170,1050,CITd,red,5,-0.14,1.0,Rua25 Mark14 Bou90
-13,1280,1200,CITv,green,5,-0.12,1.0,Rua25 Bou90
-14,950,1135,AITd,red,5,-0.16,1.1,Rua25 Bou90
+11,1400,850,PITd,green,5,-0.1,0.9,Rua25 Mark14 Bou90
+12,1170,1050,CITd,green,5,-0.14,1,Rua25 Mark14 Bou90
+13,1280,1200,CITv,green,5,-0.12,1,Rua25 Bou90
+14,950,1135,AITd,green,5,-0.16,1.1,Rua25 Bou90
 15,1080,1280,AITv,green,5,-0.14,1.1,Rua25
-16,1150,830,STPp,red,5,-0.05,1.0,Mark14 Bou90
+16,1150,830,STPp,red,5,-0.05,1,Mark14 Bou90
 17,860,1030,STPa,red,5,-0.1,1.1,Mark14 Bou90
-18,1150,680,STGp,red,5,-0.05,1.0,Rua25
+18,1150,680,STGp,red,5,-0.05,1,Rua25
 19,880,850,STGa,red,5,-0.1,1.1,Mark14
 20,600,850,insula,black,5,-0.08,1.15,Rua25
 21,1550,400,MSTd,blue,5,0.05,0.85,Bou90
@@ -27,11 +27,11 @@ id,x,y,label,color,size,center_x,center_y,FSTcomments
 26,1280,140,AIP,blue,5,0.1,0.9,Rua25
 27,1480,140,LIP,blue,5,0.1,0.9,Rua25 Sel96 Bou90
 28,1380,140,VIP,blue,5,0.12,0.9,Rua25 Sel96 Bou90
-30,1000,150,S1,blue,5,0.14,0.9,Rua25 Mark14
-32,240,500,FEF,black,5,0.0,1.4,Mark14 Bou90 Sel96
-33,240,300,SEF,black,5,0.0,1.4,Rua25 Mark14
-34,100,480,dlPFC,black,5,0.0,1.45,Mark14
-35,100,590,vlPFC,black,5,0.0,1.45,Rua25
+30,1000,150,S1,black,5,0.14,0.9,Rua25 Mark14
+32,240,500,FEF,black,5,0,1.4,Mark14 Bou90 Sel96
+33,240,300,SEF,black,5,0,1.4,Rua25 Mark14
+34,100,480,dlPFC,black,5,0,1.45,Mark14
+35,100,590,vlPFC,black,5,0,1.45,Rua25
 36,700,300,M1,black,5,0.02,1.2,Rua25 Mark14
 37,460,200,PMd,black,5,0.03,1.3,Mark14 Rua25
 38,500,500,PMv,black,5,0.015,1.3,Mark14 Rua25
@@ -41,10 +41,10 @@ id,x,y,label,color,size,center_x,center_y,FSTcomments
 46,3200,650,RSC,black,5,0.06,0.9,Rua25
 47,3100,450,PCCa,black,5,0.06,0.9,Rua25
 48,3000,550,PCCp,black,5,0.06,0.9,Rua25
-49,2700,1800,thalamus,black,0,0.0,0.0,Bou92
-50,2700,1900,claustrum,black,0,0.0,0.0,Bou92
-51,2700,2000,striatum,black,0,0.0,0.0,Bou92
-52,2700,2100,basalfore,black,0,0.0,0.0,Bou92
-53,3000,1900,pretectum,black,0,0.0,0.0,Bou92
-54,3000,2000,SC,black,0,0.0,0.0,Bog19 Bog21 Bou92
-55,3300,1950,pons,black,0,0.0,0.0,Bou92
+49,2700,1800,thalamus,black,0,0,0,Bou92
+50,2700,1900,claustrum,black,0,0,0,Bou92
+51,2700,2000,striatum,black,0,0,0,Bou92
+52,2700,2100,basalfore,black,0,0,0,Bou92
+53,3000,1900,pretectum,black,0,0,0,Bou92
+54,3000,2000,SC,black,0,0,0,Bog19 Bog21 Bou92
+55,3300,1950,pons,black,0,0,0,Bou92

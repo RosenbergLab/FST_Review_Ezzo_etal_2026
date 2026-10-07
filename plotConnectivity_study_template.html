@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FST connectivity by study</title>
+  <style>
+    html, body { margin: 0; background: #fff; color: #1f2937; font-family: Arial, sans-serif; }
+    .study-panel { padding: 12px 18px; border-bottom: 1px solid #bbb; background: #f9fbfd; }
+    .study-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+    .study-controls button, .only-study { cursor: pointer; }
+    .study-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 6px 16px; }
+    .study-row { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+    .study-row label { min-width: 0; line-height: 1.25; }
+    .only-study { flex: none; }
+    @media (max-width: 370px) { .study-grid { grid-template-columns: 1fr; } }
+    .study-note, .study-status { font-size: 13px; margin: 7px 0 0; }
+    .study-status { font-weight: bold; }
+    #stage { position: relative; overflow: hidden; background: #fff; }
+    svg { display: block; touch-action: none; cursor: grab; }
+    svg.dragging { cursor: grabbing; }
+    .node { cursor: pointer; }
+    .node-label { font-size: 10px; text-anchor: middle; fill: #111;
+      stroke: #fff; stroke-width: 2px; paint-order: stroke; pointer-events: none; }
+    #tooltip { position: fixed; z-index: 10; display: none; max-width: 340px;
+      white-space: pre-wrap; padding: 7px 9px; border: 1px solid #777;
+      border-radius: 3px; background: rgba(255,255,255,.96);
+      box-shadow: 0 2px 8px #0003; font-size: 12px; pointer-events: none; }
+    #legend { position: absolute; top: 8px; right: 8px; display: none;
+      padding: 8px 10px; border: 1px solid #999; background: rgba(255,255,255,.9);
+      font-size: 11px; }
+    .legend-title { font-weight: bold; margin-bottom: 5px; }
+    .legend-row { display: flex; align-items: center; min-height: 27px; gap: 7px; }
+    .legend-dot { display: inline-block; flex: none; border-radius: 50%; background: #000; }
+  </style>
+</head>
+<body>
+  <div class="study-panel">
+    <strong>Show results from studies</strong>
+    <div class="study-controls">
+      <button type="button" id="select-all-studies">Select all</button>
+      <button type="button" id="clear-studies">Clear</button>
+      <span>Check several studies to see their combined connections.</span>
+    </div>
+    <div id="study-grid" class="study-grid"></div>
+    <p class="study-note">Fel91 uses reported FST pathways in Table 3; its hierarchy citations in evidence.csv are not treated as connection reports. Fel91 does not grade connection strength, so its dots are small unless another selected tracer study supplies a grade.</p>
+    <p id="study-status" class="study-status" aria-live="polite"></p>
+  </div>
+  <div id="stage">
+    <svg id="plot" role="img" aria-label="Interactive FST connectivity diagram"></svg>
+    <div id="legend"><div class="legend-title">Anatomical tracer strength</div></div>
+  </div>
+  <div id="tooltip"></div>
+  <script>
+  (function () {
+    'use strict';
+    const data = __CONNECTIVITY_DATA__;
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const positive = new Set(['weak', 'moderate', 'strong', 'present', 'broad']);
+    const ranks = { weak: 1, moderate: 2, strong: 3 };
+    const strengthNames = { 1: 'weak', 2: 'moderate', 3: 'strong' };
+    const strengthSizes = { 1: 11, 2: 18, 3: 26 };
+    const seed = String(data.seed || 'FST');
+    const stage = document.getElementById('stage');
+    const svg = document.getElementById('plot');
+    const tooltip = document.getElementById('tooltip');
+    const legend = document.getElementById('legend');
+    const grid = document.getElementById('study-grid');
+    const status = document.getElementById('study-status');
+    const choices = [];
+    const events = (data.events || []).map(event => ({
+      study: String(event.study),
+      target: String(event.target),
+      direction: String(event.direction).toLowerCase(),
+      grade: String(event.grade).toLowerCase(),
+      type: String(event.type).toLowerCase()
+    }));
+
+    stage.style.width = data.width + 'px';
+    stage.style.height = data.height + 'px';
+    svg.setAttribute('width', data.width);
+    svg.setAttribute('height', data.height);
+    svg.setAttribute('viewBox', `0 0 ${data.width} ${data.height}`);
+    const scene = add(svg, 'g', {});
+
+    function add(parent, tag, attrs) {
+      const el = document.createElementNS(svgNS, tag);
+      for (const [key, value] of Object.entries(attrs)) el.setAttribute(key, value);
+      parent.appendChild(el);
+      return el;
+    }
+    function px(x) {
+      return (x - data.xLimits[0]) * data.width / (data.xLimits[1] - data.xLimits[0]);
+    }
+    function py(y) {
+      return (data.yLimits[1] - y) * data.height / (data.yLimits[1] - data.yLimits[0]);
+    }
+    function halfEvenMean(values) {
+      const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+      const lower = Math.floor(mean);
+      const fraction = mean - lower;
+      return fraction > 0.5 ? lower + 1 : fraction < 0.5 ? lower :
+        (lower % 2 ? lower + 1 : lower);
+    }
+    function selectedCodes() {
+      return new Set(choices.filter(choice => choice.checked).map(choice => choice.value));
+    }
+    function positionTooltip(event) {
+      tooltip.style.left = Math.max(8, Math.min(event.clientX + 12,
+        innerWidth - tooltip.offsetWidth - 8)) + 'px';
+      tooltip.style.top = Math.max(8, Math.min(event.clientY + 12,
+        innerHeight - tooltip.offsetHeight - 8)) + 'px';
+    }
+
+    for (const study of data.studies || []) {
+      const row = document.createElement('div');
+      row.className = 'study-row';
+      const label = document.createElement('label');
+      const choice = document.createElement('input');
+      choice.type = 'checkbox';
+      choice.className = 'study-choice';
+      choice.value = String(study.code);
+      choice.checked = true;
+      choice.addEventListener('change', updateView);
+      label.append(choice, document.createTextNode(' ' + String(study.label)));
+      const only = document.createElement('button');
+      only.type = 'button';
+      only.className = 'only-study';
+      only.textContent = 'Only';
+      only.setAttribute('aria-label', 'Show only ' + String(study.label));
+      only.addEventListener('click', () => {
+        for (const item of choices) item.checked = item.value === choice.value;
+        updateView();
+      });
+      row.append(label, only);
+      grid.appendChild(row);
+      choices.push(choice);
+    }
+
+    if (data.displayBrain && data.image) {
+      add(scene, 'image', { href: data.image, x: 0, y: 0,
+        width: data.width, height: data.height, preserveAspectRatio: 'xMidYMid meet' });
+    }
+    const edgeVisuals = [];
+    if (!data.nodesOnly) {
+      for (const edge of data.edges || []) {
+        const line = add(scene, 'line', {
+          class: 'edge', x1: px(edge.x0), y1: py(edge.y0),
+          x2: px(edge.x1), y2: py(edge.y1),
+          stroke: edge.color, 'stroke-width': edge.width
+        });
+        if (edge.dash) line.setAttribute('stroke-dasharray', '6 4');
+        edgeVisuals.push({ element: line, target: String(edge.target) });
+      }
+    }
+    const nodeVisuals = [];
+    for (const node of data.nodes || []) {
+      const x = px(node.x), y = py(node.y);
+      const group = add(scene, 'g', {});
+      const dot = add(group, 'circle', { class: 'node', cx: x, cy: y,
+        r: Math.max(0.15, Number(node.size) / 2), fill: node.fill,
+        'fill-opacity': node.alpha, stroke: node.outline,
+        'stroke-opacity': node.alpha, 'stroke-width': 1 });
+      const label = add(group, 'text', { class: 'node-label', x,
+        y: y - Number(node.size) / 2 - 3 });
+      label.textContent = node.label;
+      const visual = { node, group, dot, label, y, hover: '' };
+      dot.addEventListener('mouseenter', event => {
+        tooltip.textContent = visual.hover;
+        tooltip.style.display = 'block';
+        positionTooltip(event);
+      });
+      dot.addEventListener('mousemove', positionTooltip);
+      dot.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+      nodeVisuals.push(visual);
+    }
+    if (data.legend && data.legend.length) {
+      legend.style.display = 'block';
+      for (const item of data.legend) {
+        const row = document.createElement('div');
+        row.className = 'legend-row';
+        const dot = document.createElement('span');
+        dot.className = 'legend-dot';
+        dot.style.width = item.size + 'px';
+        dot.style.height = item.size + 'px';
+        const label = document.createElement('span');
+        label.textContent = item.label;
+        row.append(dot, label);
+        legend.append(row);
+      }
+    }
+
+    function updateView() {
+      tooltip.style.display = 'none';
+      const selected = selectedCodes();
+      const byTarget = new Map();
+      for (const event of events) {
+        if (!selected.has(event.study)) continue;
+        if (!byTarget.has(event.target)) byTarget.set(event.target, []);
+        byTarget.get(event.target).push(event);
+      }
+      const visibleTargets = new Set();
+      for (const visual of nodeVisuals) {
+        const node = visual.node;
+        const isSeed = String(node.label) === seed;
+        const reports = byTarget.get(String(node.label)) || [];
+        const present = reports.filter(event => positive.has(event.grade));
+        const visible = isSeed || present.length > 0;
+        visual.group.style.display = visible ? '' : 'none';
+        if (!visible) continue;
+        if (isSeed) {
+          visual.dot.setAttribute('r', 3);
+          visual.dot.setAttribute('fill-opacity', 1);
+          visual.dot.setAttribute('stroke-opacity', 1);
+          visual.label.setAttribute('y', visual.y - 6);
+          visual.hover = String(node.label) + '\nSeed region';
+          continue;
+        }
+        visibleTargets.add(String(node.label));
+        const graded = { out: [], in: [] };
+        for (const event of present) {
+          if (event.type === 'tracer' && ranks[event.grade] && graded[event.direction]) {
+            graded[event.direction].push(ranks[event.grade]);
+          }
+        }
+        const directionScores = Object.values(graded).filter(values => values.length)
+          .map(halfEvenMean);
+        const score = directionScores.length ? Math.max(...directionScores) : null;
+        const size = strengthSizes[score] || 6;
+        const conflicting = ['out', 'in'].every(direction =>
+          reports.some(event => event.direction === direction && positive.has(event.grade)) &&
+          reports.some(event => event.direction === direction && event.grade === 'absent'));
+        const alpha = conflicting ? 0.2 : 1;
+        const studies = [...new Set(present.map(event => event.study))].sort();
+        const absentStudies = [...new Set(reports.filter(event => event.grade === 'absent')
+          .map(event => event.study))].sort();
+        visual.dot.setAttribute('r', size / 2);
+        visual.dot.setAttribute('fill-opacity', alpha);
+        visual.dot.setAttribute('stroke-opacity', alpha);
+        visual.label.setAttribute('y', visual.y - size / 2 - 3);
+        visual.hover = String(node.label) +
+          '\nReported by: ' + studies.join(', ') +
+          '\nGraded tracer strength: ' + (score === null ? 'not reported' : strengthNames[score]) +
+          (absentStudies.length ? '\nSelected reports of absence: ' + absentStudies.join(', ') : '');
+      }
+      for (const edge of edgeVisuals) {
+        edge.element.style.display = visibleTargets.has(edge.target) ? '' : 'none';
+      }
+      status.textContent = visibleTargets.size + ' connected regions shown from ' +
+        selected.size + ' selected ' + (selected.size === 1 ? 'study' : 'studies') + '.';
+    }
+    document.getElementById('select-all-studies').addEventListener('click', () => {
+      for (const choice of choices) choice.checked = true;
+      updateView();
+    });
+    document.getElementById('clear-studies').addEventListener('click', () => {
+      for (const choice of choices) choice.checked = false;
+      updateView();
+    });
+    updateView();
+
+    let scale = 1, tx = 0, ty = 0, drag = null;
+    function updateTransform() {
+      scene.setAttribute('transform', `translate(${tx} ${ty}) scale(${scale})`);
+    }
+    svg.addEventListener('wheel', event => {
+      event.preventDefault();
+      const rect = svg.getBoundingClientRect();
+      const x = (event.clientX - rect.left) * data.width / rect.width;
+      const y = (event.clientY - rect.top) * data.height / rect.height;
+      const nextScale = Math.max(0.25, Math.min(20,
+        scale * (event.deltaY < 0 ? 1.15 : 1 / 1.15)));
+      const ratio = nextScale / scale;
+      tx = x - (x - tx) * ratio;
+      ty = y - (y - ty) * ratio;
+      scale = nextScale;
+      updateTransform();
+    }, { passive: false });
+    svg.addEventListener('pointerdown', event => {
+      if (event.button !== 0) return;
+      tooltip.style.display = 'none';
+      drag = { x: event.clientX, y: event.clientY };
+      svg.setPointerCapture(event.pointerId);
+      svg.classList.add('dragging');
+    });
+    svg.addEventListener('pointermove', event => {
+      if (!drag) return;
+      const rect = svg.getBoundingClientRect();
+      tx += (event.clientX - drag.x) * data.width / rect.width;
+      ty += (event.clientY - drag.y) * data.height / rect.height;
+      drag = { x: event.clientX, y: event.clientY };
+      updateTransform();
+    });
+    function endDrag() { drag = null; svg.classList.remove('dragging'); }
+    svg.addEventListener('pointerup', endDrag);
+    svg.addEventListener('pointercancel', endDrag);
+    svg.addEventListener('dblclick', () => {
+      scale = 1; tx = 0; ty = 0; updateTransform();
+    });
+  }());
+  </script>
+</body>
+</html>

@@ -1,18 +1,18 @@
 id,x,y,label,color,size,center_x,center_y,FSTcomments
-0,2228,935,V1,black,5,0.0,0.35,Rua25
+0,2228,935,V1,black,5,0,0.35,Rua25
 1,2200,945,V2,black,5,-0.025,0.8,Rol23 Rua25 Bak18
 3,2170,955,V3,black,5,-0.025,0.8,Rol23 Rua25 Bak18
 4,2200,792,V3A/B,blue,5,-0.025,0.8,Rol23 Bak18 Rua25
 5,2100,580,V7,blue,5,-0.025,0.8,Rol23 Bak18
 6,2114,1040,V4,green,5,-0.025,0.8,Rol23 Bak18 Rua25
-7,1930,1040,V4t,black,5,-0.025,0.7,Rol23 Bak18
-8,1930,900,MT,black,5,0.025,0.7,Rol23 Bak18
-9,1845,946,MST,black,5,-0.025,0.8,Rol23 Bak18
+7,1930,1040,V4t,blue,5,-0.025,0.7,Rol23 Bak18
+8,1930,900,MT,blue,5,0.025,0.7,Rol23 Bak18
+9,1845,946,MST,blue,5,-0.025,0.8,Rol23 Bak18
 10,1830,1040,FST,black,5,-0.025,0.8,
-11,2020,968,LO1,red,5,-0.025,0.8,Rol23 Bak18
-12,1975,1070,LO2,red,5,-0.025,0.8,Rol23 Bak18
-13,2000,895,LO3,red,5,-0.025,0.8,Rol23 Bak18
-14,1945,1140,PIT,red,5,-0.025,0.8,Rol23 Bak18
+11,2020,968,LO1,green,5,-0.025,0.8,Rol23 Bak18
+12,1975,1070,LO2,green,5,-0.025,0.8,Rol23 Bak18
+13,2000,895,LO3,green,5,-0.025,0.8,Rol23 Bak18
+14,1945,1140,PIT,green,5,-0.025,0.8,Rol23 Bak18
 15,1845,1800,V8,green,5,-0.025,0.8,Rol23 Bak18
 16,1845,2000,VMV,green,5,-0.025,0.8,Rol23 Bak18
 17,1610,1900,VVC,green,5,-0.025,0.8,Rol23 Bak18
@@ -40,8 +40,8 @@ id,x,y,label,color,size,center_x,center_y,FSTcomments
 40,1500,230,AIP,blue,5,-0.025,0.8,Rol23 Bak18 Rua25
 41,1670,110,VIP,blue,5,-0.025,0.8,Rol23 Bak18 Rua25
 42,1820,200,MIP,blue,5,-0.025,0.8,Rol23
-43,1270,240,BA1/2,blue,5,-0.025,0.8,Rol23 Bak18 Rua25
-44,1120,260,3a/3b,blue,5,-0.025,0.8,Rol23 Bak18 Rua25
+43,1270,240,BA1/2,black,5,-0.025,0.8,Rol23 Bak18 Rua25
+44,1120,260,3a/3b,black,5,-0.025,0.8,Rol23 Bak18 Rua25
 45,950,190,M1,black,5,-0.025,0.8,Rol23 Bak18 Rua25
 46,795,280,55b,black,5,-0.025,0.8,Rol23 Rua25
 47,795,190,FEF,black,5,-0.025,0.8,Rol23 Bak18 Rua25

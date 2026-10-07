@@ -48,11 +48,14 @@ The first markdown cell in the notebook summarizes these, but here's what each o
 
 | Flag | Values | Effect |
 |---|---|---|
-| `edgeweight` | `"evidencecount"` or `"connectivitystrength"` | Controls line thickness / node size: either the number of supporting studies, or a rough average of reported connection strength (weak/moderate/strong), taking the max of forward and backward projection strength. |
+| `edgeweight` | `"evidencecount"` or `"connectivitystrength"` | Controls line thickness and, outside the macaque FST view, dot size. |
+| `node_size_source` | `"tracer_strength"` for macaque FST by default | Sizes macaque FST dots by weak/moderate/strong anatomical tracer labels from evidence.csv. Positive reports are averaged within each projection direction, and the larger direction summary is shown. Absence and ungraded presence do not count as weak; areas without a graded tracer report use a fixed small dot. Fel91 supplies relative hierarchy, not connection strength. |
 | `edgecolor` | `"hierarchy"` or `"projections"` | Controls line/node edge color: hierarchical relationship to the main ROI (higher/lower/equal/unknown, based on Felleman & Van Essen-style hierarchy) or projection direction relative to the main ROI (sends/receives/bidirectional). |
 | `edgedashed` | `"certainty"` | Determines solid vs. dashed styling: `"certain"` (positive evidence, or absence not explicitly tested) vs. `"conflicting"` (some studies find the connection, others explicitly test for and don't find it). |
 | `comment` | `"evidencesource"` | Populates the hover text for each node with the abbreviated study codes that support connections to it (defined in `citations.txt`). |
 | `remove_unconnected_nodes` | `0` or `1` | If `1`, drops nodes from `selectnodes.csv`/the plot that have no surviving connection to the main ROI after filtering. |
+
+For macaque marker colors, the existing blue, red, and green node categories are rendered as dorsal light blue (#B3E4F8), lateral light red (#F2B3D0), and ventral light yellow (#F9F384). Black nodes remain neutral.
 
 ### Plot layout (final cell)
 
@@ -77,25 +80,31 @@ Running the full pipeline for a given `species`/`mainROI`:
 3. Displays an interactive Plotly figure.
 4. Saves the figure to the repo root as both a static `<species>_<roi>_displaybrain<0|1>.pdf` (e.g. `human_FST_displaybrain0.pdf`) and an interactive, self-contained `<species>_<roi>_displaybrain<0|1>.html` (e.g. `human_FST_displaybrain0.html`) that preserves hover tooltips (`comment`/`evidencesource`) and can be opened directly in a browser.
 
+The macaque FST notebook saves its study-filtered view as macaque_FST_displaybrain1_by_study.html. Open that file for the controls.
+
+In the macaque FST HTML, check multiple studies to display the union of their reported connections. Dot sizes are recomputed from graded tracer results in the chosen studies; Fel91 alone supplies no graded strength. Use **Only** beside a study to isolate it, **Select all** to restore every study, or **Clear** to hide connections. The notebook shows a link to this interactive HTML after running. The Fel91 option uses positive FST pathways transcribed from Table 3 of Felleman and Van Essen (1991) in macaque/fel91_fst_connections.csv, because Fel91 is otherwise recorded only as a hierarchy reference in evidence.csv. Paper labels VP, PIT, and MSTl have no exact node-name match and are not shown in the current plot.
+
 Because `edges.csv` and `selectnodes.csv` are regenerated (and overwritten) each run, treat them as build artifacts of `evidence.csv` and `nodes.csv` rather than source data to hand-edit.
 
 ## Repository structure
 
 ```
-CorticalConnectivity/
+FST_Review_Ezzo_etal_2026/
 ├── network_diagram.ipynb   # main notebook — see above
+├── study_filter.py        # offline study-selector HTML generator
 ├── human/                  # human data + assets
 └── macaque/                # macaque data + assets
 ```
 
 Running the notebook (see [Output](#output) below) will also produce a `<species>_<roi>_displaybrain<0|1>.pdf` file at the repo root.
 
-Each species folder (`human/`, `macaque/`) has the same layout:
+Both species folders share the following core files; the Fel91 connection table is macaque-specific:
 
 | File | Description |
 |---|---|
 | `nodes.csv` | Master list of all candidate ROIs for the species: id, plot coordinates (`x`,`y`, and normalized `center_x`,`center_y`), display `label`, `color`, marker `size`, and a `{roi}comments` column populated per run with hover-text citations. |
 | `evidence.csv` | The literature review itself — one row per study/finding relating `Main` (the seed ROI, e.g. FST/MST/MT) to an `Affiliate` region. Columns capture wake state, study type, projection presence/strength in each direction with references, hierarchical level relative to `Main`, and free-text notes. This is the source data the notebook reads to build everything else. |
+| `fel91_fst_connections.csv` | Macaque only: positive, directed FST pathways transcribed from Table 3 of Felleman and Van Essen (1991). Paper area labels without an exact node-name match are kept in this source file but omitted from the plot. |
 | `edges.csv` | **Generated** by the notebook — the filtered/summarized connection list (evidence count, strength, hierarchy, certainty, projection direction) for the current `mainROI`/flag settings. Overwritten on each run. |
 | `selectnodes.csv` | **Generated** by the notebook — `nodes.csv` filtered down to nodes actually used/connected for the current run (if `remove_unconnected_nodes = 1`), plus hover-text comments. Overwritten on each run. |
 | `abbreviations.csv` | Expands ROI/region abbreviations (e.g. `FST` → fundus of the superior temporal area) used throughout the other files. |
@@ -103,4 +112,4 @@ Each species folder (`human/`, `macaque/`) has the same layout:
 | `evidence.xlsm` | Working spreadsheet version of `evidence.csv`, used for editing/curating the review data before exporting to CSV. |
 | `surface_snapshots/` | Cortical surface renderings (`.tif` images, plus an `.ai` source file) at different inflation levels (`white`, `midthickness`, `inflated`, `veryinflated`) and views (`lat`, `med`, `dor`, `ven`, and combined montages), used as the background image in the plots. These are pre-rendered assets — no need to regenerate them to use the notebook. |
 
-Both species folders follow the identical schema, so the notebook's logic is species-agnostic aside from the `datapath`/`species` flag.
+The species folders share the core nodes and evidence schema. The Fel91 connection table is specific to macaque FST.

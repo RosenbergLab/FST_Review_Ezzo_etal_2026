@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connectivity diagram</title>
+  <style>
+    html, body { margin: 0; background: white; font-family: Arial, sans-serif; }
+    #stage { position: relative; overflow: hidden; background: white; }
+    svg { display: block; touch-action: none; cursor: grab; }
+    svg.dragging { cursor: grabbing; }
+    .node { cursor: pointer; }
+    .node-label { font-size: 10px; text-anchor: middle; fill: #111;
+      stroke: white; stroke-width: 2px; paint-order: stroke; pointer-events: none; }
+    #tooltip { position: fixed; z-index: 10; display: none; max-width: 340px;
+      white-space: pre-wrap; padding: 7px 9px; border: 1px solid #777;
+      border-radius: 3px; background: rgba(255,255,255,.96);
+      box-shadow: 0 2px 8px #0003; font-size: 12px; pointer-events: none; }
+    #legend { position: absolute; top: 8px; right: 8px; display: none;
+      padding: 8px 10px; border: 1px solid #999; background: rgba(255,255,255,.9);
+      font-size: 11px; }
+    .legend-title { font-weight: bold; margin-bottom: 5px; }
+    .legend-row { display: flex; align-items: center; min-height: 27px; gap: 7px; }
+    .legend-dot { display: inline-block; flex: none; border-radius: 50%; background: black; }
+  </style>
+</head>
+<body>
+  <div id="stage"><svg id="plot" role="img" aria-label="Interactive connectivity diagram"></svg>
+    <div id="legend"><div class="legend-title">Anatomical tracer strength</div></div>
+  </div>
+  <div id="tooltip"></div>
+  <script>
+    const data = __CONNECTIVITY_DATA__;
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const stage = document.getElementById('stage');
+    const svg = document.getElementById('plot');
+    const tooltip = document.getElementById('tooltip');
+    const legend = document.getElementById('legend');
+    stage.style.width = data.width + 'px';
+    stage.style.height = data.height + 'px';
+    svg.setAttribute('width', data.width);
+    svg.setAttribute('height', data.height);
+    svg.setAttribute('viewBox', `0 0 ${data.width} ${data.height}`);
+    const scene = document.createElementNS(svgNS, 'g');
+    svg.appendChild(scene);
+    function add(parent, tag, attrs) {
+      const el = document.createElementNS(svgNS, tag);
+      for (const [key, value] of Object.entries(attrs)) el.setAttribute(key, value);
+      parent.appendChild(el);
+      return el;
+    }
+    function px(x) {
+      return (x - data.xLimits[0]) * data.width / (data.xLimits[1] - data.xLimits[0]);
+    }
+    function py(y) {
+      return (data.yLimits[1] - y) * data.height / (data.yLimits[1] - data.yLimits[0]);
+    }
+    if (data.displayBrain && data.image) {
+      add(scene, 'image', { href: data.image, x: 0, y: 0,
+        width: data.width, height: data.height, preserveAspectRatio: 'xMidYMid meet' });
+    }
+    if (!data.nodesOnly) {
+      for (const edge of data.edges) {
+        const line = add(scene, 'line', {
+          x1: px(edge.x0), y1: py(edge.y0), x2: px(edge.x1), y2: py(edge.y1),
+          stroke: edge.color, 'stroke-width': edge.width
+        });
+        if (edge.dash) line.setAttribute('stroke-dasharray', '6 4');
+      }
+    }
+    for (const node of data.nodes) {
+      const x = px(node.x), y = py(node.y);
+      const dot = add(scene, 'circle', { class: 'node', cx: x, cy: y,
+        r: Math.max(0.15, node.size / 2), fill: node.fill,
+        'fill-opacity': node.alpha, stroke: node.outline,
+        'stroke-opacity': node.alpha, 'stroke-width': 1 });
+      const label = add(scene, 'text', { class: 'node-label', x, y: y - node.size / 2 - 3 });
+      label.textContent = node.label;
+      dot.addEventListener('mouseenter', () => {
+        tooltip.textContent = node.label + (node.comment ? '\n' + node.comment : '');
+        tooltip.style.display = 'block';
+      });
+      dot.addEventListener('mousemove', event => {
+        tooltip.style.left = Math.min(event.clientX + 12, innerWidth - tooltip.offsetWidth - 8) + 'px';
+        tooltip.style.top = Math.min(event.clientY + 12, innerHeight - tooltip.offsetHeight - 8) + 'px';
+      });
+      dot.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+    }
+    if (data.legend.length) {
+      legend.style.display = 'block';
+      for (const item of data.legend) {
+        const row = document.createElement('div');
+        row.className = 'legend-row';
+        const dot = document.createElement('span');
+        dot.className = 'legend-dot';
+        dot.style.width = item.size + 'px';
+        dot.style.height = item.size + 'px';
+        const label = document.createElement('span');
+        label.textContent = item.label;
+        row.append(dot, label);
+        legend.append(row);
+      }
+    }
+    let scale = 1, tx = 0, ty = 0, drag = null;
+    function update() { scene.setAttribute('transform', `translate(${tx} ${ty}) scale(${scale})`); }
+    svg.addEventListener('wheel', event => {
+      event.preventDefault();
+      const rect = svg.getBoundingClientRect();
+      const x = (event.clientX - rect.left) * data.width / rect.width;
+      const y = (event.clientY - rect.top) * data.height / rect.height;
+      const nextScale = Math.max(0.25, Math.min(20, scale * (event.deltaY < 0 ? 1.15 : 1 / 1.15)));
+      const ratio = nextScale / scale;
+      tx = x - (x - tx) * ratio;
+      ty = y - (y - ty) * ratio;
+      scale = nextScale;
+      update();
+    }, { passive: false });
+    svg.addEventListener('pointerdown', event => {
+      if (event.button !== 0) return;
+      drag = { x: event.clientX, y: event.clientY };
+      svg.setPointerCapture(event.pointerId);
+      svg.classList.add('dragging');
+    });
+    svg.addEventListener('pointermove', event => {
+      if (!drag) return;
+      const rect = svg.getBoundingClientRect();
+      tx += (event.clientX - drag.x) * data.width / rect.width;
+      ty += (event.clientY - drag.y) * data.height / rect.height;
+      drag = { x: event.clientX, y: event.clientY };
+      update();
+    });
+    function endDrag() { drag = null; svg.classList.remove('dragging'); }
+    svg.addEventListener('pointerup', endDrag);
+    svg.addEventListener('pointercancel', endDrag);
+    svg.addEventListener('dblclick', () => { scale = 1; tx = 0; ty = 0; update(); });
+  </script>
+</body>
+</html>
