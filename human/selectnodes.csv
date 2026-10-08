@@ -9,9 +9,7 @@ id,x,y,label,color,size,center_x,center_y,FSTcomments
 8,1930,900,MT,blue,5,0.025,0.7,Rol23 Bak18
 9,1845,946,MST,blue,5,-0.025,0.8,Rol23 Bak18
 10,1830,1040,FST,black,5,-0.025,0.8,
-11,2020,968,LO1,green,5,-0.025,0.8,Rol23 Bak18
-12,1975,1070,LO2,green,5,-0.025,0.8,Rol23 Bak18
-13,2000,895,LO3,green,5,-0.025,0.8,Rol23 Bak18
+12,1975,1070,LO1-3,green,5,-0.025,0.8,Rol23 Bak18
 14,1945,1140,PIT,green,5,-0.025,0.8,Rol23 Bak18
 15,1845,1800,V8,green,5,-0.025,0.8,Rol23 Bak18
 16,1845,2000,VMV,green,5,-0.025,0.8,Rol23 Bak18

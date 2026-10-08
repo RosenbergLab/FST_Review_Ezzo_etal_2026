@@ -8,9 +8,7 @@ source,targetid,targetname,evidencecount,projections,connectivitystrength,certai
 10,7,V4t,2,bidirectional,moderate,certain,lower
 10,8,MT,3,bidirectional,moderate,certain,lower
 10,9,MST,3,bidirectional,moderate,certain,equal
-10,11,LO1,3,bidirectional,moderate,certain,unknown
-10,12,LO2,3,bidirectional,moderate,certain,unknown
-10,13,LO3,3,bidirectional,moderate,certain,unknown
+10,12,LO1-3,9,bidirectional,moderate,certain,unknown
 10,14,PIT,2,bidirectional,moderate,certain,equal
 10,15,V8,1,bidirectional,moderate,conflicting,unknown
 10,16,VMV,1,bidirectional,strong,conflicting,higher

@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fst-connectivity"
+version = "0.1.2"
+description = "Interactive macaque and human FST connectivity figures"
+readme = "PYTHON_PACKAGE.md"
+requires-python = ">=3.10"
+authors = [{name = "Rosenberg Lab"}]
+dependencies = []
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Scientific/Engineering :: Visualization",
+]
+
+[project.scripts]
+fst-connectivity = "fst_connectivity.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+fst_connectivity = [
+  "explorer.html",
+  "data/*.json",
+  "data/human/*.csv",
+  "data/human/*.txt",
+  "data/human/surface_snapshots/*.png",
+  "data/macaque/*.csv",
+  "data/macaque/*.txt",
+  "data/macaque/surface_snapshots/*.png",
+]

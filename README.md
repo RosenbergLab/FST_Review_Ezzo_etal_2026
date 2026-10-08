@@ -2,7 +2,7 @@
 
 Generates schematic diagrams of structural/functional connectivity for a chosen region of interest (currently **FST**, **MST**, or **MT**), built from a literature review of human and macaque tracer, DTI tractography, rs-fMRI, and inactivation studies. Node positions are plotted on top of a cortical surface snapshot, with edge/node styling (line weight, color, dashing) driven by the evidence behind each connection.
 
-The whole pipeline lives in a single notebook: [network_diagram.ipynb](network_diagram.ipynb).
+The original Plotly workflow lives in [network_diagram.ipynb](network_diagram.ipynb). The current FST paper-style explorer is available in both MATLAB and Python.
 
 ## View the diagrams online
 
@@ -14,7 +14,28 @@ No setup required — the interactive figures are hosted via GitHub Pages and up
 
 (GitHub's own file browser can't preview these — they're too large for that viewer and will show "View raw" instead. Use the links above, not the `blob/main/...` links on github.com.)
 
-## Requirements
+## Python interactive FST explorer
+
+Install the package from a downloaded copy of this repository and open the figure:
+
+```bash
+python -m pip install .
+fst-connectivity
+```
+
+The package bundles the curated evidence and lateral brain backgrounds. It opens the same macaque/human study controls and dot-size options as the MATLAB FST explorer in a browser, with no additional runtime plotting libraries. Both species offer study-count dot sizing; the macaque view also offers graded strength sizing. `python -m fst_connectivity` is an equivalent launch command. To make one offline file for a collaborator, run `fst-connectivity --output FST_connectivity_explorer.html --no-open`. See [Python package guide](PYTHON_PACKAGE.md) for the Python API and updated-data option.
+
+For a direct download, install the [prebuilt wheel](dist/fst_connectivity-0.1.2-py3-none-any.whl) with `python -m pip install fst_connectivity-0.1.2-py3-none-any.whl` after saving it locally.
+
+## MATLAB interactive FST explorer
+
+In MATLAB, set the current folder to this repository and open `FST_connectivity_explorer.fig`. The **Species** menu switches between macaque and human views in the same window. Each view has study filters and study-count dot sizing; the macaque view also offers graded strength sizing. The saved figure uses `plotConnectivity.m` and the two `paper*ConnectivityLayout.m` files in this folder, so keep those files with the `human/` and `macaque/` data folders when sharing it. Python is not needed to use the MATLAB figure.
+
+In macaque **Uniform** mode, connection dots are open because no strength grade is displayed; the FST seed dot remains filled. Selecting an eligible single study and projection direction can display graded strength with filled, size-coded dots.
+
+To rebuild a view, run `plotConnectivity(Species="macaque")` or `plotConnectivity(Species="human")`. The human FST view shows LO1–LO3 as one dot labeled `LO1-3`; `human/evidence.csv` keeps their individual reports. Species-specific figures and PDFs are saved as `<species>_FST_paper_lateral.fig` and `<species>_FST_paper_lateral.pdf`.
+
+## Notebook requirements (original Plotly workflow)
 
 Python 3, Jupyter Notebook (or an equivalent like JupyterLab or VS Code's Jupyter extension) to open `network_diagram.ipynb`, and:
 

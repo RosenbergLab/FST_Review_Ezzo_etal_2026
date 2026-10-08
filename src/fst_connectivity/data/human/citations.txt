@@ -1,0 +1,3 @@
+Bak18: Baker, C. M., Burks, J. D., Briggs, R. G., Stafford, J., Conner, A. K., Glenn, C. A., ... & Sughrue, M. E. (2018). A connectomic atlas of the human cerebrum—chapter 9: the occipital lobe. Operative Neurosurgery, 15(suppl_1), S372-S406.
+Rol23: Rolls, E. T., Deco, G., Huang, C. C., & Feng, J. (2023). Multiple cortical visual streams in humans. Cerebral Cortex, 33(7), 3319-3349.
+Rua25: Ruan, J., Yuan, Y., Qiao, Y., Qiu, M., Dong, X., Cui, Y., ... & Liu, N. (2025). Connectional differences between humans and macaques in the MT+ complex. Iscience, 28(1).

@@ -8,3 +8,7 @@
 __pycache__/
 *.py[cod]
 .venv/
+
+# Python package build intermediates (keep distributable wheels in dist/)
+build/
+*.egg-info/

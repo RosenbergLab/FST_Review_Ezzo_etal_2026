@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FST connectivity explorer</title>
+  <style>
+    :root { font-family: Arial, Helvetica, sans-serif; color: #29384b; background: white; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    #holder { margin: 0 auto; position: relative; }
+    #frame { position: relative; width: 1835px; height: 820px; background: white;
+      transform-origin: top left; }
+    .species-view { position: absolute; inset: 0; background: white; }
+    .species-view[hidden] { display: none; }
+    .plot-canvas { position: absolute; left: 0; top: 0; width: 1335px; height: 820px; }
+    .plot-canvas svg { position: absolute; display: block; overflow: visible; }
+    .study-panel { position: absolute; left: 1335px; top: 0; width: 500px;
+      height: 820px; border: 1px solid #929ba5; background: #f9fbfd;
+      color: #26354b; font-size: 13px; }
+    .study-panel h2 { font-size: 14px; margin: 5px 11px; padding: 0 0 5px;
+      border-bottom: 1px solid #b9c2cb; }
+    .top-controls { position: absolute; top: 52px; left: 12px; right: 12px;
+      height: 30px; display: flex; align-items: center; }
+    button, select { font: inherit; color: #303741; border: 1px solid #aaa;
+      border-radius: 4px; background: #fff; height: 28px; cursor: pointer; }
+    button:hover, select:hover { border-color: #52769a; background: #f1f6fc; }
+    button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid #1265a2; }
+    .all-button { width: 100px; }
+    .clear-button { width: 70px; margin-left: 10px; }
+    .species-label { margin-left: auto; margin-right: 7px; }
+    .species-choice { width: 120px; }
+    .study-list { position: absolute; top: 98px; left: 12px; right: 14px; }
+    .study-row { height: 31px; display: flex; align-items: center; justify-content: space-between; }
+    .human .study-row { height: 34px; }
+    .study-row label { display: flex; align-items: center; min-width: 0; max-width: 410px;
+      cursor: pointer; white-space: nowrap; }
+    .study-row input { margin: 0 4px 0 0; flex: none; }
+    .study-row .label-text { overflow: hidden; text-overflow: ellipsis; }
+    .only-button { width: 55px; height: 26px; flex: none; margin-left: 5px; }
+    .mixed-detail { position: absolute; top: 354px; left: 12px; right: 12px;
+      min-height: 104px; white-space: pre-line; font-size: 12px; line-height: 1.22; }
+    .size-group { position: absolute; top: 469px; left: 12px; width: 476px;
+      height: 170px; border: 1px solid #d7dde3; padding: 6px 10px; }
+    .size-group legend { font-size: 14px; }
+    .size-group label { display: block; height: 28px; white-space: nowrap; }
+    .size-group input { margin: 0 5px 0 0; vertical-align: -1px; }
+    .size-group label.disabled { color: #aeb4bb; }
+    .size-note { position: absolute; top: 647px; left: 12px; right: 12px;
+      height: 34px; white-space: pre-line; line-height: 1.2; }
+    .legend { position: absolute; top: 685px; left: 12px; right: 12px;
+      height: 82px; border: 1px solid #9ea6ae; padding: 3px; }
+    .legend-title { font-size: 13px; border-bottom: 1px solid #d6dce1; }
+    .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 7px;
+      padding: 4px 7px; font-size: 12px; }
+    .legend-entry { height: 20px; display: flex; align-items: center; gap: 11px; }
+    .legend-dot { display: inline-block; flex: none; border-radius: 50%; background: #444; }
+    .legend-dot.open { background: transparent; border: 1.5px solid #444; }
+    .status { position: absolute; top: 773px; left: 12px; right: 12px;
+      min-height: 40px; font-weight: 600; }
+    .human-note { position: absolute; top: 226px; left: 12px; right: 12px;
+      line-height: 1.25; }
+    .human .status { top: 290px; }
+    .human .size-group { top: 346px; height: 112px; }
+    .human .size-note { top: 468px; }
+    .human .legend { top: 516px; }
+    #tooltip { position: fixed; z-index: 20; display: none; pointer-events: none;
+      max-width: 340px; padding: 8px 10px; border: 1px solid #8c97a5;
+      border-radius: 3px; background: rgba(255,255,255,.98); color: #243246;
+      box-shadow: 0 2px 9px #0003; font-size: 13px; white-space: pre-line;
+      overflow-wrap: anywhere; line-height: 1.35; }
+  </style>
+</head>
+<body>
+  <div id="holder"><main id="frame" aria-label="Interactive FST connectivity"></main></div>
+  <div id="tooltip" role="tooltip"></div>
+  <script id="connectivity-data" type="application/json">__CONNECTIVITY_PAYLOAD__</script>
+  <script>
+  (() => {
+    'use strict';
+    const data = JSON.parse(document.getElementById('connectivity-data').textContent);
+    const frame = document.getElementById('frame');
+    const holder = document.getElementById('holder');
+    const tooltip = document.getElementById('tooltip');
+    const NS = 'http://www.w3.org/2000/svg';
+    const positiveGrades = new Set(['weak', 'moderate', 'strong', 'present', 'broad']);
+    const graded = new Set(['weak', 'moderate', 'strong']);
+    const strengthTypes = new Set(['tracer', 'DTI tractography']);
+    const views = {};
+    let activeSpecies = 'macaque';
+
+    function svgElement(name, attrs, parent) {
+      const item = document.createElementNS(NS, name);
+      for (const [key, value] of Object.entries(attrs)) item.setAttribute(key, String(value));
+      if (parent) parent.appendChild(item);
+      return item;
+    }
+    function htmlElement(name, className, parent, text) {
+      const item = document.createElement(name);
+      if (className) item.className = className;
+      if (text !== undefined) item.textContent = text;
+      if (parent) parent.appendChild(item);
+      return item;
+    }
+    function displayName(code, sourceNames) { return sourceNames[code] || code; }
+    function uniqueNames(events, sourceNames) {
+      return [...new Set(events.map(e => e.study))].sort()
+        .map(code => displayName(code, sourceNames)).filter((name, i, all) => all.indexOf(name) === i);
+    }
+    function projectionClass(event) {
+      if (event.type !== 'tracer' && event.type !== 'literature synthesis') return 'unspecified';
+      return event.direction === 'in' ? 'afferent' : event.direction === 'out' ? 'efferent' : 'unspecified';
+    }
+    function rank(grade) { return {weak: 1, moderate: 2, strong: 3}[grade] || 0; }
+    function roundHalfEven(value) {
+      const lower = Math.floor(value), fraction = value - lower;
+      return Math.abs(fraction - .5) < 1e-12 ? lower + lower % 2 : Math.round(value);
+    }
+    function showTooltip(event, marker) {
+      tooltip.textContent = marker._tooltip;
+      tooltip.style.display = 'block';
+      moveTooltip(event);
+    }
+    function moveTooltip(event) {
+      if (tooltip.style.display !== 'block') return;
+      const width = tooltip.offsetWidth, height = tooltip.offsetHeight;
+      tooltip.style.left = Math.max(6, Math.min(event.clientX + 14, innerWidth - width - 8)) + 'px';
+      tooltip.style.top = Math.max(6, Math.min(event.clientY + 12, innerHeight - height - 8)) + 'px';
+    }
+    function hideTooltip() { tooltip.style.display = 'none'; }
+    function pathwayTag(svg, item, font) {
+      const width = item.name.length * font * .53 + 5;
+      const color = {'dorsal pathway':'#B3E4F8', 'lateral pathway':'#F2B3D0',
+        'ventral pathway':'#F9F384'}[item.name];
+      svgElement('rect', {x:item.x-width/2, y:item.y-font*.74, width, height:font+2,
+        fill:color, stroke:'#666', 'stroke-width':'.35'}, svg);
+      const text = svgElement('text', {x:item.x, y:item.y, 'text-anchor':'middle',
+        'font-size':font, fill:'#243448'}, svg);
+      text.textContent = item.name;
+    }
+    function buildPlot(payload, root) {
+      const plot = htmlElement('div', 'plot-canvas', root);
+      const svg = svgElement('svg', {width:payload.plot_size[0], height:payload.plot_size[1],
+        viewBox:payload.view_box.join(' '), role:'img',
+        'aria-label':payload.title + ' lateral brain view'}, plot);
+      svg.style.left = payload.plot_offset[0] + 'px';
+      svg.style.top = payload.plot_offset[1] + 'px';
+      const image = svgElement('image', {x:payload.image_geometry[0], y:payload.image_geometry[1],
+        width:payload.image_geometry[2], height:payload.image_geometry[3],
+        opacity:'.5', preserveAspectRatio:'none'}, svg);
+      image.setAttribute('href', payload.image);
+      const ratio = payload.plot_size[0] / payload.view_box[2];
+      const font = payload.species === 'macaque' ? 5.3 : 6.5;
+      const title = svgElement('text', {x:266, y:18, 'text-anchor':'middle',
+        'font-size':payload.species === 'macaque' ? 6.7 : 8.2, fill:'#262626'}, svg);
+      title.textContent = payload.title;
+      for (const box of payload.boxes) {
+        svgElement('rect', {x:box.rect[0], y:box.rect[1], width:box.rect[2],
+          height:box.rect[3], rx:3, fill:'#EDEBDB', stroke:'#555',
+          'stroke-width':.45}, svg);
+      }
+      for (const item of payload.pathways) pathwayTag(svg, item, font);
+      const markers = {};
+      for (const node of payload.nodes) {
+        const circle = svgElement('circle', {cx:node.x, cy:node.y, r:1.35,
+          fill:node.fill, stroke:node.fill, 'stroke-width':.4,
+          'pointer-events':'all', tabindex:0, role:'img',
+          'aria-label':node.display_label}, svg);
+        circle.addEventListener('pointerenter', event => showTooltip(event, circle));
+        circle.addEventListener('pointermove', moveTooltip);
+        circle.addEventListener('pointerleave', hideTooltip);
+        circle.addEventListener('focus', event => {
+          const rect = circle.getBoundingClientRect();
+          showTooltip({clientX:rect.right, clientY:rect.top}, circle);
+        });
+        circle.addEventListener('blur', hideTooltip);
+        markers[node.label] = {circle, node};
+      }
+      for (const node of payload.nodes) {
+        const label = svgElement('text', {x:node.x, y:node.y-5,
+          'text-anchor':'middle', 'font-size':font, fill:'#2A3F5F',
+          'pointer-events':'none'}, svg);
+        label.textContent = node.display_label;
+        markers[node.label].label = label;
+      }
+      for (const box of payload.boxes) {
+        const label = svgElement('text', {x:box.rect[0]+box.rect[2]/2,
+          y:box.rect[1]+6, 'text-anchor':'middle', 'font-size':font,
+          fill:'#29394b', 'pointer-events':'none'}, svg);
+        label.textContent = box.name;
+      }
+      return {markers, ratio};
+    }
+    function addLegend(panel) {
+      const legend = htmlElement('div', 'legend', panel);
+      const title = htmlElement('div', 'legend-title', legend);
+      const grid = htmlElement('div', 'legend-grid', legend);
+      return {legend, title, grid};
+    }
+    function updateLegend(view, countMode) {
+      const {title, grid} = view.controls.legend;
+      title.textContent = countMode ? 'Number of studies' : 'Dot size legend';
+      grid.replaceChildren();
+      let entries = countMode
+        ? [['1 study', 9], ['2 studies', 10], ['3 studies', 15], ['4 studies', 20]]
+        : [['Weak (small)', 9], ['Moderate (medium)', 15],
+           ['Strong (large)', 22], ['No grade (open)', 9, true]];
+      if (countMode && view.data.species === 'human')
+        entries = entries.slice(0, Math.min(4, view.data.source_studies.length));
+      for (const [label, size, open] of entries) {
+        const entry = htmlElement('div', 'legend-entry', grid);
+        const dot = htmlElement('span', 'legend-dot' + (open ? ' open' : ''), entry);
+        const width = Math.max(7, .75 * size);
+        dot.style.width = width + 'px'; dot.style.height = width + 'px';
+        htmlElement('span', '', entry, label);
+      }
+    }
+    function buildControls(payload, root) {
+      const panel = htmlElement('aside', 'study-panel ' + payload.species, root);
+      htmlElement('h2', '', panel, 'Show results from studies');
+      const top = htmlElement('div', 'top-controls', panel);
+      const all = htmlElement('button', 'all-button', top, 'Select all'); all.type = 'button';
+      const clear = htmlElement('button', 'clear-button', top, 'Clear'); clear.type = 'button';
+      htmlElement('label', 'species-label', top, 'Species:');
+      const speciesChoice = htmlElement('select', 'species-choice', top);
+      speciesChoice.setAttribute('aria-label', 'Species');
+      for (const name of ['Macaque', 'Human']) {
+        const option = htmlElement('option', '', speciesChoice, name);
+        option.value = name.toLowerCase();
+      }
+      speciesChoice.value = payload.species;
+      speciesChoice.addEventListener('change', () => activate(speciesChoice.value));
+      const list = htmlElement('div', 'study-list', panel);
+      const choices = [];
+      for (const study of payload.studies) {
+        const row = htmlElement('div', 'study-row', list);
+        const label = htmlElement('label', '', row);
+        label.title = study.detail;
+        const choice = htmlElement('input', '', label);
+        choice.type = 'checkbox'; choice.checked = true;
+        choice.setAttribute('aria-label', study.label);
+        htmlElement('span', 'label-text', label, study.label);
+        const only = htmlElement('button', 'only-button', row, 'Only'); only.type = 'button';
+        only.title = 'Show only ' + study.label;
+        only.addEventListener('click', () => {
+          choices.forEach(item => { item.checked = item === choice; });
+          update(views[payload.species]);
+        });
+        choice.addEventListener('change', () => update(views[payload.species]));
+        choices.push(choice);
+      }
+      all.addEventListener('click', () => {
+        choices.forEach(choice => { choice.checked = true; });
+        update(views[payload.species]);
+      });
+      clear.addEventListener('click', () => {
+        choices.forEach(choice => { choice.checked = false; });
+        update(views[payload.species]);
+      });
+      let sizeMode = null, sizeInputs = {}, sizeNote = null, legend = null;
+      if (payload.species === 'macaque') {
+        const mixed = payload.studies.find(study => study.code === 'mixed_tracer');
+        if (mixed) htmlElement('div', 'mixed-detail', panel, mixed.detail);
+        const field = htmlElement('fieldset', 'size-group', panel);
+        htmlElement('legend', '', field, 'Dot size');
+        const modes = [
+          ['uniform', 'Uniform'],
+          ['afferent', 'Connection strength (afferent)'],
+          ['efferent', 'Connection strength (efferent)'],
+          ['unspecified', 'Connection strength (unspecified)'],
+          ['studycount', 'Number of reporting studies'],
+        ];
+        for (const [mode, title] of modes) {
+          const label = htmlElement('label', '', field);
+          const input = htmlElement('input', '', label);
+          input.type = 'radio'; input.name = 'dot-size-' + payload.species;
+          input.value = mode; input.checked = mode === 'uniform';
+          input.addEventListener('change', () => update(views[payload.species]));
+          label.append(title);
+          sizeInputs[mode] = {input, label};
+        }
+        sizeNote = htmlElement('div', 'size-note', panel);
+        legend = addLegend(panel);
+      } else {
+        htmlElement('div', 'human-note', panel,
+          'Choose studies to show their FST connections.\nSelect all to enable study-count dot sizes.');
+        const field = htmlElement('fieldset', 'size-group', panel);
+        htmlElement('legend', '', field, 'Dot size');
+        for (const [mode, title] of [
+          ['uniform', 'Uniform'], ['studycount', 'Number of reporting studies'],
+        ]) {
+          const label = htmlElement('label', '', field);
+          const input = htmlElement('input', '', label);
+          input.type = 'radio'; input.name = 'dot-size-' + payload.species;
+          input.value = mode; input.checked = mode === 'uniform';
+          input.addEventListener('change', () => update(views[payload.species]));
+          label.append(title);
+          sizeInputs[mode] = {input, label};
+        }
+        sizeNote = htmlElement('div', 'size-note', panel);
+        legend = addLegend(panel);
+        legend.legend.style.display = 'none';
+      }
+      const status = htmlElement('div', 'status', panel);
+      status.setAttribute('aria-live', 'polite');
+      return {panel, choices, speciesChoice, sizeInputs, sizeNote, legend, status};
+    }
+    function update(view) {
+      const {data: payload, controls, plot} = view;
+      const checkedGroups = payload.studies.filter((_, i) => controls.choices[i].checked);
+      const selected = new Set(checkedGroups.flatMap(study => study.codes));
+      const reports = payload.events.filter(event => selected.has(event.study));
+      const sourceNames = Object.fromEntries(payload.source_studies.map(study => [study.code, study.label]));
+      let mode = 'uniform';
+      const available = {};
+      const countEnabled = checkedGroups.length > 0 && checkedGroups.length === payload.studies.length;
+      controls.sizeInputs.studycount.input.disabled = !countEnabled;
+      controls.sizeInputs.studycount.label.classList.toggle('disabled', !countEnabled);
+      if (payload.species === 'macaque') {
+        for (const key of ['afferent', 'efferent', 'unspecified']) {
+          available[key] = [...new Set(reports.filter(event =>
+            positiveGrades.has(event.grade) && graded.has(event.strengthGrade) &&
+            strengthTypes.has(event.type) && projectionClass(event) === key)
+            .map(event => event.study))];
+          const enabled = checkedGroups.length === 1 && available[key].length === 1;
+          controls.sizeInputs[key].input.disabled = !enabled;
+          controls.sizeInputs[key].label.classList.toggle('disabled', !enabled);
+        }
+        mode = Object.keys(controls.sizeInputs).find(key => controls.sizeInputs[key].input.checked) || 'uniform';
+        if ((mode === 'studycount' && !countEnabled) ||
+            (mode !== 'uniform' && mode !== 'studycount' && controls.sizeInputs[mode].input.disabled)) {
+          controls.sizeInputs.uniform.input.checked = true; mode = 'uniform';
+        }
+        const countMode = mode === 'studycount';
+        controls.sizeNote.textContent = countMode
+          ? 'Counts distinct papers with a positive connection.\nMore studies make a larger dot; open = no graded strength.'
+          : mode === 'uniform'
+            ? 'Uniform dots are open; no strength grade is shown.\nSelect one study to size dots by connection strength.'
+            : 'Dots remain visible for all selected studies.\nFilled dots show graded connection strength.';
+        updateLegend(view, countMode);
+      } else {
+        mode = controls.sizeInputs.studycount.input.checked ? 'studycount' : 'uniform';
+        if (mode === 'studycount' && !countEnabled) {
+          controls.sizeInputs.uniform.input.checked = true;
+          mode = 'uniform';
+        }
+        controls.legend.legend.style.display = mode === 'studycount' ? '' : 'none';
+        controls.sizeNote.textContent = mode === 'studycount'
+          ? 'Dots count distinct papers with a positive connection.\nBaker et al. (2018) counts once across methods.'
+          : 'Select all studies to size dots by number of reporting studies.';
+        if (mode === 'studycount') updateLegend(view, true);
+      }
+      let connected = 0;
+      for (const {node, circle, label} of Object.values(plot.markers)) {
+        const targetReports = reports.filter(event => event.target === node.label);
+        const positive = targetReports.filter(event => positiveGrades.has(event.grade));
+        const isSeed = node.label === 'FST';
+        const shown = isSeed || positive.length > 0;
+        circle.style.display = shown ? '' : 'none';
+        label.style.display = shown ? '' : 'none';
+        if (!shown) continue;
+        let diameter = 9, open = false, description = 'Seed region';
+        if (!isSeed) {
+          connected++;
+          const sources = uniqueNames(positive, sourceNames);
+          const absent = uniqueNames(targetReports.filter(e => e.grade === 'absent'), sourceNames);
+          description = 'Reported by: ' + sources.join(', ');
+          if (payload.species === 'human') {
+            if (node.label === 'LO1-3')
+              description = 'LO1, LO2, and LO3 shown as one dot.\n' + description;
+            if (mode === 'studycount') {
+              const studyCount = new Set(positive.map(e => e.study)).size;
+              diameter = Math.max(9, 5 * studyCount);
+              description += '\nSupporting studies: ' + studyCount;
+            }
+          } else {
+            let hasGrade = mode === 'uniform' ? false
+              : positive.some(e => graded.has(e.strengthGrade) && strengthTypes.has(e.type));
+            let strength = 'not encoded by size (uniform)';
+            if (mode === 'studycount') {
+              const studyCount = new Set(positive.map(e => e.study)).size;
+              diameter = Math.max(9, 5 * studyCount);
+              strength = 'not encoded by size (study count)';
+              description += '\nSupporting studies: ' + studyCount;
+            } else if (mode !== 'uniform') {
+              const activeCode = available[mode][0];
+              const gradedReports = positive.filter(e => e.study === activeCode &&
+                projectionClass(e) === mode && graded.has(e.strengthGrade) && strengthTypes.has(e.type));
+              hasGrade = gradedReports.length > 0;
+              strength = 'not reported for ' + mode;
+              if (hasGrade) {
+                const score = roundHalfEven(gradedReports.reduce((sum, e) => sum + rank(e.strengthGrade), 0)
+                  / gradedReports.length);
+                diameter = [0, 9, 15, 22][score];
+                strength = ['','weak','moderate','strong'][score] + ' (' + mode + '; ' +
+                  displayName(activeCode, sourceNames) + ')';
+              }
+            }
+            open = !hasGrade;
+            description += '\nGraded connection strength: ' + strength;
+          }
+          if (absent.length) description += '\nSelected reports of absence: ' + absent.join(', ');
+        }
+        const radius = .75 * diameter / (2 * plot.ratio);
+        circle.setAttribute('r', String(radius));
+        circle.setAttribute('fill', open ? 'none' : node.fill);
+        circle.setAttribute('stroke', node.fill);
+        circle.setAttribute('stroke-width', String((open ? 1.8 : 1) / plot.ratio));
+        const dataPerPixel = payload.view_box[3] / payload.plot_size[1];
+        label.setAttribute('y', String(node.y - (diameter/2 + 8) * dataPerPixel));
+        circle._tooltip = node.display_label + '\n' + description;
+      }
+      if (payload.species === 'human') {
+        controls.status.textContent = connected + ' connected regions from ' +
+          checkedGroups.length + ' selected studies.';
+      } else {
+        controls.status.textContent = connected + ' connected ' +
+          (connected === 1 ? 'region' : 'regions') + ' from ' + checkedGroups.length +
+          ' study ' + (checkedGroups.length === 1 ? 'selection' : 'selections') +
+          ' (' + selected.size + ' papers).';
+      }
+    }
+    function buildView(payload) {
+      const root = htmlElement('div', 'species-view', frame);
+      root.hidden = payload.species !== activeSpecies;
+      const plot = buildPlot(payload, root);
+      const controls = buildControls(payload, root);
+      const view = {data:payload, root, plot, controls};
+      views[payload.species] = view;
+      update(view);
+    }
+    function activate(species) {
+      if (!views[species]) return;
+      for (const [name, view] of Object.entries(views)) {
+        view.root.hidden = name !== species;
+        if (name === species) view.controls.speciesChoice.value = name;
+      }
+      activeSpecies = species;
+      hideTooltip();
+    }
+    function fit() {
+      const scale = Math.min(1, (innerWidth - 8) / 1835, (innerHeight - 8) / 820);
+      frame.style.transform = 'scale(' + Math.max(.35, scale) + ')';
+      holder.style.width = 1835 * Math.max(.35, scale) + 'px';
+      holder.style.height = 820 * Math.max(.35, scale) + 'px';
+    }
+    buildView(data.macaque);
+    buildView(data.human);
+    activate(data.initial_species || 'macaque');
+    addEventListener('resize', fit);
+    fit();
+  })();
+  </script>
+</body>
+</html>

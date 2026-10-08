@@ -1,6 +1,6 @@
 function result = plotConnectivity(options)
 %PLOTCONNECTIVITY Build and explore the connectivity diagram in MATLAB.
-%   RESULT = plotConnectivity() opens a macaque FST figure over the lateral
+%   RESULT = plotConnectivity() opens a human FST figure over the lateral
 %   TIFF rendered at 50% opacity, with pathway color carried by the dots.
 %
 %   RESULT = plotConnectivity(DataPath=ROOT, Species="human", MainROI="FST", ...)
@@ -8,13 +8,16 @@ function result = plotConnectivity(options)
 %   folder containing this function. OutputDir defaults to ROOT. The function
 %   writes <OutputDir>/<species>/edges.csv and selectnodes.csv, plus a MATLAB
 %   .fig and PDF. HTML export for the new paper layout will follow later.
-%   For macaque and human FST, StudySelector=true adds study controls.
+%   For macaque and human FST, StudySelector=true adds study controls and a
+%   species menu that switches views in the same MATLAB figure window.
 %   Study checkboxes control which reports are shown. The dot-size selector
 %   can encode afferent, efferent, or unspecified connection strength.
 %   The FST figures use one lateral brain image and compact inset boxes.
 %   Dorsal, lateral, and ventral dot colors come from nodes.csv. Macaque
 %   strength-based dot sizing requires one selected study and never averages
-%   across studies. Human FST dots are uniformly sized.
+%   across studies. Uniform macaque connection dots are open because no
+%   strength grade is displayed. Human FST dots are uniformly sized. Human LO1-LO3 share
+%   one display dot while source evidence.csv keeps the three areas apart.
 %
 %   Examples:
 %     plotConnectivity;
@@ -45,7 +48,11 @@ arguments
     options.ExportPDF (1,1) logical = true
     options.ExportHTML (1,1) logical = false
     options.SaveFigure (1,1) logical = true
+    options.WriteTables (1,1) logical = true
     options.Visible (1,1) string = "on"
+    options.ReuseFigure = []
+    options.PreloadSpecies (1,1) logical = true
+    options.ActivateView (1,1) logical = true
 end
 
 species = lower(options.Species);
@@ -72,7 +79,7 @@ outputSpeciesDir = fullfile(outputDir, species);
 if ~isfolder(speciesDir)
     error('plotConnectivity:MissingSpeciesDir', 'Missing data folder: %s', speciesDir);
 end
-if ~isfolder(outputSpeciesDir)
+if options.WriteTables && ~isfolder(outputSpeciesDir)
     mkdir(outputSpeciesDir);
 end
 
@@ -92,6 +99,9 @@ evidence = readtable(fullfile(speciesDir, 'evidence.csv'), ...
     'TextType', 'string', 'VariableNamingRule', 'preserve');
 nodes = readtable(fullfile(speciesDir, 'nodes.csv'), ...
     'TextType', 'string', 'VariableNamingRule', 'preserve');
+if species == "human" && strcmpi(roi, "FST")
+    [nodes, evidence] = mergeHumanLOAreas(nodes, evidence);
+end
 allLabels = cleanColumn(nodes, "label");
 allIDs = numericColumn(nodes, "id");
 seedIndex = find(strcmpi(allLabels, roi), 1);
@@ -233,8 +243,10 @@ end
 
 edgeCsv = fullfile(outputSpeciesDir, 'edges.csv');
 nodeCsv = fullfile(outputSpeciesDir, 'selectnodes.csv');
-writetable(edges, edgeCsv);
-writetable(nodes, nodeCsv);
+if options.WriteTables
+    writetable(edges, edgeCsv);
+    writetable(nodes, nodeCsv);
+end
 
 selectedIDs = numericColumn(nodes, "id");
 selectedLabels = cleanColumn(nodes, "label");
@@ -359,6 +371,8 @@ if paperMode
             if label == roi
                 note = "Seed region " + roi + "; dot size does not represent a connection";
             else
+                % Uniform size does not display a strength grade.
+                openMarker(k) = true;
                 group = affiliate == label & strengthRows;
                 hasGrade = any(ismember(toAffiliate(group), gradedGrades) | ...
                     ismember(toMain(group), gradedGrades) | ...
@@ -367,7 +381,6 @@ if paperMode
                     (toMain(group) == "present" & ...
                     ismember(strengthIn(group), gradedGrades)));
                 if ~hasGrade
-                    openMarker(k) = true;
                     note = "No graded connection strength";
                 else
                     note = "Graded reports available; select one study to size dots";
@@ -420,11 +433,63 @@ elseif nodeSizeSource == "tracer_strength"
     end
 end
 
-fig = figure('Name', sprintf('%s %s connectivity', species, roi), ...
-    'Color', 'w', 'Units', 'pixels', ...
-    'Position', [80, 80, figureWidth, figureHeight], ...
-    'Visible', char(options.Visible));
-ax = axes('Parent', fig, 'Position', [0, 0, 1, 1]);
+interactiveFST = paperMode && enableStudySelector;
+if interactiveFST
+    canvasWidth = 1335;
+    canvasHeight = 820;
+    sidePanelWidth = 500;
+elseif paperMode && species == "macaque"
+    canvasWidth = figureWidth;
+    canvasHeight = figureHeight;
+    sidePanelWidth = 260;
+else
+    canvasWidth = figureWidth;
+    canvasHeight = figureHeight;
+    sidePanelWidth = 0;
+end
+windowWidth = canvasWidth + sidePanelWidth;
+if isempty(options.ReuseFigure)
+    fig = figure('Name', sprintf('%s %s connectivity', species, roi), ...
+        'Color', 'w', 'Units', 'pixels', ...
+        'Position', [80, 80, windowWidth, canvasHeight], ...
+        'Visible', char(options.Visible));
+else
+    fig = options.ReuseFigure;
+    if ~isgraphics(fig, 'figure') || ~isscalar(fig)
+        error('plotConnectivity:InvalidReuseFigure', ...
+            'ReuseFigure must be an existing MATLAB figure.');
+    end
+    if ~interactiveFST
+        oldPosition = get(fig, 'Position');
+        datacursormode(fig, 'off');
+        clf(fig, 'reset');
+        set(fig, 'Color', 'w', 'Units', 'pixels', ...
+            'Position', [oldPosition(1:2), windowWidth, canvasHeight], ...
+            'Visible', char(options.Visible));
+    end
+end
+if paperMode
+    viewVisible = 'on';
+    if interactiveFST && ~isempty(options.ReuseFigure)
+        viewVisible = 'off';
+    end
+    viewRoot = uipanel('Parent', fig, 'Units', 'pixels', ...
+        'Position', [0, 0, windowWidth, canvasHeight], ...
+        'BorderType', 'none', 'BackgroundColor', 'white', ...
+        'Visible', viewVisible);
+    setappdata(fig, 'ConnectivityBuildingViewRoot', viewRoot);
+    plotLeft = 0;
+    plotBottom = 0;
+    if interactiveFST && species == "human"
+        plotLeft = round((canvasWidth - figureWidth) / 2);
+        plotBottom = round((canvasHeight - figureHeight) / 2);
+    end
+    ax = axes('Parent', viewRoot, 'Units', 'pixels', ...
+        'Position', [plotLeft, plotBottom, figureWidth, figureHeight]);
+else
+    viewRoot = fig;
+    ax = axes('Parent', fig, 'Position', [0, 0, 1, 1]);
+end
 hold(ax, 'on');
 if options.DisplayBrain
     if paperMode
@@ -493,7 +558,7 @@ if paperMode
 end
 legendAx = [];
 if ~isempty(legendLabels)
-    legendAx = axes('Parent', fig, 'Units', 'normalized', ...
+    legendAx = axes('Parent', viewRoot, 'Units', 'normalized', ...
         'Position', [0.765, 0.845, 0.23, 0.145], ...
         'Color', 'white', 'Box', 'on', 'XLim', [0, 1], 'YLim', [0, 1], ...
         'XTick', [], 'YTick', [], 'FontSize', 8);
@@ -553,16 +618,30 @@ studyHTMLPath = "";
 studyControls = struct('Panel', [], 'CheckBoxes', gobjects(0, 1), ...
     'OnlyButtons', gobjects(0, 1), 'ProjectionGroup', [], ...
     'ProjectionButtons', gobjects(0, 1), 'SizeGroup', [], ...
-    'SizeButtons', gobjects(0, 1));
+    'SizeButtons', gobjects(0, 1), 'SpeciesPopup', []);
 if options.ExportPDF
     pdfPath = basePath + ".pdf";
-    exportgraphics(fig, pdfPath, 'ContentType', 'image', 'Resolution', 200);
+    if paperMode
+        % Export the species' original plot canvas, without the wider UI frame.
+        pdfFig = figure('Visible', 'off', 'Color', 'w', ...
+            'Units', 'pixels', 'Position', [80, 80, figureWidth, figureHeight]);
+        pdfAx = copyobj(ax, pdfFig);
+        set(pdfAx, 'Units', 'pixels', ...
+            'Position', [0, 0, figureWidth, figureHeight]);
+        exportgraphics(pdfFig, pdfPath, ...
+            'ContentType', 'image', 'Resolution', 200);
+        close(pdfFig);
+    else
+        exportgraphics(fig, pdfPath, ...
+            'ContentType', 'image', 'Resolution', 200);
+    end
 end
 if enableStudySelector
     if species == "human"
         studyControls = addHumanStudyControls(fig, ax, figureWidth, ...
-            figureHeight, selectedLabels, markerHandles, textHandles, ...
-            edgeHandles, edges, studyEvents, displayStudies, studies, roi);
+            figureHeight, selectedLabels, nodeY, dataUnitsPerPixel, ...
+            markerHandles, textHandles, edgeHandles, edges, studyEvents, ...
+            displayStudies, studies, roi);
     else
         studyControls = addStudyControls(fig, ax, legendAx, figureWidth, ...
             figureHeight, selectedLabels, nodeX, nodeY, markerHandles, ...
@@ -579,11 +658,50 @@ elseif paperMode && species == "macaque"
         hasAnyStrength);
 end
 if paperMode && ~isempty(studyControls.Panel)
+    if enableStudySelector
+        studyControls.SpeciesPopup = addSpeciesSwitchControl( ...
+            studyControls.Panel, species, canvasHeight);
+    end
     studyControls.Panel.FontSize = 11;
     set(findall(studyControls.Panel, 'Type', 'uibuttongroup'), ...
         'FontSize', 11);
     set(findall(studyControls.Panel, 'Type', 'uicontrol'), ...
         'FontSize', 10);
+end
+if paperMode
+    rmappdata(fig, 'ConnectivityBuildingViewRoot');
+end
+setappdata(fig, 'ConnectivitySourceOptions', struct( ...
+    'DataPath', options.DataPath, 'OutputDir', options.OutputDir, ...
+    'IncludeStudies', options.IncludeStudies, ...
+    'NodesOnly', options.NodesOnly, 'DisplayBrain', options.DisplayBrain, ...
+    'Medial', options.Medial));
+if interactiveFST
+    views = getappdata(fig, 'ConnectivityViewCache');
+    if ~isstruct(views)
+        views = struct;
+    end
+    views.(char(species)) = viewRoot;
+    setappdata(fig, 'ConnectivityViewCache', views);
+    if options.ActivateView
+        activateCachedSpecies(fig, species);
+    end
+elseif paperMode
+    setappdata(fig, 'ConnectivityViewRoot', viewRoot);
+    setappdata(fig, 'ConnectivitySpecies', species);
+end
+if interactiveFST && isempty(options.ReuseFigure) && options.PreloadSpecies
+    otherSpecies = "human";
+    if species == "human"
+        otherSpecies = "macaque";
+    end
+    plotConnectivity(DataPath=options.DataPath, OutputDir=options.OutputDir, ...
+        Species=otherSpecies, MainROI=roi, ...
+        IncludeStudies=options.IncludeStudies, NodesOnly=options.NodesOnly, ...
+        DisplayBrain=options.DisplayBrain, Medial=options.Medial, ...
+        StudySelector=true, ExportPDF=false, ExportHTML=false, ...
+        SaveFigure=false, WriteTables=false, Visible=options.Visible, ...
+        ReuseFigure=fig, PreloadSpecies=false, ActivateView=false);
 end
 if options.SaveFigure
     figurePath = basePath + ".fig";
@@ -617,6 +735,28 @@ result = struct('Figure', fig, 'Axes', ax, 'Edges', edges, 'Nodes', nodes, ...
     'StudyControls', studyControls, ...
     'NodeHandles', markerHandles, 'PaperMode', paperMode, ...
     'StrengthSize', strengthSize);
+end
+
+function [nodes, evidence] = mergeHumanLOAreas(nodes, evidence)
+% Combine the three identically reported FST LO areas for display only.
+labels = cleanColumn(nodes, "label");
+loNames = ["LO1", "LO2", "LO3"];
+if ~all(ismember(loNames, labels))
+    return
+end
+representative = find(labels == "LO2", 1);
+nodes.label(representative) = "LO1-3";
+nodes(ismember(labels, ["LO1", "LO3"]), :) = [];
+
+main = cleanColumn(evidence, "Main");
+affiliate = cleanColumn(evidence, "Affiliate");
+mergedRows = main == "FST" & ismember(affiliate, loNames);
+evidence.Affiliate(mergedRows) = "LO1-3";
+mergedIndices = find(mergedRows);
+[~, uniqueRows] = unique(evidence(mergedRows, :), 'rows', 'stable');
+keepRows = ~mergedRows;
+keepRows(mergedIndices(uniqueRows)) = true;
+evidence = evidence(keepRows, :);
 end
 
 function evidence = correctLegacyFSTEvidence(evidence)
@@ -1039,11 +1179,9 @@ ungraded = false(height(grouped), 1);
 for k = 1:height(grouped)
     sourceTypes = unique(events.type( ...
         ismember(events.study, grouped.codes{k})));
-    % Keep Barone selectable on its own for its within-study V1/V4
-    % labeling-density comparison, without assigning dot-size grades.
+    % Group all tracer studies without a graded connection-strength report.
     ungraded(k) = ~isempty(sourceTypes) && all(sourceTypes == "tracer") && ...
-        ~any(ismember(grouped.codes{k}, gradedCodes)) && ...
-        grouped.code(k) ~= "Bar00";
+        ~any(ismember(grouped.codes{k}, gradedCodes));
 end
 if any(ungraded)
     sourceCodes = vertcat(grouped.codes{ungraded});
@@ -1066,25 +1204,29 @@ codes = codes(ismember(codes, known));
 end
 
 function controls = addHumanStudyControls(fig, ax, width, plotHeight, ...
-    nodeLabels, nodeHandles, textHandles, edgeHandles, edges, ...
+    nodeLabels, nodeY, dataUnitsPerPixel, nodeHandles, textHandles, ...
+    edgeHandles, edges, ...
     events, studies, sourceStudies, seed)
-panelWidth = 400;
-position = fig.Position;
-fig.Position = [position(1:2), width + panelWidth, plotHeight];
-set(ax, 'Units', 'pixels', 'Position', [0, 0, width, plotHeight]);
-panel = uipanel('Parent', fig, 'Units', 'pixels', ...
-    'Position', [width, 0, panelWidth, plotHeight], ...
+panelWidth = 500;
+panelHeight = 820;
+canvasWidth = 1335;
+set(ax, 'Units', 'pixels', 'Position', ...
+    [round((canvasWidth - width) / 2), ...
+    round((panelHeight - plotHeight) / 2), width, plotHeight]);
+panel = uipanel('Parent', getappdata(fig, 'ConnectivityBuildingViewRoot'), ...
+    'Units', 'pixels', ...
+    'Position', [canvasWidth, 0, panelWidth, panelHeight], ...
     'Title', 'Show results from studies', 'FontWeight', 'bold', ...
     'BackgroundColor', [0.975, 0.985, 1]);
 uicontrol('Parent', panel, 'Style', 'pushbutton', ...
-    'Position', [12, plotHeight - 82, 100, 28], 'String', 'Select all', ...
+    'Position', [12, panelHeight - 82, 100, 28], 'String', 'Select all', ...
     'Callback', @(src, ~) selectEveryHumanStudy(ancestor(src, 'figure'), true));
 uicontrol('Parent', panel, 'Style', 'pushbutton', ...
-    'Position', [122, plotHeight - 82, 70, 28], 'String', 'Clear', ...
+    'Position', [122, panelHeight - 82, 70, 28], 'String', 'Clear', ...
     'Callback', @(src, ~) selectEveryHumanStudy(ancestor(src, 'figure'), false));
 checkboxes = gobjects(height(studies), 1);
 onlyButtons = gobjects(height(studies), 1);
-firstY = plotHeight - 126;
+firstY = panelHeight - 126;
 for k = 1:height(studies)
     y = firstY - (k - 1) * 34;
     checkboxes(k) = uicontrol('Parent', panel, 'Style', 'checkbox', ...
@@ -1097,28 +1239,134 @@ for k = 1:height(studies)
         'Position', [panelWidth - 70, y, 55, 26], 'String', 'Only', ...
         'Callback', @(src, ~) selectOnlyHumanStudy(ancestor(src, 'figure'), k));
 end
-note = sprintf(['Choose one or more studies to show their reported\n' ...
-    'FST connections. Dots stay the same size.']);
+note = sprintf(['Choose studies to show their FST connections.\n' ...
+    'Select all to enable study-count dot sizes.']);
 uicontrol('Parent', panel, 'Style', 'text', ...
-    'Position', [12, plotHeight - 278, panelWidth - 24, 52], ...
+    'Position', [12, panelHeight - 278, panelWidth - 24, 52], ...
     'String', note, 'HorizontalAlignment', 'left', ...
     'BackgroundColor', [0.975, 0.985, 1]);
 status = uicontrol('Parent', panel, 'Style', 'text', ...
-    'Position', [12, plotHeight - 332, panelWidth - 24, 42], ...
+    'Position', [12, panelHeight - 332, panelWidth - 24, 42], ...
     'String', '', 'FontWeight', 'bold', ...
     'HorizontalAlignment', 'left', ...
     'BackgroundColor', [0.975, 0.985, 1]);
+sizeGroup = uibuttongroup('Parent', panel, 'Units', 'pixels', ...
+    'Position', [12, 362, panelWidth - 24, 112], 'Title', 'Dot size', ...
+    'BackgroundColor', [0.975, 0.985, 1]);
+uniformButton = uicontrol('Parent', sizeGroup, 'Style', 'radiobutton', ...
+    'Position', [10, 54, 440, 26], 'String', 'Uniform', ...
+    'Tag', 'uniform', 'BackgroundColor', [0.975, 0.985, 1]);
+countButton = uicontrol('Parent', sizeGroup, 'Style', 'radiobutton', ...
+    'Position', [10, 22, 440, 26], ...
+    'String', 'Number of reporting studies', 'Tag', 'studycount', ...
+    'TooltipString', ['Each paper with a positive connection counts once, ' ...
+    'including Baker''s DTI and rs-fMRI reports.'], ...
+    'BackgroundColor', [0.975, 0.985, 1]);
+sizeGroup.SelectedObject = uniformButton;
+sizeNote = uicontrol('Parent', panel, 'Style', 'text', ...
+    'Position', [12, 318, panelWidth - 24, 34], ...
+    'String', '', 'HorizontalAlignment', 'left', ...
+    'BackgroundColor', [0.975, 0.985, 1]);
+countLegend = addDotSizeLegend(panel, ...
+    [12, 222, panelWidth - 24, 82], false, "count", ...
+    height(sourceStudies));
+countLegend.Visible = 'off';
 state = struct('Events', events, 'Studies', studies, ...
     'SourceStudies', sourceStudies, 'CheckBoxes', checkboxes, ...
-    'NodeLabels', nodeLabels, 'NodeHandles', nodeHandles, ...
+    'NodeLabels', nodeLabels, 'NodeY', nodeY, ...
+    'Scale', dataUnitsPerPixel, 'NodeHandles', nodeHandles, ...
     'TextHandles', textHandles, 'EdgeHandles', edgeHandles, ...
-    'EdgeTargets', edges.targetname, 'Seed', seed, 'Status', status);
+    'EdgeTargets', edges.targetname, 'Seed', seed, 'Status', status, ...
+    'SizeGroup', sizeGroup, 'UniformButton', uniformButton, ...
+    'CountButton', countButton, 'SizeNote', sizeNote, ...
+    'CountLegend', countLegend);
 setappdata(fig, 'HumanStudySelectorState', state);
+sizeGroup.SelectionChangedFcn = ...
+    @(src, ~) refreshHumanStudySelector(ancestor(src, 'figure'));
 refreshHumanStudySelector(fig);
 controls = struct('Panel', panel, 'CheckBoxes', checkboxes, ...
     'OnlyButtons', onlyButtons, 'ProjectionGroup', [], ...
-    'ProjectionButtons', gobjects(0, 1), 'SizeGroup', [], ...
-    'SizeButtons', gobjects(0, 1));
+    'ProjectionButtons', gobjects(0, 1), 'SizeGroup', sizeGroup, ...
+    'SizeButtons', [uniformButton; countButton]);
+end
+
+function popup = addSpeciesSwitchControl(panel, species, plotHeight)
+% Both FST views rebuild inside their current figure when species changes.
+panelWidth = panel.Position(3);
+uicontrol('Parent', panel, 'Style', 'text', ...
+    'Position', [panelWidth - 195, plotHeight - 78, 58, 22], ...
+    'String', 'Species:', 'HorizontalAlignment', 'right', ...
+    'BackgroundColor', [0.975, 0.985, 1]);
+popup = uicontrol('Parent', panel, 'Style', 'popupmenu', ...
+    'Position', [panelWidth - 132, plotHeight - 82, 120, 28], ...
+    'String', {'Macaque', 'Human'}, ...
+    'Value', 1 + (species == "human"), ...
+    'Tag', 'ConnectivitySpeciesSelector', ...
+    'Callback', @(src, ~) switchConnectivitySpecies(src));
+end
+
+function switchConnectivitySpecies(popup)
+fig = ancestor(popup, 'figure');
+speciesNames = ["macaque", "human"];
+target = speciesNames(popup.Value);
+current = getappdata(fig, 'ConnectivitySpecies');
+if target == current
+    return
+end
+if activateCachedSpecies(fig, target)
+    return
+end
+source = getappdata(fig, 'ConnectivitySourceOptions');
+oldPointer = fig.Pointer;
+fig.Pointer = 'watch';
+drawnow limitrate;
+try
+    plotConnectivity(DataPath=source.DataPath, OutputDir=source.OutputDir, ...
+        Species=target, MainROI="FST", IncludeStudies=source.IncludeStudies, ...
+        NodesOnly=source.NodesOnly, DisplayBrain=source.DisplayBrain, ...
+        Medial=source.Medial, StudySelector=true, ...
+        ExportPDF=false, ExportHTML=false, SaveFigure=false, ...
+        WriteTables=false, Visible=string(fig.Visible), ...
+        ReuseFigure=fig, PreloadSpecies=false);
+catch cause
+    unfinished = getappdata(fig, 'ConnectivityBuildingViewRoot');
+    if ~isempty(unfinished) && isgraphics(unfinished, 'uipanel')
+        delete(unfinished);
+    end
+    if isappdata(fig, 'ConnectivityBuildingViewRoot')
+        rmappdata(fig, 'ConnectivityBuildingViewRoot');
+    end
+    fig.Pointer = oldPointer;
+    rethrow(cause);
+end
+fig.Pointer = oldPointer;
+end
+
+function activated = activateCachedSpecies(fig, target)
+activated = false;
+views = getappdata(fig, 'ConnectivityViewCache');
+if ~isstruct(views) || ~isfield(views, char(target))
+    return
+end
+nextView = views.(char(target));
+if ~isgraphics(nextView, 'uipanel')
+    return
+end
+currentView = getappdata(fig, 'ConnectivityViewRoot');
+if ~isempty(currentView) && isgraphics(currentView, 'uipanel') && ...
+        ~isequal(currentView, nextView)
+    currentView.Visible = 'off';
+end
+nextView.Visible = 'on';
+speciesPopup = findobj(nextView, 'Tag', 'ConnectivitySpeciesSelector');
+if isscalar(speciesPopup)
+    speciesPopup.Value = 1 + (target == "human");
+end
+setappdata(fig, 'ConnectivityViewRoot', nextView);
+setappdata(fig, 'ConnectivitySpecies', target);
+fig.Name = sprintf('%s FST connectivity', target);
+drawnow limitrate;
+activated = true;
 end
 
 function selectEveryHumanStudy(fig, selected)
@@ -1143,6 +1391,26 @@ checked = false(numel(state.CheckBoxes), 1);
 for k = 1:numel(state.CheckBoxes)
     checked(k) = state.CheckBoxes(k).Value ~= 0;
 end
+canSizeByCount = ~isempty(checked) && all(checked);
+if canSizeByCount
+    state.CountButton.Enable = 'on';
+else
+    state.CountButton.Enable = 'off';
+end
+sizeMode = string(state.SizeGroup.SelectedObject.Tag);
+if sizeMode == "studycount" && ~canSizeByCount
+    state.SizeGroup.SelectedObject = state.UniformButton;
+    sizeMode = "uniform";
+end
+if sizeMode == "studycount"
+    state.CountLegend.Visible = 'on';
+    state.SizeNote.String = sprintf(['Dots count distinct papers with a positive connection.\n' ...
+        'Baker et al. (2018) counts once across methods.']);
+else
+    state.CountLegend.Visible = 'off';
+    state.SizeNote.String = ...
+        'Select all studies to size dots by number of reporting studies.';
+end
 selectedCodes = strings(0, 1);
 for k = find(checked(:))'
     selectedCodes = [selectedCodes; state.Studies.codes{k}(:)]; %#ok<AGROW>
@@ -1162,6 +1430,7 @@ for k = 1:numel(state.NodeLabels)
     end
     state.NodeHandles(k).Visible = 'on';
     state.TextHandles(k).Visible = 'on';
+    size = 9;
     if label == state.Seed
         description = "Seed region";
     else
@@ -1169,13 +1438,27 @@ for k = 1:numel(state.NodeLabels)
         sources = sort(unique(nodeReports.study(positive)));
         sourceNames = displayStudyNames(sources, state.SourceStudies);
         description = "Reported by: " + strjoin(sourceNames, ', ');
+        if sizeMode == "studycount"
+            studyCount = numel(unique(nodeReports.study(positive)));
+            size = max(9, 5 * studyCount);
+            description = description + newline + ...
+                "Supporting studies: " + string(studyCount);
+        end
         absent = sort(unique(nodeReports.study(nodeReports.grade == "absent")));
         if ~isempty(absent)
             absentNames = displayStudyNames(absent, state.SourceStudies);
             description = description + newline + ...
                 "Selected reports of absence: " + strjoin(absentNames, ', ');
         end
+        if label == "LO1-3"
+            description = "LO1, LO2, and LO3 shown as one dot." + ...
+                newline + description;
+        end
     end
+    state.NodeHandles(k).SizeData = (0.75 * size)^2;
+    position = state.TextHandles(k).Position;
+    position(2) = labelPositionY(state.NodeY(k), size, state.Scale);
+    state.TextHandles(k).Position = position;
     state.NodeHandles(k).DataTipTemplate.DataTipRows = ...
         wrappedDataTipRows(displayAreaLabel(label), description);
 end
@@ -1199,15 +1482,14 @@ function controls = addStudyControls(fig, ax, legendAx, width, plotHeight, ...
     seed, nodeColors, nodeOutlines, ...
     paperMode, nodeSizeSource, strengthTypes)
 panelWidth = 500;
-position = fig.Position;
-fig.Position = [position(1:2), width + panelWidth, plotHeight];
 set(ax, 'Units', 'pixels', 'Position', [0, 0, width, plotHeight]);
 if ~isempty(legendAx)
     set(legendAx, 'Units', 'pixels', ...
         'Position', [0.765 * width, 0.845 * plotHeight, ...
         0.23 * width, 0.145 * plotHeight]);
 end
-panel = uipanel('Parent', fig, 'Units', 'pixels', ...
+panel = uipanel('Parent', getappdata(fig, 'ConnectivityBuildingViewRoot'), ...
+    'Units', 'pixels', ...
     'Position', [width, 0, panelWidth, plotHeight], ...
     'Title', 'Show results from studies', 'FontWeight', 'bold', ...
     'BackgroundColor', [0.975, 0.985, 1]);
@@ -1380,8 +1662,13 @@ if sizeMode == "studycount"
 else
     state.StrengthLegend.Visible = 'on';
     state.CountLegend.Visible = 'off';
-    state.Note.String = sprintf(['Dots remain visible for all selected studies.\n' ...
-        'Select one study to size dots by connection strength.']);
+    if sizeMode == "uniform"
+        state.Note.String = sprintf(['Uniform dots are open; no strength grade is shown.\n' ...
+            'Select one study to size dots by connection strength.']);
+    else
+        state.Note.String = sprintf(['Dots remain visible for all selected studies.\n' ...
+            'Filled dots show graded connection strength.']);
+    end
 end
 connected = 0;
 for k = 1:numel(state.NodeLabels)
@@ -1406,9 +1693,7 @@ for k = 1:numel(state.NodeLabels)
         connected = connected + 1;
         if sizeMode == "uniform"
             size = 9;
-            hasNodeGrade = any(positive & ...
-                ismember(nodeReports.strengthGrade, gradedGrades) & ...
-                ismember(nodeReports.type, state.StrengthTypes));
+            hasNodeGrade = false;
             strength = "not encoded by size (uniform)";
         elseif sizeMode == "studycount"
             studyCount = numel(unique(nodeReports.study(positive)));
@@ -1612,14 +1897,10 @@ end
 
 function drawPaperDecorations(ax, layout, roi, species)
 if species == "human"
-    panelLetter = '(B)';
     speciesTitle = "humans";
 else
-    panelLetter = '(A)';
     speciesTitle = "macaques";
 end
-text(ax, 8, 18, panelLetter, 'FontSize', 13, 'FontWeight', 'bold', ...
-    'Color', [0.16, 0.16, 0.16], 'HitTest', 'off');
 text(ax, 266, 18, "Connectivity in " + speciesTitle + " — " + roi, ...
     'HorizontalAlignment', 'center', 'FontSize', 13, ...
     'Color', [0.15, 0.15, 0.15], 'Interpreter', 'none', 'HitTest', 'off');
@@ -1654,15 +1935,14 @@ function controls = addPaperSizeControls(fig, ax, legendAx, width, plotHeight, .
     nodeHandles, textHandles, nodeY, strengthSize, scale, initialMode, ...
     roi, nodeLabels, hasAnyStrength)
 panelWidth = 260;
-position = fig.Position;
-fig.Position = [position(1:2), width + panelWidth, plotHeight];
 set(ax, 'Units', 'pixels', 'Position', [0, 0, width, plotHeight]);
 if ~isempty(legendAx)
     set(legendAx, 'Units', 'pixels', ...
         'Position', [0.765 * width, 0.845 * plotHeight, ...
         0.23 * width, 0.145 * plotHeight]);
 end
-panel = uipanel('Parent', fig, 'Units', 'pixels', ...
+panel = uipanel('Parent', getappdata(fig, 'ConnectivityBuildingViewRoot'), ...
+    'Units', 'pixels', ...
     'Position', [width, 0, panelWidth, plotHeight], ...
     'Title', 'Connectivity view', 'FontWeight', 'bold', ...
     'BackgroundColor', [0.975, 0.985, 1]);
@@ -1704,15 +1984,20 @@ controls = struct('Panel', panel, 'CheckBoxes', gobjects(0, 1), ...
     'SizeButtons', [uniformButton; strengthButton]);
 end
 
-function key = addDotSizeLegend(parent, position, singleColumn, kind)
+function key = addDotSizeLegend(parent, position, singleColumn, kind, maxCount)
 if nargin < 4
     kind = "strength";
+end
+if nargin < 5
+    maxCount = 4;
 end
 if kind == "count"
     legendTitle = 'Number of studies';
     legendTag = 'StudyCountLegend';
-    labels = ["1 study", "2 studies", "3 studies", "4 studies"];
-    diameters = [9, 10, 15, 20];
+    countValues = 1:min(maxCount, 4);
+    labels = string(countValues) + " studies";
+    labels(1) = "1 study";
+    diameters = max(9, 5 * countValues);
     openIndex = 0;
 else
     legendTitle = 'Dot size legend';
