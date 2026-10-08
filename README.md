@@ -10,8 +10,6 @@ This repository collects published evidence about structural and functional conn
 | **MATLAB** | Set MATLAB's current folder to this repository and open [FST_connectivity_explorer.fig](FST_connectivity_explorer.fig). Its **Species** menu switches between macaque and human in one window. Keep the `.m` files and the `human/` and `macaque/` folders with the FIG so the controls can load their data. Separate [human](human_FST_paper_lateral.fig) and [macaque](macaque_FST_paper_lateral.fig) FIGs are also available. |
 | **Python package** | Use the package to generate your own browser file. See the [Python package guide](PYTHON_PACKAGE.md) for installation, command-line use, and the Python API. |
 
-The browser and MATLAB figures use the same curated FST evidence and the same reference-mapped human dot positions. The browser file contains its evidence and images and opens offline.
-
 ## Read the figure
 
 | Feature | Meaning |
