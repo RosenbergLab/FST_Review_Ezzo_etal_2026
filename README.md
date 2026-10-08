@@ -8,9 +8,9 @@ This repository collects published evidence about structural and functional conn
 | --- | --- |
 | **Browser — easiest** | Download [FST_connectivity_explorer_python.html](FST_connectivity_explorer_python.html) and open it in a browser. It includes both species, the brain images, and the evidence in one offline file. **No Python or MATLAB installation is needed.** The filename reflects how the file was generated. GitHub's file viewer does not run the interactive figure, so download the HTML before opening it. |
 | **MATLAB** | Set MATLAB's current folder to this repository and open [FST_connectivity_explorer.fig](FST_connectivity_explorer.fig). Its **Species** menu switches between macaque and human in one window. Keep the `.m` files and the `human/` and `macaque/` folders with the FIG so the controls can load their data. Separate [human](human_FST_paper_lateral.fig) and [macaque](macaque_FST_paper_lateral.fig) FIGs are also available. |
-| **Python package** | Use the package to generate a fresh browser file from updated evidence. See the [Python package guide](PYTHON_PACKAGE.md) for installation, command-line use, and the Python API. |
+| **Python package** | Use the package to generate your own browser file. See the [Python package guide](PYTHON_PACKAGE.md) for installation, command-line use, and the Python API. |
 
-The browser and MATLAB figures use the same curated FST evidence and the same reference-mapped human dot positions. The browser file is a saved snapshot; rebuild it after changing the CSV data.
+The browser and MATLAB figures use the same curated FST evidence and the same reference-mapped human dot positions. The browser file contains its evidence and images and opens offline.
 
 ## Read the figure
 
@@ -48,7 +48,7 @@ The `human/` and `macaque/` folders hold the literature review data and brain im
 | [macaque/fel91_fst_connections.csv](macaque/fel91_fst_connections.csv) | FST pathways transcribed from Felleman and Van Essen (1991). |
 | `<species>/edges.csv`, `<species>/selectnodes.csv` | Generated summaries from MATLAB; edit `evidence.csv` and `nodes.csv` as source data instead. |
 
-The `evidence.xlsm` files are working review spreadsheets. Export curated changes to the corresponding `evidence.csv` before rebuilding a figure.
+The `evidence.xlsm` files are working review spreadsheets. The CSV files are the inputs used to build the figures.
 
 ## Rebuild the browser file with Python
 
