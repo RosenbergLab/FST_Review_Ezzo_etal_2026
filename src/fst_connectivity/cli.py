@@ -6,6 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from . import __version__
 from .view import launch
 
 
@@ -29,7 +30,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--no-open", action="store_true", help="write the figure without opening a browser",
     )
-    parser.add_argument("--version", action="version", version="fst-connectivity 0.1.2")
+    parser.add_argument("--version", action="version", version=f"fst-connectivity {__version__}")
     options = parser.parse_args(argv)
     try:
         path = launch(

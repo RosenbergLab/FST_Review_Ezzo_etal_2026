@@ -122,30 +122,50 @@ def _human(nodes: list[dict]) -> dict:
         node["x"] = offset_x + scale * (center_x + inward * (node["native_x"] - center_x))
         node["y"] = offset_y + scale * (center_y + inward * (node["native_y"] - center_y))
 
-    early = {"V1": (2120, 920), "V2": (2085, 945), "V3": (2050, 975)}
-    for name, (x, y) in early.items():
-        _put(by_label, name, (offset_x + scale * x, offset_y + scale * y))
-    for name, point in {
-        "LO1-3": (412, 222), "LO1": (416.1, 220), "LO2": (408, 238),
-        "LO3": (412.5, 207), "PIT": (388, 245.4),
-    }.items():
-        _put(by_label, name, point)
+    # The paper's dot centers are registered to the lateral TIFF outline.
+    # Keep the inward native coordinates above as a fallback for future areas.
+    paper_left, paper_top, paper_right, paper_bottom = 33, 62, 865, 648
+    lateral_left, lateral_top, lateral_right, lateral_bottom = 43.6, 28, 466.2, 326.4
+    paper_scale_x = (lateral_right - lateral_left) / (paper_right - paper_left)
+    paper_scale_y = (lateral_bottom - lateral_top) / (paper_bottom - paper_top)
 
-    medial_names = ["V6", "BA7", "BA23", "BA31", "precuneus", "RSC", "mPFC", "preSMA"]
-    medial_rect = [8, 198, 122, 104]
-    if "BA31" in by_label:
-        medial_points = [(37, 230), (98, 230), (37, 250), (98, 250),
-                         (98, 270), (37, 270), (37, 290), (98, 290)]
-    else:
-        medial_points = [(37, 230), (98, 230), (37, 250), (98, 250),
-                         (98, 250), (37, 270), (98, 270), (67, 290)]
-    for name, point in zip(medial_names, medial_points):
-        _put(by_label, name, point)
-    for name, point in {
-        "V8": (430, 264), "VMV": (400, 274), "VVC": (344, 294),
-        "FFC": (365, 277), "TF": (270, 307),
-    }.items():
-        _put(by_label, name, point)
+    def paper_point(x: float, y: float) -> tuple[float, float]:
+        return (lateral_left + (x - paper_left) * paper_scale_x,
+                lateral_top + (y - paper_top) * paper_scale_y)
+
+    # Match referenceNames/referencePixels in paperHumanConnectivityLayout.m.
+    reference_pixels = (
+        ("PMd", 304, 144), ("SEF", 355, 128), ("FEF", 355, 177),
+        ("M1", 405, 165), ("55b", 355, 232), ("3a/3b", 469, 179),
+        ("BA1/2", 529, 145), ("AIP", 592, 162), ("VIP", 654, 117),
+        ("LIP", 675, 162), ("MIP", 711, 151), ("IPS0/1", 740, 193),
+        ("PFm", 666, 260), ("V7", 812, 285), ("V3A/B", 835, 347),
+        ("BA8", 249, 299), ("PMv", 325, 327), ("op", 382, 356),
+        ("PFop", 441, 342), ("BA44", 255, 376), ("aud", 470, 418),
+        ("insula", 265, 503), ("TPOJ1", 587, 363), ("TPOJ2", 648, 389),
+        ("TPOJ3", 692, 352), ("STSp", 522, 452), ("STSa", 402, 521),
+        ("TE1a", 449, 577), ("TE1m", 515, 551), ("TE1p", 579, 522),
+        ("TE2a", 461, 615), ("TE2p", 592, 576), ("TG", 339, 628),
+        ("PHT", 619, 439), ("MST", 675, 439), ("MT", 724, 425),
+        ("LO1-3", 772, 432), ("PH", 647, 512), ("PIT", 705, 521),
+        ("FFC", 672, 554), ("V4t", 767, 477), ("V4", 813, 460),
+        ("V3", 845, 444), ("V1", 882, 435), ("V2", 876, 475),
+        ("V8", 768, 553), ("VMV", 731, 591), ("VVC", 637, 606),
+        ("FST", 707, 477),
+    )
+    for name, paper_x, paper_y in reference_pixels:
+        _put(by_label, name, paper_point(paper_x, paper_y))
+
+    medial_rect = [44, 192, 93, 110]
+    medial_pixels = (
+        ("mPFC", 85, 462), ("BA23", 165, 462),
+        ("V6", 85, 507), ("preSMA", 165, 507),
+        ("RSC", 85, 553), ("BA7", 165, 553),
+        ("precuneus", 125, 590),
+    )
+    for name, paper_x, paper_y in medial_pixels:
+        _put(by_label, name, paper_point(paper_x, paper_y))
+    _put(by_label, "BA31", (medial_rect[0] + medial_rect[2] / 2, 275))
     _finish(nodes, y_max=425)
 
     return {

@@ -10,14 +10,14 @@ This repository contains a literature-based review of human and macaque **FST** 
 | MATLAB | Set MATLAB's current folder to this repository, then open [FST_connectivity_explorer.fig](FST_connectivity_explorer.fig). The [human](human_FST_paper_lateral.fig) and [macaque](macaque_FST_paper_lateral.fig) FIGs are also available separately. Keep the `.m` files and species data folders with the FIG so its controls can run. |
 | Python package | From the repository folder, run `python -m pip install .`, then `python -m fst_connectivity`. Python 3.10 or newer is required. On Windows, `py -m` can replace `python -m`. No separate plotting libraries are needed at runtime. |
 
-The [prebuilt Python wheel](dist/fst_connectivity-0.1.2-py3-none-any.whl) is another installation option. See the [Python package guide](PYTHON_PACKAGE.md) for its API, output-file command, and use with updated data.
+The [prebuilt Python wheel](dist/fst_connectivity-0.1.3-py3-none-any.whl) is another installation option. See the [Python package guide](PYTHON_PACKAGE.md) for its API, output-file command, and use with updated data.
 
-The MATLAB and Python explorers use the same curated evidence and study controls. **The MATLAB human FIG has the latest dot positions mapped from the paper reference; the Python human view still uses the earlier arrangement.**
+The MATLAB and Python explorers use the same curated evidence, study controls, and reference-mapped human dot positions.
 
 ## Use the controls
 
 - **Species** switches between macaque and human without opening another window. Study selections are retained separately for each species. **Select all**, **Clear**, and **Only** control which papers contribute visible connections.
-- Dot colors mark dorsal, lateral, and ventral pathways; black dots are neutral. The paper views use one lateral brain image at 50% opacity, with inset boxes for areas off that surface. The latest MATLAB human layout deliberately places V1, V2, V8, VMV, and VVC outside the brain outline.
+- Dot colors mark dorsal, lateral, and ventral pathways; black dots are neutral. The paper views use one lateral brain image at 50% opacity, with inset boxes for areas off that surface. The human layout deliberately places V1, V2, V8, VMV, and VVC outside the brain outline.
 - The macaque panel combines Boussaoud et al. (1990, 1992), combines Bogadhi et al. (2019, 2021), and places ungraded tracer reports—including Barone et al. (2000) and Ungerleider et al. (2008)—under **Mixed tracer evidence**.
 - Macaque **Uniform** connection dots are open because size does not show a strength grade; the FST seed stays filled. With one eligible study selection, the afferent, efferent, or unspecified strength mode uses that study's weak/moderate/strong reports. It does not average grades across papers. In a strength mode, dots without a grade are open.
 - Both species offer **Number of reporting studies** when all study options are selected. It sizes each area by the number of distinct papers with a positive report, not by CSV row count. Human Baker et al. (2018) counts once even where DTI and rs-fMRI each have a row. Human LO1, LO2, and LO3 share one display dot labeled `LO1-3`; their source rows remain separate.
