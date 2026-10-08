@@ -5,7 +5,7 @@ id,x,y,label,color,size,center_x,center_y,FSTcomments
 4,2200,792,V3A/B,blue,5,-0.025,0.8,Rol23 Bak18 Rua25
 5,2100,580,V7,blue,5,-0.025,0.8,Rol23 Bak18
 6,2114,1040,V4,green,5,-0.025,0.8,Rol23 Bak18 Rua25
-7,1930,1040,V4t,blue,5,-0.025,0.7,Rol23 Bak18
+7,1930,1040,V4t,green,5,-0.025,0.7,Rol23 Bak18
 8,1930,900,MT,blue,5,0.025,0.7,Rol23 Bak18
 9,1845,946,MST,blue,5,-0.025,0.8,Rol23 Bak18
 10,1830,1040,FST,black,5,-0.025,0.8,

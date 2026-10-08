@@ -15,13 +15,26 @@ from .model import load_species
 TEMPLATE = Path(__file__).with_name("explorer.html")
 
 
+def _default_data_dir() -> Path:
+    """Use bundled evidence after installation and canonical CSVs in a checkout."""
+    if all((DATA_DIR / species / "evidence.csv").is_file()
+           for species in ("macaque", "human")):
+        return DATA_DIR
+    checkout = Path(__file__).resolve().parents[2]
+    if (checkout / "pyproject.toml").is_file() and all(
+            (checkout / species / "evidence.csv").is_file()
+            for species in ("macaque", "human")):
+        return checkout
+    return DATA_DIR
+
+
 def build_payload(
     *, data_dir: str | Path | None = None, initial_species: str = "macaque"
 ) -> dict:
     """Build JSON-ready plot data for both FST views from the curated CSVs."""
     if initial_species not in {"macaque", "human"}:
         raise ValueError("initial_species must be 'macaque' or 'human'")
-    root = Path(data_dir) if data_dir is not None else DATA_DIR
+    root = Path(data_dir) if data_dir is not None else _default_data_dir()
     payload = {"initial_species": initial_species}
     for species in ("macaque", "human"):
         evidence = load_species(species, root)

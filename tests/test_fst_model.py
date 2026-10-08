@@ -1,4 +1,4 @@
-"""Evidence-model checks against the packaged, curated FST source data."""
+"""Evidence-model checks against the canonical FST source data."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from fst_connectivity.model import load_species  # noqa: E402
 
 
 DATA = Path(os.environ.get(
-    "FST_CONNECTIVITY_DATA_PATH", ROOT / "src" / "fst_connectivity" / "data"
+    "FST_CONNECTIVITY_DATA_PATH", ROOT
 ))
 
 

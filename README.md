@@ -57,4 +57,4 @@ python -m pip install .
 python -m fst_connectivity --data-dir . --output FST_connectivity_explorer_python.html --no-open
 ```
 
-The [prebuilt wheel](dist/fst_connectivity-0.1.3-py3-none-any.whl) is an alternative to installing from source. The package also includes bundled copies of the evidence for use outside the repository. See [PYTHON_PACKAGE.md](PYTHON_PACKAGE.md) for more options.
+The [prebuilt wheel](dist/fst_connectivity-0.1.4-py3-none-any.whl) is an alternative to installing from source. It bundles the repository evidence for use outside this folder. See [PYTHON_PACKAGE.md](PYTHON_PACKAGE.md) for more options.

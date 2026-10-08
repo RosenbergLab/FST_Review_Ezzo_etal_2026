@@ -5,7 +5,7 @@ id,x,y,label,color,size,center_x,center_y,FSTcomments
 3,1900,380,V3A,blue,5,0.05,0.5,Rua25 Bou90
 4,1670,760,V4,green,5,-0.025,0.6,Rua25 Mark14 Fel97 Bar00 Ung08 Bou90
 5,1550,935,VOT/TEO,green,5,-0.05,0.65,Mark14
-6,1575,690,V4t,blue,5,-0.025,0.7,Bou90
+6,1575,690,V4t,green,5,-0.025,0.7,Bou90
 7,1540,580,MT,blue,5,0.025,0.7,Mark14 Bou90
 8,1450,500,MSTm,blue,5,0.025,0.8,Bou90
 9,1400,670,FST,black,5,-0.025,0.8,

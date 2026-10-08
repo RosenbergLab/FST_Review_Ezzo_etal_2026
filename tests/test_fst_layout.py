@@ -15,7 +15,7 @@ from fst_connectivity.layout import layout_species  # noqa: E402
 from fst_connectivity.model import load_species  # noqa: E402
 
 
-DATA = ROOT / "src" / "fst_connectivity" / "data"
+DATA = ROOT
 
 
 class LayoutTests(unittest.TestCase):
@@ -27,6 +27,7 @@ class LayoutTests(unittest.TestCase):
         self.assertEqual(view["plot_offset"], [0, 0])
         self.assertEqual((nodes["FST"]["x"], nodes["FST"]["y"]), (313, 153))
         self.assertEqual((nodes["V4t"]["x"], nodes["V4t"]["y"]), (345, 157))
+        self.assertEqual(nodes["V4t"]["fill"], "#F9F384")
         self.assertEqual(nodes["basalfore"]["display_label"], "basal forebrain")
         self.assertEqual(nodes["PITd"]["fill"], "#F9F384")
         self.assertEqual(len(view["boxes"]), 2)
@@ -42,6 +43,7 @@ class LayoutTests(unittest.TestCase):
         self.assertEqual(view["plot_size"], [1080, 728])
         self.assertEqual(view["plot_offset"], [128, 46])
         self.assertEqual(nodes["LO1-3"]["fill"], "#F9F384")
+        self.assertEqual(nodes["V4t"]["fill"], "#F9F384")
 
         # Compare with the MATLAB source, so a future MATLAB move cannot leave
         # the downloadable browser view silently using the older positions.
