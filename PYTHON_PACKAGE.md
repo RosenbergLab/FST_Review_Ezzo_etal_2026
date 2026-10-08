@@ -40,4 +40,4 @@ Use `--data-dir PATH` or `render_html(..., data_dir=PATH)` to read updated `huma
 - Macaque dot-size choices: uniform, connection strength by afferent/efferent/unspecified projection, or the number of distinct supporting papers. Uniform connection dots are open because no strength grade is displayed; FST stays filled. Strength sizing is available only for one eligible study selection, with filled dots for graded reports and open dots where that selection has no grade. The human view offers Uniform and Number of reporting studies; Baker's DTI and rs-fMRI reports count as one paper per area.
 - Human LO1, LO2, and LO3 appear as one `LO1-3` display dot. Their individual rows remain in the source `human/evidence.csv`.
 
-The package reads only the FST evidence used by the current paper-style views. The older notebook and `study_filter.py` remain available for the earlier Plotly workflow.
+The package reads only the FST evidence used by the paper-style views.

@@ -1,13 +1,13 @@
-# CorticalConnectivity
+# FST connectivity explorer
 
-This repository contains a literature-based review of human and macaque cortical connectivity. The current paper-style explorer focuses on **FST** and lets you switch species, choose studies, and inspect the evidence behind each area. The original notebook also supports other seed regions, including MST and MT.
+This repository contains a literature-based review of human and macaque **FST** connectivity. The paper-style explorer lets you switch species, choose studies, and inspect the evidence behind each area.
 
 ## Open the current FST explorer
 
 | Option | How to open it |
 | --- | --- |
+| **Browser — easiest** | Download [FST_connectivity_explorer_python.html](FST_connectivity_explorer_python.html) and open it locally. One file contains both species, images, and evidence and works offline. GitHub's file viewer does not run the interactive HTML. |
 | MATLAB | Set MATLAB's current folder to this repository, then open [FST_connectivity_explorer.fig](FST_connectivity_explorer.fig). The [human](human_FST_paper_lateral.fig) and [macaque](macaque_FST_paper_lateral.fig) FIGs are also available separately. Keep the `.m` files and species data folders with the FIG so its controls can run. |
-| Browser, no installation | Download [FST_connectivity_explorer_python.html](FST_connectivity_explorer_python.html) and open it locally. It contains both species, images, and evidence, and works offline. GitHub's file viewer does not run the interactive HTML. |
 | Python package | From the repository folder, run `python -m pip install .`, then `python -m fst_connectivity`. Python 3.10 or newer is required. On Windows, `py -m` can replace `python -m`. No separate plotting libraries are needed at runtime. |
 
 The [prebuilt Python wheel](dist/fst_connectivity-0.1.2-py3-none-any.whl) is another installation option. See the [Python package guide](PYTHON_PACKAGE.md) for its API, output-file command, and use with updated data.
@@ -41,14 +41,6 @@ The installed Python package uses bundled copies of the CSVs by default. To use 
 
 ```bash
 python -m fst_connectivity --data-dir . --output FST_connectivity_explorer_python.html --no-open
-```
-
-## Original Plotly notebook
-
-[network_diagram.ipynb](network_diagram.ipynb) and [study_filter.py](study_filter.py) are the earlier workflow for FST, MST, and MT. Its `*_displaybrain*.html` outputs and any older hosted Plotly pages are separate from the current paper-style explorer; the current MATLAB and Python commands do not refresh those pages. Run the notebook from the repository root so its relative data paths resolve correctly. Its additional dependencies are:
-
-```bash
-python -m pip install notebook pandas numpy plotly pillow matplotlib kaleido
 ```
 
 ## Repository map
