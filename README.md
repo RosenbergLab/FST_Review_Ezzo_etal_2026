@@ -1,51 +1,62 @@
-# FST connectivity explorer
+# CorticalConnectivity
 
-This repository contains a literature-based review of human and macaque **FST** connectivity. The paper-style explorer lets you switch species, choose studies, and inspect the evidence behind each area.
+This repository collects published evidence about structural and functional connectivity in human and macaque brains, including anatomical tracer, DTI tractography, rs-fMRI, and functional inactivation studies. The current interactive figures focus on **FST** (fundus of the superior temporal area). They place areas reported in the literature on a lateral brain view, show their pathway category by dot color, and let readers inspect which studies support each connection. The evidence tables also contain reports for other seed areas; the figures described here are the current FST views.
 
-## Open the current FST explorer
+## Open the FST figures
 
-| Option | How to open it |
+| Option | How to use it |
 | --- | --- |
-| **Browser — easiest** | Download [FST_connectivity_explorer_python.html](FST_connectivity_explorer_python.html) and open it locally. One file contains both species, images, and evidence and works offline. GitHub's file viewer does not run the interactive HTML. |
-| MATLAB | Set MATLAB's current folder to this repository, then open [FST_connectivity_explorer.fig](FST_connectivity_explorer.fig). The [human](human_FST_paper_lateral.fig) and [macaque](macaque_FST_paper_lateral.fig) FIGs are also available separately. Keep the `.m` files and species data folders with the FIG so its controls can run. |
-| Python package | From the repository folder, run `python -m pip install .`, then `python -m fst_connectivity`. Python 3.10 or newer is required. On Windows, `py -m` can replace `python -m`. No separate plotting libraries are needed at runtime. |
+| **Browser — easiest** | Download [FST_connectivity_explorer_python.html](FST_connectivity_explorer_python.html) and open it in a browser. It includes both species, the brain images, and the evidence in one offline file. **No Python or MATLAB installation is needed.** The filename reflects how the file was generated. GitHub's file viewer does not run the interactive figure, so download the HTML before opening it. |
+| **MATLAB** | Set MATLAB's current folder to this repository and open [FST_connectivity_explorer.fig](FST_connectivity_explorer.fig). Its **Species** menu switches between macaque and human in one window. Keep the `.m` files and the `human/` and `macaque/` folders with the FIG so the controls can load their data. Separate [human](human_FST_paper_lateral.fig) and [macaque](macaque_FST_paper_lateral.fig) FIGs are also available. |
+| **Python package** | Use the package to generate a fresh browser file from updated evidence. See the [Python package guide](PYTHON_PACKAGE.md) for installation, command-line use, and the Python API. |
 
-The [prebuilt Python wheel](dist/fst_connectivity-0.1.3-py3-none-any.whl) is another installation option. See the [Python package guide](PYTHON_PACKAGE.md) for its API, output-file command, and use with updated data.
+The browser and MATLAB figures use the same curated FST evidence and the same reference-mapped human dot positions. The browser file is a saved snapshot; rebuild it after changing the CSV data.
 
-The MATLAB and Python explorers use the same curated evidence, study controls, and reference-mapped human dot positions.
+## Read the figure
 
-## Use the controls
+| Feature | Meaning |
+| --- | --- |
+| Brain and insets | Each species uses one lateral brain image at 50% opacity. Inset boxes hold areas that are not shown on that surface. In the human view, V1, V2, V8, VMV, and VVC are placed just outside the brain outline, following the supplied figure. |
+| Dot color | Light blue marks the dorsal pathway, pink the lateral pathway, and yellow the ventral pathway. Black dots are neutral. Color identifies the area category; it does not encode connection strength. |
+| Study controls | Select studies to show their reported FST connections. **Only** isolates one study, **Select all** restores every option, and **Clear** hides connection dots. Macaque Boussaoud (1990, 1992) and Bogadhi (2019, 2021) papers each have a combined option. Ungraded tracer reports, including Barone (2000) and Ungerleider (2008), appear under **Mixed tracer evidence**. |
+| Dot size | **Uniform** shows no strength grade. Macaque connection dots are open in this mode; the FST seed stays filled. For an eligible single study, macaque dots can show its weak, moderate, and strong reports separately for afferent, efferent, or unspecified projections. An open dot in a strength view has no grade from that selection. Grades are not averaged across studies. |
+| Reporting studies | When all study options are selected, **Number of reporting studies** sizes a dot by the number of distinct papers reporting that connection. It is available for both species. |
+| Area details | Hover over a browser dot or click a MATLAB dot for the selected supporting studies and any selected reports of absence. Human LO1, LO2, and LO3 share one display dot labeled `LO1-3`; their evidence rows remain separate. |
 
-- **Species** switches between macaque and human without opening another window. Study selections are retained separately for each species. **Select all**, **Clear**, and **Only** control which papers contribute visible connections.
-- Dot colors mark dorsal, lateral, and ventral pathways; black dots are neutral. The paper views use one lateral brain image at 50% opacity, with inset boxes for areas off that surface. The human layout deliberately places V1, V2, V8, VMV, and VVC outside the brain outline.
-- The macaque panel combines Boussaoud et al. (1990, 1992), combines Bogadhi et al. (2019, 2021), and places ungraded tracer reports—including Barone et al. (2000) and Ungerleider et al. (2008)—under **Mixed tracer evidence**.
-- Macaque **Uniform** connection dots are open because size does not show a strength grade; the FST seed stays filled. With one eligible study selection, the afferent, efferent, or unspecified strength mode uses that study's weak/moderate/strong reports. It does not average grades across papers. In a strength mode, dots without a grade are open.
-- Both species offer **Number of reporting studies** when all study options are selected. It sizes each area by the number of distinct papers with a positive report, not by CSV row count. Human Baker et al. (2018) counts once even where DTI and rs-fMRI each have a row. Human LO1, LO2, and LO3 share one display dot labeled `LO1-3`; their source rows remain separate.
+## MATLAB: open or rebuild
 
-Hover over a dot to see the selected supporting papers and any selected reports of absence.
-
-## Evidence and rebuilding
-
-The [human/evidence.csv](human/evidence.csv) and [macaque/evidence.csv](macaque/evidence.csv) files record the seed area (`Main`), partner area (`Affiliate`), method, reports in each projection direction, and study reference codes. The matching [human/nodes.csv](human/nodes.csv) and [macaque/nodes.csv](macaque/nodes.csv) files supply area labels and native coordinates; each species folder also has `citations.txt`. The macaque Felleman and Van Essen (1991) FST pathways additionally come from [macaque/fel91_fst_connections.csv](macaque/fel91_fst_connections.csv).
-
-The current MATLAB explorer reads the repository CSVs. From MATLAB with this repository as the current folder, rebuild either species with:
+To use the saved interactive figure, open [FST_connectivity_explorer.fig](FST_connectivity_explorer.fig) from MATLAB with this repository as the current folder. To rebuild a species view from the current CSV files, run:
 
 ```matlab
 plotConnectivity(Species="macaque");
 plotConnectivity(Species="human");
 ```
 
-These calls save the paper FIG and PDF and update `<species>/edges.csv` and `<species>/selectnodes.csv`. Those two CSVs are **generated outputs**; edit `evidence.csv` and `nodes.csv` as source data. Pass `WriteTables=false` to rebuild figures without rewriting the generated tables.
+These calls save `<species>_FST_paper_lateral.fig` and `.pdf` in the repository folder. They also update `<species>/edges.csv` and `<species>/selectnodes.csv`, which are generated tables. Use `WriteTables=false` if you want to rebuild figures without rewriting those tables. The source code is [plotConnectivity.m](plotConnectivity.m), with display positions in [paperConnectivityLayout.m](paperConnectivityLayout.m) and [paperHumanConnectivityLayout.m](paperHumanConnectivityLayout.m).
 
-The installed Python package uses bundled copies of the CSVs by default. To use the current repository data and write a new offline HTML file, run from the repository folder:
+## Evidence and source files
+
+The `human/` and `macaque/` folders hold the literature review data and brain images. These files are the sources used to build the FST views:
+
+| File | Purpose |
+| --- | --- |
+| [human/evidence.csv](human/evidence.csv), [macaque/evidence.csv](macaque/evidence.csv) | One row per literature finding. `Main` is the seed area and `Affiliate` is the partner. Columns record study method, reports and grades for `Main → Affiliate` and `Affiliate → Main`, reference codes, and notes. For FST, those directions are efferent and afferent, respectively. |
+| [human/nodes.csv](human/nodes.csv), [macaque/nodes.csv](macaque/nodes.csv) | Area labels, native coordinates, and pathway colors. MATLAB and Python map these to the paper-style display positions for FST. |
+| `human/citations.txt`, `macaque/citations.txt` | Full citations for the reference codes in the evidence tables. |
+| `human/abbreviations.csv`, `macaque/abbreviations.csv` | Expansions of area abbreviations. |
+| `human/surface_snapshots/`, `macaque/surface_snapshots/` | Cortical surface images used behind the dots. |
+| [macaque/fel91_fst_connections.csv](macaque/fel91_fst_connections.csv) | FST pathways transcribed from Felleman and Van Essen (1991). |
+| `<species>/edges.csv`, `<species>/selectnodes.csv` | Generated summaries from MATLAB; edit `evidence.csv` and `nodes.csv` as source data instead. |
+
+The `evidence.xlsm` files are working review spreadsheets. Export curated changes to the corresponding `evidence.csv` before rebuilding a figure.
+
+## Rebuild the browser file with Python
+
+Python 3.10 or newer is needed only to generate a new offline HTML file. From this repository, install the package and render the current CSV data with:
 
 ```bash
+python -m pip install .
 python -m fst_connectivity --data-dir . --output FST_connectivity_explorer_python.html --no-open
 ```
 
-## Repository map
-
-- [plotConnectivity.m](plotConnectivity.m), [paperConnectivityLayout.m](paperConnectivityLayout.m), and [paperHumanConnectivityLayout.m](paperHumanConnectivityLayout.m): MATLAB FST explorer and display coordinates.
-- [src/fst_connectivity](src/fst_connectivity) and [pyproject.toml](pyproject.toml): installable Python package, bundled evidence, and offline browser interface.
-- [human](human) and [macaque](macaque): source evidence, citations, node lists, and cortical surface images. The `evidence.xlsm` files are working review spreadsheets; export their curated changes to `evidence.csv` before rebuilding.
-- [tests](tests): MATLAB and Python checks for study controls, evidence handling, layout, and saved FIG behavior.
+The [prebuilt wheel](dist/fst_connectivity-0.1.3-py3-none-any.whl) is an alternative to installing from source. The package also includes bundled copies of the evidence for use outside the repository. See [PYTHON_PACKAGE.md](PYTHON_PACKAGE.md) for more options.
