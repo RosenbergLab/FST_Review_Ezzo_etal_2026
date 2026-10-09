@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 import json
 import os
 import sys
@@ -39,6 +40,28 @@ class ModelTests(unittest.TestCase):
                                 and node["y"] == node["native_y"]
                                 for node in payload["nodes"]))
             json.dumps(payload)
+
+    def test_every_positive_fst_area_has_a_display_node(self):
+        positive = {"weak", "moderate", "strong", "present", "broad"}
+        for species, payload in (("macaque", self.macaque),
+                                 ("human", self.human)):
+            with self.subTest(species=species):
+                with (DATA / species / "evidence.csv").open(
+                        newline="", encoding="utf-8-sig") as stream:
+                    rows = list(csv.DictReader(stream))
+                targets = {
+                    row["Affiliate"] for row in rows
+                    if row["Main"] == "FST"
+                    and (row["1_main_to_affiliate_projection"].lower() in positive
+                         or row["2_affiliate_to_main_projection"].lower() in positive)
+                }
+                if species == "human":
+                    targets.difference_update({"LO1", "LO2", "LO3"})
+                    targets.add("LO1-3")
+                labels = {node["label"] for node in payload["nodes"]}
+                self.assertFalse(targets - labels)
+                self.assertEqual(len({node["id"] for node in payload["nodes"]}),
+                                 len(payload["nodes"]))
 
     def test_human_lo_areas_share_one_display_dot_and_reports(self):
         labels = {node["label"] for node in self.human["nodes"]}

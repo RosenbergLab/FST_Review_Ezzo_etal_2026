@@ -30,6 +30,23 @@ class LayoutTests(unittest.TestCase):
         self.assertEqual(nodes["V4t"]["fill"], "#F9F384")
         self.assertEqual(nodes["basalfore"]["display_label"], "basal forebrain")
         self.assertEqual(nodes["PITd"]["fill"], "#F9F384")
+        for name in ("CITd", "AITd", "V4t"):
+            self.assertEqual(nodes[name]["fill"], "#F9F384")
+        for name in ("MT", "MSTm"):
+            self.assertEqual(nodes[name]["fill"], "#B3E4F8")
+        self.assertEqual(nodes["S1"]["fill"], "#000000")
+        self.assertEqual((nodes["A1"]["x"], nodes["A1"]["y"]), (268.6, 156.4))
+        self.assertEqual((nodes["BA23"]["x"], nodes["BA23"]["y"]),
+                         (86.1, 257.7))
+        self.assertEqual((nodes["BA31"]["x"], nodes["BA31"]["y"]),
+                         (47.1, 281.7))
+        self.assertEqual((nodes["pulvinar"]["x"], nodes["pulvinar"]["y"]),
+                         (394, 306.7))
+        self.assertEqual((nodes["TRN"]["x"], nodes["TRN"]["y"]), (459, 306.7))
+        self.assertEqual(nodes["V3d"]["fill"], "#000000")
+        self.assertEqual(nodes["A1"]["fill"], "#000000")
+        self.assertFalse({"VOT/TEO", "SEF", "STGp", "PCCa", "PCCp", "thalamus"}
+                         & nodes.keys())
         self.assertEqual(len(view["boxes"]), 2)
         for label in ("VIP", "S1"):
             node = nodes[label]
@@ -44,6 +61,13 @@ class LayoutTests(unittest.TestCase):
         self.assertEqual(view["plot_offset"], [128, 46])
         self.assertEqual(nodes["LO1-3"]["fill"], "#F9F384")
         self.assertEqual(nodes["V4t"]["fill"], "#F9F384")
+        self.assertEqual(nodes["PIT"]["fill"], "#F9F384")
+        for name in ("MT", "MST"):
+            self.assertEqual(nodes[name]["fill"], "#B3E4F8")
+        for name in ("BA1/2", "3a/3b"):
+            self.assertEqual(nodes[name]["fill"], "#000000")
+        self.assertEqual(nodes["SMA"]["fill"], "#000000")
+        self.assertNotIn("SEF", nodes)
 
         # Compare with the MATLAB source, so a future MATLAB move cannot leave
         # the downloadable browser view silently using the older positions.

@@ -4,7 +4,7 @@ id,x,y,label,color,size,center_x,center_y,FSTcomments
 2,1810,500,V3,black,5,0.00,0.47,FSTcomments
 3,1900,380,V3A,blue,5,0.05,0.50,FSTcomments
 4,1670,760,V4,green,5,-0.025,0.60,FSTcomments
-5,1550,935,VOT/TEO,green,5,-0.05,0.65,FSTcomments
+5,1900,550,V3d,black,5,0.05,0.50,FSTcomments
 6,1575,690,V4t,green,5,-0.025,0.70,FSTcomments
 7,1540,580,MT,blue,5,0.025,0.70,FSTcomments
 8,1450,500,MSTm,blue,5,0.025,0.80,FSTcomments
@@ -17,7 +17,7 @@ id,x,y,label,color,size,center_x,center_y,FSTcomments
 15,1080,1280,AITv,green,5,-0.14,1.10,FSTcomments
 16,1150,830,STPp,red,5,-0.05,1.00,FSTcomments
 17,860,1030,STPa,red,5,-0.1,1.10,FSTcomments
-18,1150,680,STGp,red,5,-0.05,1.00,FSTcomments
+18,1150,680,A1,black,5,-0.05,1.00,FSTcomments
 19,880,850,STGa,red,5,-0.1,1.10,FSTcomments
 20,600,850,insula,black,5,-0.08,1.15,FSTcomments
 21,1550,400,MSTd,blue,5,0.05,0.85,FSTcomments
@@ -32,7 +32,7 @@ id,x,y,label,color,size,center_x,center_y,FSTcomments
 30,1000,150,S1,black,5,0.14,0.90,FSTcomments
 31,1200,0,5,blue,5,0.14,0.90,FSTcomments
 32,240,500,FEF,black,5,0.00,1.40,FSTcomments
-33,240,300,SEF,black,5,0.00,1.40,FSTcomments
+33,2850,1800,TRN,black,0,0,0,FSTcomments
 34,100,480,dlPFC,black,5,0.00,1.45,FSTcomments
 35,100,590,vlPFC,black,5,0.00,1.45,FSTcomments
 36,700,300,M1,black,5,0.02,1.20,FSTcomments
@@ -55,3 +55,6 @@ id,x,y,label,color,size,center_x,center_y,FSTcomments
 53,3000,1900,pretectum,black,0,0,0,FSTcomments
 54,3000,2000,SC,black,0,0,0,FSTcomments
 55,3300,1950,pons,black,0,0,0,FSTcomments
+56,3100,450,BA23,black,5,0.06,0.9,FSTcomments
+57,3000,550,BA31,black,5,0.06,0.9,FSTcomments
+58,2700,1800,pulvinar,black,0,0,0,FSTcomments

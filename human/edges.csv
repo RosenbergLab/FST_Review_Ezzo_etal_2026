@@ -42,7 +42,7 @@ source,targetid,targetname,evidencecount,projections,connectivitystrength,certai
 10,45,M1,2,bidirectional,moderate,conflicting,higher
 10,46,55b,1,bidirectional,moderate,conflicting,higher
 10,47,FEF,3,bidirectional,moderate,certain,higher
-10,48,SEF,1,bidirectional,moderate,conflicting,higher
+10,48,SMA,1,bidirectional,moderate,conflicting,higher
 10,49,PMd,2,bidirectional,moderate,conflicting,higher
 10,50,PMv,2,bidirectional,moderate,conflicting,higher
 10,51,BA44,1,bidirectional,moderate,certain,inferred from functional complexity of abstract reasoning and language

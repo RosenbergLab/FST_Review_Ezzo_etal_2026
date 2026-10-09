@@ -53,23 +53,27 @@ def _macaque(nodes: list[dict]) -> dict:
     _put(by_label, "5", (offset_x + scale_x * 1200, offset_y + scale_y * 80))
     _put(by_label, "PO", (offset_x + scale_x * 1830, offset_y + scale_y * 275))
 
-    medial_names = ["V6", "PCCa", "PCCp", "RSC", "24c", "7m", "preSMA"]
+    medial_names = ["V6", "PCCa", "PCCp", "RSC", "24c", "7m", "preSMA",
+                    "BA23", "BA31"]
     has_extra_medial = any(name in by_label for name in ("24c", "7m", "preSMA"))
     if has_extra_medial:
         medial_rect = [36, 220, 93, 85]
         medial_points = [(51, 253), (96, 275), (51, 297), (96, 297),
-                         (81, 253), (113, 253), (51, 275)]
+                         (81, 253), (113, 253), (51, 275),
+                         (96, 275), (51, 297)]
     else:
         medial_rect = [36, 236, 68, 51]
         medial_points = [(47, 260), (85, 260), (47, 281), (85, 281),
-                         (47, 260), (85, 260), (47, 281)]
+                         (47, 260), (85, 260), (47, 281),
+                         (85, 260), (47, 281)]
     for name, point in zip(medial_names, medial_points):
         _put(by_label, name, point)
 
     subcortical_names = ["basalfore", "SC", "claustrum", "pons",
-                         "striatum", "pretectum", "thalamus"]
+                         "striatum", "pretectum", "thalamus", "pulvinar", "TRN"]
     subcortical_points = [(394, 249), (459, 249), (394, 270), (459, 270),
-                          (394, 290), (459, 290), (394, 310)]
+                          (394, 290), (459, 290), (394, 310),
+                          (394, 306.7), (459, 306.7)]
     for name, point in zip(subcortical_names, subcortical_points):
         _put(by_label, name, point)
 
@@ -135,7 +139,7 @@ def _human(nodes: list[dict]) -> dict:
 
     # Match referenceNames/referencePixels in paperHumanConnectivityLayout.m.
     reference_pixels = (
-        ("PMd", 304, 144), ("SEF", 355, 128), ("FEF", 355, 177),
+        ("PMd", 304, 144), ("SMA", 355, 128), ("FEF", 355, 177),
         ("M1", 405, 165), ("55b", 355, 232), ("3a/3b", 469, 179),
         ("BA1/2", 529, 145), ("AIP", 592, 162), ("VIP", 654, 117),
         ("LIP", 675, 162), ("MIP", 711, 151), ("IPS0/1", 740, 193),

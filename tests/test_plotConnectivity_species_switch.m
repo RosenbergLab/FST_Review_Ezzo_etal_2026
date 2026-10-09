@@ -36,6 +36,7 @@ assert(isequal(originalPosition(3:4), [1835 820]), ...
     'Both species must use the same 1835-by-820 window.');
 cache = verifyCache(fig);
 verifyViewGeometry(fig, cache);
+verifyUpdatedAreaMapping(fig);
 verifyActiveView(fig, cache, "human");
 assert(nnz(string(result.Nodes.label) == "LO1-3") == 1);
 assert(~any(ismember(string(result.Nodes.label), ["LO1", "LO2", "LO3"])));
@@ -116,6 +117,34 @@ assert(isequal(humanAxes.Position, [128 46 1080 728]), ...
     'Human axes are not centered in the shared canvas.');
 assert(isequal(macAxes.Position, [0 0 1335 820]), ...
     'Macaque axes moved in the shared canvas.');
+end
+
+function verifyUpdatedAreaMapping(fig)
+human = getappdata(fig, 'HumanStudySelectorState');
+humanLabels = string(human.NodeLabels);
+assert(any(humanLabels == "SMA") && ~any(humanLabels == "SEF"), ...
+    'Updated human SMA label did not replace SEF.');
+
+mac = getappdata(fig, 'StudySelectorState');
+macLabels = string(mac.NodeLabels);
+assert(all(ismember(["V3d", "A1", "BA23", "BA31", "pulvinar", "TRN"], ...
+    macLabels)), 'Updated macaque areas are missing.');
+assert(~any(ismember(["VOT/TEO", "SEF", "STGp", "PCCa", "PCCp", ...
+    "thalamus"], macLabels)), 'Old macaque FST area labels remain.');
+names = ["A1", "BA23", "BA31", "pulvinar", "TRN"];
+points = [268.6 156.4; 86.1 257.7; 47.1 281.7; ...
+    394 306.7; 459 306.7];
+for k = 1:numel(names)
+    index = find(macLabels == names(k), 1);
+    point = [mac.NodeHandles(index).XData, mac.NodeHandles(index).YData];
+    assert(max(abs(point - points(k, :))) < 1e-9, ...
+        'The current position changed for %s.', names(k));
+end
+for label = ["A1", "V3d"]
+    index = find(macLabels == label, 1);
+    assert(max(abs(mac.NodeHandles(index).MarkerEdgeColor)) < 1e-9, ...
+        'The new area %s should use the neutral color.', label);
+end
 end
 
 function verifyActiveView(fig, cache, species)

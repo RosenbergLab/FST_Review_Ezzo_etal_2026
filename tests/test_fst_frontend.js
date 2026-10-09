@@ -99,6 +99,12 @@ for (const radio of all(macaque, el => el.tag === 'input' && el.type === 'radio'
 countRadio.listeners.change();
 assert.equal(one(macaque, el => el.className === 'legend-title').textContent,
   'Number of studies');
+const fef = one(macaque, el => el.tag === 'circle' &&
+  el.attributes['aria-label'] === 'FEF');
+assert.match(fef._tooltip, /Supporting studies: 4/);
+const pulvinar = one(macaque, el => el.tag === 'circle' &&
+  el.attributes['aria-label'] === 'pulvinar');
+assert.match(pulvinar._tooltip, /Supporting studies: 1/);
 
 const macSpecies = one(macaque, el => el.className === 'species-choice');
 macSpecies.value = 'human';
