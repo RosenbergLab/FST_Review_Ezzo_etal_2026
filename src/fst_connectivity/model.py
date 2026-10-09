@@ -8,6 +8,7 @@ The display-only LO merge and two macaque paper corrections mirror
 from __future__ import annotations
 
 import csv
+import math
 import re
 from pathlib import Path
 
@@ -25,6 +26,27 @@ OUT_STRENGTH = "1_main_to_affiliate_projection_strength"
 IN_STRENGTH = "2_affiliate_to_main_projection_strength"
 OUT_REF = "1_main_to_affiliate_ref"
 IN_REF = "2_affiliate_to_main_ref"
+OUT_SCORE = "1_main_to_affiliate_strength_score_1to3"
+IN_SCORE = "2_affiliate_to_main_strength_score_1to3"
+
+
+def _strength_score(value: str) -> float | None:
+    """Read a legacy word grade or a validated 1–3 tracer score."""
+    legacy = {"weak": 1.0, "moderate": 2.0, "strong": 3.0}
+    if value in legacy:
+        return legacy[value]
+    try:
+        score = float(value)
+    except (TypeError, ValueError):
+        return None
+    return score if math.isfinite(score) and 1 <= score <= 3 else None
+
+
+def _numeric_strength(value: str) -> str:
+    score = _strength_score(value)
+    return f"{score:g}" if score is not None and value not in {
+        "weak", "moderate", "strong"
+    } else ""
 
 
 def _macaque_display_area(area: str) -> str:
@@ -141,26 +163,35 @@ def _study_events(
         method = _value(row, "study_type")
         if method == "inactivation":
             method = "functional inactivation"
-        for direction, grade_col, strength_col, ref_col, other_ref_col in (
-            ("out", OUT_GRADE, OUT_STRENGTH, OUT_REF, IN_REF),
-            ("in", IN_GRADE, IN_STRENGTH, IN_REF, OUT_REF),
+        for direction, grade_col, strength_col, score_col, ref_col, other_ref_col in (
+            ("out", OUT_GRADE, OUT_STRENGTH, OUT_SCORE, OUT_REF, IN_REF),
+            ("in", IN_GRADE, IN_STRENGTH, IN_SCORE, IN_REF, OUT_REF),
         ):
             grade = _value(row, grade_col).lower()
-            if grade not in REPORTED_GRADES:
+            numeric_strength = _numeric_strength(_value(row, score_col))
+            if grade not in REPORTED_GRADES and not (
+                    grade == "tentative" and numeric_strength):
                 continue
-            strength_grade = _event_strength(
-                grade, _value(row, strength_col).lower()
-            )
             codes = _reference_codes(_value(row, ref_col), known)
             if not codes:
                 codes = _reference_codes(_value(row, other_ref_col), known)
             for code in codes:
+                event_grade = (
+                    "present" if code == "Bou90" and grade == "tentative"
+                    and numeric_strength else grade
+                )
+                if event_grade not in REPORTED_GRADES:
+                    continue
+                strength_grade = (
+                    numeric_strength if code == "Bou90"
+                    else _event_strength(grade, _value(row, strength_col).lower())
+                )
                 events.append(
                     {
                         "study": code,
                         "target": target,
                         "direction": direction,
-                        "grade": grade,
+                        "grade": event_grade,
                         "type": method,
                         "strengthGrade": strength_grade,
                     }
@@ -223,7 +254,7 @@ def _group_studies(
     ]
     graded_codes = {
         event["study"] for event in events
-        if event["strengthGrade"] in GRADED_STRENGTHS
+        if _strength_score(event["strengthGrade"]) is not None
         and event["type"] in STRENGTH_METHODS
     }
 

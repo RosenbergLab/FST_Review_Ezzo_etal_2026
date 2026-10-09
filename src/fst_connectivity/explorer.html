@@ -54,6 +54,8 @@
     .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 7px;
       padding: 4px 7px; font-size: 12px; }
     .legend-entry { height: 20px; display: flex; align-items: center; gap: 11px; }
+    .legend.numeric .legend-grid { gap: 1px 7px; padding: 2px 7px; font-size: 11px; }
+    .legend.numeric .legend-entry { height: 18px; }
     .legend-dot { display: inline-block; flex: none; border-radius: 50%; background: #444; }
     .legend-dot.open { background: transparent; border: 1.5px solid #444; }
     .status { position: absolute; top: 773px; left: 12px; right: 12px;
@@ -84,7 +86,6 @@
     const tooltip = document.getElementById('tooltip');
     const NS = 'http://www.w3.org/2000/svg';
     const positiveGrades = new Set(['weak', 'moderate', 'strong', 'present', 'broad']);
-    const graded = new Set(['weak', 'moderate', 'strong']);
     const strengthTypes = new Set(['tracer', 'DTI tractography']);
     const views = {};
     let activeSpecies = 'macaque';
@@ -111,7 +112,15 @@
       if (event.type !== 'tracer' && event.type !== 'literature synthesis') return 'unspecified';
       return event.direction === 'in' ? 'afferent' : event.direction === 'out' ? 'efferent' : 'unspecified';
     }
-    function rank(grade) { return {weak: 1, moderate: 2, strong: 3}[grade] || 0; }
+    function rank(grade) {
+      const legacy = {weak: 1, moderate: 2, strong: 3}[grade];
+      if (legacy) return legacy;
+      const score = Number(grade);
+      return grade !== '' && Number.isFinite(score) && score >= 1 && score <= 3 ? score : 0;
+    }
+    function diameterForScore(score) {
+      return score <= 2 ? 9 + 6 * (score - 1) : 15 + 7 * (score - 2);
+    }
     function roundHalfEven(value) {
       const lower = Math.floor(value), fraction = value - lower;
       return Math.abs(fraction - .5) < 1e-12 ? lower + lower % 2 : Math.round(value);
@@ -197,12 +206,17 @@
       const grid = htmlElement('div', 'legend-grid', legend);
       return {legend, title, grid};
     }
-    function updateLegend(view, countMode) {
-      const {title, grid} = view.controls.legend;
-      title.textContent = countMode ? 'Number of studies' : 'Dot size legend';
+    function updateLegend(view, countMode, numericMode = false) {
+      const {legend, title, grid} = view.controls.legend;
+      legend.classList.toggle('numeric', numericMode);
+      title.textContent = countMode ? 'Number of studies'
+        : numericMode ? 'Tracer score (1–3)' : 'Dot size legend';
       grid.replaceChildren();
       let entries = countMode
         ? [['1 study', 9], ['2 studies', 10], ['3 studies', 15], ['4 studies', 20]]
+        : numericMode
+          ? [['1 (weak)', 9], ['1.5', 12], ['2 (moderate)', 15],
+             ['2.5', 18.5], ['3 (strong)', 22], ['No grade (open)', 9, true]]
         : [['Weak (small)', 9], ['Moderate (medium)', 15],
            ['Strong (large)', 22], ['No grade (open)', 9, true]];
       if (countMode && view.data.species === 'human')
@@ -319,7 +333,7 @@
       if (payload.species === 'macaque') {
         for (const key of ['afferent', 'efferent', 'unspecified']) {
           available[key] = [...new Set(reports.filter(event =>
-            positiveGrades.has(event.grade) && graded.has(event.strengthGrade) &&
+            positiveGrades.has(event.grade) && rank(event.strengthGrade) > 0 &&
             strengthTypes.has(event.type) && projectionClass(event) === key)
             .map(event => event.study))];
           const enabled = checkedGroups.length === 1 && available[key].length === 1;
@@ -332,12 +346,16 @@
           controls.sizeInputs.uniform.input.checked = true; mode = 'uniform';
         }
         const countMode = mode === 'studycount';
+        const numericMode = !countMode && mode !== 'uniform' &&
+          checkedGroups.length === 1 && checkedGroups[0].codes.includes('Bou90');
         controls.sizeNote.textContent = countMode
           ? 'Counts distinct papers with a positive connection.\nMore studies make a larger dot; open = no graded strength.'
           : mode === 'uniform'
             ? 'Uniform dots are open; no strength grade is shown.\nSelect one study to size dots by connection strength.'
+            : numericMode
+              ? 'Boussaoud (1990) median positive tracer grade, 1–3.\nIntermediate values keep their own dot size; no workbook grade = open.'
             : 'Dots remain visible for all selected studies.\nFilled dots show graded connection strength.';
-        updateLegend(view, countMode);
+        updateLegend(view, countMode, numericMode);
       } else {
         mode = controls.sizeInputs.studycount.input.checked ? 'studycount' : 'uniform';
         if (mode === 'studycount' && !countEnabled) {
@@ -375,7 +393,7 @@
             }
           } else {
             let hasGrade = mode === 'uniform' ? false
-              : positive.some(e => graded.has(e.strengthGrade) && strengthTypes.has(e.type));
+              : positive.some(e => rank(e.strengthGrade) > 0 && strengthTypes.has(e.type));
             let strength = 'not encoded by size (uniform)';
             if (mode === 'studycount') {
               const studyCount = new Set(positive.map(e => e.study)).size;
@@ -385,14 +403,17 @@
             } else if (mode !== 'uniform') {
               const activeCode = available[mode][0];
               const gradedReports = positive.filter(e => e.study === activeCode &&
-                projectionClass(e) === mode && graded.has(e.strengthGrade) && strengthTypes.has(e.type));
+                projectionClass(e) === mode && rank(e.strengthGrade) > 0 && strengthTypes.has(e.type));
               hasGrade = gradedReports.length > 0;
               strength = 'not reported for ' + mode;
               if (hasGrade) {
-                const score = roundHalfEven(gradedReports.reduce((sum, e) => sum + rank(e.strengthGrade), 0)
-                  / gradedReports.length);
-                diameter = [0, 9, 15, 22][score];
-                strength = ['','weak','moderate','strong'][score] + ' (' + mode + '; ' +
+                const meanScore = gradedReports.reduce((sum, e) => sum + rank(e.strengthGrade), 0)
+                  / gradedReports.length;
+                const numericScore = activeCode === 'Bou90';
+                const score = numericScore ? meanScore : roundHalfEven(meanScore);
+                diameter = diameterForScore(score);
+                strength = (numericScore ? String(score) + '/3'
+                  : ['','weak','moderate','strong'][score]) + ' (' + mode + '; ' +
                   displayName(activeCode, sourceNames) + ')';
               }
             }

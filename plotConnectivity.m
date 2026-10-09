@@ -843,6 +843,14 @@ value = strtrim(string(tbl.(char(name))));
 value(ismissing(value)) = "";
 end
 
+function value = optionalCleanColumn(tbl, name)
+if ismember(name, string(tbl.Properties.VariableNames))
+    value = cleanColumn(tbl, name);
+else
+    value = repmat("", height(tbl), 1);
+end
+end
+
 function value = numericColumn(tbl, name)
 if ~ismember(name, string(tbl.Properties.VariableNames))
     error('plotConnectivity:MissingColumn', 'Missing column "%s".', name);
@@ -889,6 +897,30 @@ switch char(label)
         rank = 3 * ~tracerOnly;
     otherwise
         rank = 0;
+end
+end
+
+function score = gradedStrengthScore(value)
+switch char(lower(strtrim(string(value))))
+    case 'weak'
+        score = 1;
+    case 'moderate'
+        score = 2;
+    case 'strong'
+        score = 3;
+    otherwise
+        score = str2double(string(value));
+        if ~isfinite(score) || score < 1 || score > 3
+            score = NaN;
+        end
+end
+end
+
+function diameter = strengthDiameter(score)
+if score <= 2
+    diameter = 9 + 6 * (score - 1);
+else
+    diameter = 15 + 7 * (score - 2);
 end
 end
 
@@ -1081,6 +1113,10 @@ strengthsOut = lower(cleanColumn(evidence, ...
     "1_main_to_affiliate_projection_strength"));
 strengthsIn = lower(cleanColumn(evidence, ...
     "2_affiliate_to_main_projection_strength"));
+scoresOut = optionalCleanColumn(evidence, ...
+    "1_main_to_affiliate_strength_score_1to3");
+scoresIn = optionalCleanColumn(evidence, ...
+    "2_affiliate_to_main_strength_score_1to3");
 refsOut = cleanColumn(evidence, "1_main_to_affiliate_ref");
 refsIn = cleanColumn(evidence, "2_affiliate_to_main_ref");
 allowedGrades = ["weak", "moderate", "strong", "present", "broad", "absent"];
@@ -1092,17 +1128,23 @@ for r = 1:height(evidence)
         if d == 1
             grade = gradesOut(r);
             strengthText = strengthsOut(r);
+            numericText = scoresOut(r);
             direction = "out";
             ref = refsOut(r);
             otherRef = refsIn(r);
         else
             grade = gradesIn(r);
             strengthText = strengthsIn(r);
+            numericText = scoresIn(r);
             direction = "in";
             ref = refsIn(r);
             otherRef = refsOut(r);
         end
-        if ~ismember(grade, allowedGrades)
+        numericScore = str2double(numericText);
+        numericPresent = isfinite(numericScore) && ...
+            numericScore >= 1 && numericScore <= 3;
+        if ~ismember(grade, allowedGrades) && ...
+                ~(grade == "tentative" && numericPresent)
             continue
         end
         strengthGrade = "";
@@ -1117,12 +1159,27 @@ for r = 1:height(evidence)
             codes = referenceCodes(otherRef, citationCodes);
         end
         for c = codes(:)'
+            eventGradeValue = grade;
+            if c == "Bou90" && grade == "tentative" && numericPresent
+                eventGradeValue = "present";
+            end
+            if ~ismember(eventGradeValue, allowedGrades)
+                continue
+            end
+            eventScore = strengthGrade;
+            if c == "Bou90"
+                if numericPresent
+                    eventScore = string(numericScore);
+                else
+                    eventScore = "";
+                end
+            end
             eventStudy(end+1, 1) = c; %#ok<AGROW>
             eventTarget(end+1, 1) = affiliates(r); %#ok<AGROW>
             eventDirection(end+1, 1) = direction; %#ok<AGROW>
-            eventGrade(end+1, 1) = grade; %#ok<AGROW>
+            eventGrade(end+1, 1) = eventGradeValue; %#ok<AGROW>
             eventType(end+1, 1) = types(r); %#ok<AGROW>
-            eventStrength(end+1, 1) = strengthGrade; %#ok<AGROW>
+            eventStrength(end+1, 1) = eventScore; %#ok<AGROW>
         end
     end
 end
@@ -1186,7 +1243,7 @@ for k = 1:height(studies)
 end
 grouped.detail = grouped.label;
 gradedCodes = unique(events.study( ...
-    ismember(events.strengthGrade, ["weak", "moderate", "strong"]) & ...
+    isfinite(arrayfun(@gradedStrengthScore, events.strengthGrade)) & ...
     ismember(events.type, strengthTypes)));
 bou90 = find(grouped.code == "Bou90", 1);
 bou92 = find(grouped.code == "Bou92", 1);
@@ -1590,6 +1647,9 @@ noteControl = uicontrol('Parent', panel, 'Style', 'text', ...
     'HorizontalAlignment', 'left', 'BackgroundColor', [0.975, 0.985, 1]);
 strengthLegend = addDotSizeLegend(panel, ...
     [12, 53, panelWidth - 24, 82], false);
+numericStrengthLegend = addDotSizeLegend(panel, ...
+    [12, 53, panelWidth - 24, 82], false, "numeric");
+numericStrengthLegend.Visible = 'off';
 countLegend = addDotSizeLegend(panel, ...
     [12, 53, panelWidth - 24, 82], false, "count");
 countLegend.Visible = 'off';
@@ -1605,6 +1665,7 @@ state = struct('Events', events, 'Studies', studies, ...
     'EdgeHandles', edgeHandles, 'EdgeTargets', edges.targetname, ...
     'Scale', dataUnitsPerPixel, 'Seed', seed, 'Status', status, ...
     'Note', noteControl, 'StrengthLegend', strengthLegend, ...
+    'NumericStrengthLegend', numericStrengthLegend, ...
     'CountLegend', countLegend, 'SizeGroup', sizeGroup, ...
     'UniformButton', uniformButton, 'CountButton', countButton, ...
     'StrengthButtons', [afferentButton; efferentButton; unspecifiedButton], ...
@@ -1649,9 +1710,9 @@ for k = find(checked(:))'
 end
 reports = state.Events(ismember(state.Events.study, selectedCodes), :);
 reportClasses = projectionClasses(reports);
-gradedGrades = ["weak", "moderate", "strong"];
+reportScores = arrayfun(@gradedStrengthScore, reports.strengthGrade);
 positiveGrades = ["weak", "moderate", "strong", "present", "broad"];
-eligibleStrength = ismember(reports.strengthGrade, gradedGrades) & ...
+eligibleStrength = isfinite(reportScores) & ...
     ismember(reports.type, state.StrengthTypes) & ...
     ismember(reports.grade, positiveGrades);
 strengthModes = ["afferent", "efferent", "unspecified"];
@@ -1675,6 +1736,7 @@ else
     state.CountButton.Enable = 'off';
 end
 sizeMode = string(state.SizeGroup.SelectedObject.Tag);
+selectedModeIndex = [];
 if sizeMode == "studycount"
     if ~canSizeByCount
         state.SizeGroup.SelectedObject = state.UniformButton;
@@ -1690,17 +1752,33 @@ end
 if sizeMode == "uniform"
     selectedModeIndex = [];
 end
+numericMode = false;
+if ~isempty(selectedModeIndex) && nnz(checked) == 1
+    selectedStudy = find(checked, 1);
+    numericMode = any(state.Studies.codes{selectedStudy} == "Bou90");
+end
 if sizeMode == "studycount"
     state.StrengthLegend.Visible = 'off';
+    state.NumericStrengthLegend.Visible = 'off';
     state.CountLegend.Visible = 'on';
     state.Note.String = sprintf(['Counts distinct papers with a positive connection.\n' ...
         'More studies make a larger dot; open = no graded strength.']);
 else
     state.StrengthLegend.Visible = 'on';
+    if numericMode
+        state.StrengthLegend.Visible = 'off';
+    end
+    state.NumericStrengthLegend.Visible = 'off';
+    if numericMode
+        state.NumericStrengthLegend.Visible = 'on';
+    end
     state.CountLegend.Visible = 'off';
     if sizeMode == "uniform"
         state.Note.String = sprintf(['Uniform dots are open; no strength grade is shown.\n' ...
             'Select one study to size dots by connection strength.']);
+    elseif numericMode
+        state.Note.String = sprintf(['Boussaoud (1990) median positive tracer grade, 1–3.\n' ...
+            'Intermediate values keep their size; no workbook grade = open.']);
     else
         state.Note.String = sprintf(['Dots remain visible for all selected studies.\n' ...
             'Filled dots show graded connection strength.']);
@@ -1711,6 +1789,7 @@ for k = 1:numel(state.NodeLabels)
     label = state.NodeLabels(k);
     nodeMatch = reports.target == label;
     nodeReports = reports(nodeMatch, :);
+    nodeScores = reportScores(nodeMatch);
     nodeClasses = reportClasses(nodeMatch);
     positive = ismember(nodeReports.grade, positiveGrades);
     shown = label == state.Seed || any(positive);
@@ -1737,26 +1816,31 @@ for k = 1:numel(state.NodeLabels)
             % minimum for one-study open circles.
             size = max(9, 5 * studyCount);
             hasNodeGrade = any(positive & ...
-                ismember(nodeReports.strengthGrade, gradedGrades) & ...
+                isfinite(nodeScores) & ...
                 ismember(nodeReports.type, state.StrengthTypes));
             strength = "not encoded by size (study count)";
         else
             activeCode = availableSources{selectedModeIndex}(1);
             graded = positive & nodeClasses == sizeMode & ...
                 nodeReports.study == activeCode & ...
-                ismember(nodeReports.strengthGrade, gradedGrades) & ...
+                isfinite(nodeScores) & ...
                 ismember(nodeReports.type, state.StrengthTypes);
             hasNodeGrade = any(graded);
             size = 9;
             strength = "not reported for " + sizeMode;
             if hasNodeGrade
-                ranks = arrayfun(@(s) projectionRank(s, true), ...
-                    nodeReports.strengthGrade(graded));
-                score = roundHalfToEven(mean(ranks));
-                sizeByRank = [9, 15, 22];
+                score = mean(nodeScores(graded));
+                if activeCode ~= "Bou90"
+                    score = roundHalfToEven(score);
+                end
                 strengthNames = ["weak", "moderate", "strong"];
-                size = sizeByRank(score);
-                strength = strengthNames(score) + " (" + sizeMode + ...
+                size = strengthDiameter(score);
+                if activeCode == "Bou90"
+                    strengthLabel = string(score) + "/3";
+                else
+                    strengthLabel = strengthNames(score);
+                end
+                strength = strengthLabel + " (" + sizeMode + ...
                     "; " + displayStudyNames(activeCode, ...
                     state.SourceStudies) + ")";
             end
@@ -2040,6 +2124,13 @@ if kind == "count"
     labels(1) = "1 study";
     diameters = max(9, 5 * countValues);
     openIndex = 0;
+elseif kind == "numeric"
+    legendTitle = 'Tracer score (1–3)';
+    legendTag = 'NumericStrengthLegend';
+    labels = ["1 (weak)", "1.5", "2 (moderate)", ...
+        "2.5", "3 (strong)", "No grade (open)"];
+    diameters = [9, 12, 15, 18.5, 22, 9];
+    openIndex = numel(labels);
 else
     legendTitle = 'Dot size legend';
     legendTag = 'DotSizeLegend';
@@ -2059,7 +2150,17 @@ keyAx = axes('Parent', key, 'Units', 'pixels', ...
     'XLim', [0, plotWidth], 'YLim', [0, plotHeight], ...
     'Color', background, 'XColor', 'none', 'YColor', 'none', ...
     'HitTest', 'off');
-if singleColumn
+if kind == "numeric"
+    if singleColumn
+        markerX = repmat(18, 1, 6);
+        labelX = repmat(40, 1, 6);
+        rowY = linspace(plotHeight - 8, 8, 6);
+    else
+        markerX = [18, 180, 340, 18, 180, 340];
+        labelX = [40, 202, 362, 40, 202, 362];
+        rowY = [42, 42, 42, 14, 14, 14];
+    end
+elseif singleColumn
     markerX = [18, 18, 18, 18];
     labelX = [40, 40, 40, 40];
     rowY = [91, 64, 37, 10];

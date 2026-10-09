@@ -49,6 +49,7 @@ switchSpecies(fig, 1); % Macaque
 verifySwitch(fig, cache, originalPosition, "macaque", priorFigureCount);
 verifyStudyFilters(fig, cache.macaque, 'StudySelectorState');
 verifyUniformOpen(fig);
+verifyBoussaoudNumericStrength(fig);
 verifyNoCornerLetters(fig);
 
 switchSpecies(fig, 2); % Human, in the same figure again
@@ -228,6 +229,40 @@ for k = 1:numel(state.NodeLabels)
             'Uniform macaque connection dots must be open.');
     end
 end
+end
+
+function verifyBoussaoudNumericStrength(fig)
+state = getappdata(fig, 'StudySelectorState');
+studyIndex = find(state.Studies.code == "Bou90+Bou92", 1);
+assert(~isempty(studyIndex), 'Boussaoud grouped study is missing.');
+for k = 1:numel(state.CheckBoxes)
+    state.CheckBoxes(k).Value = k == studyIndex;
+end
+runCallback(state.CheckBoxes(studyIndex));
+
+state.SizeGroup.SelectedObject = state.StrengthButtons(2); % efferent
+callback = state.SizeGroup.SelectionChangedFcn;
+callback(state.SizeGroup, []);
+assert(strcmp(state.NumericStrengthLegend.Visible, 'on'));
+assert(strcmp(state.StrengthLegend.Visible, 'off'));
+labels = string(state.NodeLabels);
+sizeOf = @(name) state.NodeHandles(find(labels == name, 1)).SizeData;
+assert(abs(sizeOf("MT") - (0.75 * 22)^2) < 1e-9);
+assert(abs(sizeOf("VIP") - (0.75 * 18.5)^2) < 1e-9);
+assert(abs(sizeOf("V4t") - (0.75 * 9)^2) < 1e-9);
+assert(isequal(state.NodeHandles(find(labels == "CITd", 1)).MarkerFaceColor, 'none'));
+assert(isequal(state.NodeHandles(find(labels == "TRN", 1)).MarkerFaceColor, 'none'));
+
+state.SizeGroup.SelectedObject = state.StrengthButtons(1); % afferent
+callback(state.SizeGroup, []);
+assert(abs(sizeOf("MT") - (0.75 * 18.5)^2) < 1e-9);
+assert(abs(sizeOf("VIP") - (0.75 * 12)^2) < 1e-9);
+assert(abs(sizeOf("V3d") - (0.75 * 9)^2) < 1e-9);
+for k = 1:numel(state.CheckBoxes)
+    state.CheckBoxes(k).Value = 1;
+end
+runCallback(state.CheckBoxes(1));
+assert(strcmp(state.SizeGroup.SelectedObject.Tag, 'uniform'));
 end
 
 function verifySwitch(fig, cache, originalPosition, species, priorFigureCount)

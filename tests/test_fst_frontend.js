@@ -169,6 +169,29 @@ assert.ok(activeMarkers.some(circle => circle.attributes.fill !== 'none'));
 const rows = all(macaque, el => el.className === 'study-row');
 const rowFor = phrase => rows.find(row => all(row, el =>
   el.className === 'label-text' && el.textContent.includes(phrase)).length);
+one(rowFor('Boussaoud'), el => el.className === 'only-button').listeners.click();
+const efferent = one(macaque, el => el.tag === 'input' && el.value === 'efferent');
+assert.equal(efferent.disabled, false);
+for (const radio of all(macaque, el => el.tag === 'input' && el.type === 'radio'))
+  radio.checked = radio === efferent;
+efferent.listeners.change();
+assert.equal(one(macaque, el => el.className === 'legend-title').textContent,
+  'Tracer score (1–3)');
+assert.equal(all(macaque, el => el.className === 'legend-entry').length, 6);
+const bouMarker = name => one(macaque, el => el.tag === 'circle' &&
+  el.attributes['aria-label'] === name);
+assert.ok(Number(bouMarker('MT').attributes.r) > Number(bouMarker('VIP').attributes.r));
+assert.ok(Number(bouMarker('VIP').attributes.r) > Number(bouMarker('V4t').attributes.r));
+assert.match(bouMarker('VIP')._tooltip, /2\.5\/3/);
+assert.equal(bouMarker('CITd').attributes.fill, 'none');
+assert.equal(bouMarker('TRN').attributes.fill, 'none');
+const afferent = one(macaque, el => el.tag === 'input' && el.value === 'afferent');
+for (const radio of all(macaque, el => el.tag === 'input' && el.type === 'radio'))
+  radio.checked = radio === afferent;
+afferent.listeners.change();
+assert.match(bouMarker('MT')._tooltip, /2\.5\/3/);
+assert.match(bouMarker('VIP')._tooltip, /1\.5\/3/);
+assert.match(bouMarker('V3d')._tooltip, /1\/3/);
 one(rowFor('Felleman'), el => el.className === 'only-button').listeners.click();
 assert.notEqual(v3d.style.display, 'none');
 assert.match(v3d._tooltip, /named this pathway V3; shown here with V3d/);

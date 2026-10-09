@@ -100,6 +100,35 @@ class ModelTests(unittest.TestCase):
         self.assertEqual([row["code"] for row in self.human["studies"]],
                          ["Bak18", "Rol23", "Rua25"])
 
+    def test_boussaoud_1990_uses_workbook_numeric_strength(self):
+        scores = {(event["target"], event["direction"]): event["strengthGrade"]
+                  for event in self.macaque["events"] if event["study"] == "Bou90"}
+        for target, outbound, inbound in (
+            ("V3d", "1", "1"), ("V4t", "1", "1.5"),
+            ("MT", "3", "2.5"), ("VIP", "2.5", "1.5"),
+            ("PITv", "1.5", "2"), ("PITd", "1.5", "2"),
+            ("AITd", "1", "1.5"), ("FEF", "1.5", "1"),
+        ):
+            with self.subTest(area=target):
+                self.assertEqual(scores[target, "out"], outbound)
+                self.assertEqual(scores[target, "in"], inbound)
+        for target in ("CITd", "CITv", "STPp", "7a"):
+            self.assertFalse(any(score for (area, _), score in scores.items()
+                                 if area == target), target)
+        self.assertTrue(all(event["strengthGrade"] == ""
+                            for event in self.macaque["events"]
+                            if event["study"] == "Bou92"))
+
+        with (DATA / "macaque" / "evidence.csv").open(
+                newline="", encoding="utf-8-sig") as stream:
+            rows = list(csv.DictReader(stream))
+        mt = next(row for row in rows if row["Main"] == "FST"
+                  and row["Affiliate"] == "MT"
+                  and row["1_main_to_affiliate_ref"] == "Bou90")
+        self.assertEqual(mt["1_main_to_affiliate_strength_score_1to3"], "3")
+        self.assertEqual(mt["2_affiliate_to_main_strength_score_1to3"], "2.5")
+        self.assertEqual(mt["1_main_to_affiliate_positive_cases"], "2/2")
+
     def test_ungerleider_and_barone_corrections_are_ungraded(self):
         events = self.macaque["events"]
         barone = [event for event in events if event["study"] == "Bar00"]
