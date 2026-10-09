@@ -1,6 +1,8 @@
 # CorticalConnectivity
 
-This repository collects published evidence about structural and functional connectivity in human and macaque brains, including anatomical tracer, DTI tractography, rs-fMRI, and functional inactivation studies. The current interactive figures focus on **FST** (fundus of the superior temporal area). They place areas reported in the literature on a lateral brain view, show their pathway category by dot color, and let readers inspect which studies support each connection. The evidence tables also contain reports for other seed areas; the figures described here are the current FST views.
+This repository provides two resources described in the paper: an interactive connectivity figure for macaques and humans, and GIFs of structure-from-motion stimuli.
+
+The connectivity figure summarizes published evidence about structural and functional connectivity, including anatomical tracer, DTI tractography, rs-fMRI, and functional inactivation studies. The current views focus on **FST** (fundus of the superior temporal area). They place areas reported in the literature on a lateral brain view, show their pathway category by dot color, and let readers inspect which studies support each connection. The evidence tables also contain reports for other seed areas; the figures described here are the current FST views.
 
 ## Open the FST figures
 
@@ -20,17 +22,6 @@ This repository collects published evidence about structural and functional conn
 | Dot size | **Uniform** shows no strength grade. Macaque connection dots are open in this mode; the FST seed stays filled. For an eligible single study, macaque dots can show its weak, moderate, and strong reports separately for afferent, efferent, or unspecified projections. An open dot in a strength view has no grade from that selection. Grades are not averaged across studies. |
 | Reporting studies | When all study options are selected, **Number of reporting studies** sizes a dot by the number of distinct papers reporting that connection. It is available for both species. |
 | Area details | Hover over a browser dot or click a MATLAB dot for the selected supporting studies and any selected reports of absence. Human LO1, LO2, and LO3 share one display dot labeled `LO1-3`; their evidence rows remain separate. |
-
-## Motion stimuli
-
-The [MotionStimuli](MotionStimuli/) folder contains four animated examples illustrating **structure from motion**: moving points or contours reveal the organization of a figure over time.
-
-- [Point-light walker](MotionStimuli/SfM_PointLightWalker.gif)
-- [Rotating cylinder](MotionStimuli/SfM_RotatingCylinder.gif)
-- [Wire-frame form](MotionStimuli/SfM_WireFrame.gif)
-- [Stereokinetic circles](MotionStimuli/SfM_stereokinetic_circles.gif)
-
-Two `Frames_` GIFs provide brief frame examples for the point-light walker and wire-frame animations.
 
 ## MATLAB: open or rebuild
 
@@ -69,3 +60,14 @@ python -m fst_connectivity --data-dir . --output FST_connectivity_explorer_pytho
 ```
 
 The [prebuilt wheel](dist/fst_connectivity-0.1.4-py3-none-any.whl) is an alternative to installing from source. It bundles the repository evidence for use outside this folder. See [PYTHON_PACKAGE.md](PYTHON_PACKAGE.md) for more options.
+
+# Motion stimuli
+
+The [MotionStimuli](MotionStimuli/) folder contains four animated examples illustrating **structure from motion**: moving points or contours reveal the organization of a figure over time.
+
+- [Point-light walker](MotionStimuli/SfM_PointLightWalker.gif)
+- [Rotating cylinder](MotionStimuli/SfM_RotatingCylinder.gif)
+- [Wire-frame form](MotionStimuli/SfM_WireFrame.gif)
+- [Stereokinetic circles](MotionStimuli/SfM_stereokinetic_circles.gif)
+
+Two `Frames_` GIFs provide brief frame examples for the point-light walker and wire-frame animations.
