@@ -11,7 +11,7 @@ python -m pip install .
 fst-connectivity
 ```
 
-If you received only the built wheel, install it with `python -m pip install fst_connectivity-0.1.7-py3-none-any.whl` and then run `fst-connectivity`.
+If you received only the built wheel, install it with `python -m pip install fst_connectivity-0.1.8-py3-none-any.whl` and then run `fst-connectivity`.
 
 You can also run `python -m fst_connectivity`. Both commands create one self-contained HTML file and open it in your default browser. The **Species** menu switches views without reloading. Study selections are kept separately for macaques and humans.
 

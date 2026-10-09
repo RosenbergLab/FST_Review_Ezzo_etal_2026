@@ -154,7 +154,7 @@ def _human(nodes: list[dict]) -> dict:
 
     medial_rect = [33, 229, 95, 72]
     medial_pixels = (
-        ("mPFC", 91, 499), ("BA23", 180, 499),
+        ("MCC", 91, 499), ("BA23", 180, 499),
         ("V6", 65, 527), ("preSMA", 174, 527),
         ("RSC", 83, 553), ("BA7", 175, 553),
         ("precuneus", 154, 580),

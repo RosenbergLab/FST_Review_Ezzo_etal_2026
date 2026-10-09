@@ -127,7 +127,7 @@ class LayoutTests(unittest.TestCase):
         self.assertEqual((len(medial_names), len(medial_pixels)), (7, 14))
         medial_anchors = dict(zip(medial_names,
                                   zip(medial_pixels[::2], medial_pixels[1::2])))
-        self.assertEqual(medial_anchors["mPFC"], (91, 499))
+        self.assertEqual(medial_anchors["MCC"], (91, 499))
         self.assertEqual(medial_anchors["precuneus"], (154, 580))
         medial_rect = list(map(float, re.findall(r'\d+(?:\.\d+)?', matlab_array("medialRect"))))
         self.assertEqual(view["boxes"], [{"name": "medial cortex", "rect": medial_rect}])

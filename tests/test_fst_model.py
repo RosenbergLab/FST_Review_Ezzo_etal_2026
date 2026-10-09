@@ -73,6 +73,21 @@ class ModelTests(unittest.TestCase):
         self.assertEqual({event["study"] for event in reports}, {"Bak18", "Rol23"})
         self.assertFalse(any(event["study"] == "Rua25" for event in reports))
 
+    def test_human_mcc_uses_updated_evidence_and_existing_inset_point(self):
+        labels = {node["label"] for node in self.human["nodes"]}
+        self.assertIn("MCC", labels)
+        self.assertNotIn("mPFC", labels)
+        node = next(node for node in self.human["nodes"]
+                    if node["label"] == "MCC")
+        self.assertEqual((node["native_x"], node["native_y"], node["color"]),
+                         (650.0, -900.0, "black"))
+        reports = [event for event in self.human["events"]
+                   if event["target"] == "MCC"]
+        self.assertEqual(len(reports), 4)
+        self.assertEqual({(event["study"], event["grade"])
+                          for event in reports},
+                         {("Rol23", "absent"), ("Bak18", "broad")})
+
     def test_macaque_study_groups_match_matlab_controls(self):
         groups = {row["code"]: row for row in self.macaque["studies"]}
         self.assertEqual(len(groups), 6)

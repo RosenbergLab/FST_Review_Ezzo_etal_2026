@@ -58,5 +58,5 @@ id,x,y,label,color,size,center_x,center_y,FSTcomments
 57,2850,330,BA31,black,5,0.06,0.9,FSTcomments
 58,3050,130,precuneus,black,5,0.06,0.9,FSTcomments
 59,2950,530,RSC,black,5,0.06,0.9,FSTcomments
-60,650,-900,mPFC,black,5,0.06,0.9,FSTcomments
+60,650,-900,MCC,black,5,0.06,0.9,FSTcomments
 61,795,-900,preSMA,black,5,0.06,0.9,FSTcomment

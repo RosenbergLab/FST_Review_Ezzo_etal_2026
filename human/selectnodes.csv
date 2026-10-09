@@ -42,7 +42,7 @@ id,x,y,label,color,size,center_x,center_y,FSTcomments
 44,1120,260,3a/3b,black,5,-0.025,0.8,Rol23 Bak18 Rua25
 45,950,190,M1,black,5,-0.025,0.8,Rol23 Bak18 Rua25
 46,795,280,55b,black,5,-0.025,0.8,Rol23 Rua25
-47,795,190,FEF,black,5,-0.025,0.8,Rol23 Bak18 Rua25
+47,795,190,FEF,black,5,-0.025,0.8,Rua25 Rol23 Bak18
 48,795,60,SMA,black,5,-0.025,0.8,Rol23 Bak18
 49,675,90,PMd,black,5,-0.025,0.8,Rol23 Bak18 Rua25
 50,772,650,PMv,black,5,-0.025,0.8,Rol23 Bak18 Rua25
@@ -53,5 +53,5 @@ id,x,y,label,color,size,center_x,center_y,FSTcomments
 56,3050,330,BA23,black,5,0.06,0.9,Rol23 Bak18 Rua25
 58,3050,130,precuneus,black,5,0.06,0.9,Rol23 Bak18
 59,2950,530,RSC,black,5,0.06,0.9,Rol23 Rua25
-60,650,-900,mPFC,black,5,0.06,0.9,Rol23 Bak18
+60,650,-900,MCC,black,5,0.06,0.9,Rol23 Bak18
 61,795,-900,preSMA,black,5,0.06,0.9,Rol23 Bak18 Rua25

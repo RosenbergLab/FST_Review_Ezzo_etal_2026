@@ -52,5 +52,5 @@ source,targetid,targetname,evidencecount,projections,connectivitystrength,certai
 10,56,BA23,2,bidirectional,moderate,conflicting,higher
 10,58,precuneus,2,bidirectional,moderate,certain,higher
 10,59,RSC,1,bidirectional,weak,conflicting,higher
-10,60,mPFC,1,bidirectional,strong,conflicting,higher
+10,60,MCC,1,bidirectional,strong,conflicting,higher
 10,61,preSMA,2,bidirectional,moderate,conflicting,higher
