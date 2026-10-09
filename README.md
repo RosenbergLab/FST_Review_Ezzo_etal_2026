@@ -24,7 +24,7 @@ The connectivity figure summarizes published evidence about structural and funct
 | Brain and insets | Each species uses one lateral brain image at 50% opacity. Inset boxes hold areas that are not shown on that surface. In the human view, V1, V2, V8, VMV, and VVC are placed just outside the brain outline, following the supplied figure. |
 | Dot color | Light blue marks the dorsal pathway, pink the lateral pathway, and yellow the ventral pathway. Black dots are neutral. Color identifies the area category; it does not encode connection strength. |
 | Study controls | Select studies to show their reported FST connections. **Only** isolates one study, **Select all** restores every option, and **Clear** hides connection dots. Macaque Boussaoud (1990, 1992) and Bogadhi (2019, 2021) papers each have a combined option. Ungraded tracer reports, including Barone (2000) and Ungerleider (2008), appear under **Mixed tracer evidence**. |
-| Dot size | **Uniform** shows no strength grade. Macaque connection dots are open in this mode; the FST seed stays filled. For an eligible single study, macaque dots can show its strength separately for afferent, efferent, or unspecified projections. Boussaoud et al. (1990) uses a numeric 1–3 tracer score, including 1.5 and 2.5; other graded studies retain weak/moderate/strong sizes. An open dot in a strength view has no grade from that selection. Grades are not averaged across studies. |
+| Dot size | **Uniform** shows no strength grade. Macaque connection dots are open in this mode; the FST seed stays filled. For an eligible single study, macaque dots can show its strength separately for afferent, efferent, or unspecified projections. Boussaoud et al. (1990) uses a numeric 1–3 tracer score, including 1.5 and 2.5; other graded studies retain weak/moderate/strong sizes. With the grouped Boussaoud selection, afferent/efferent modes also show only the 1992 subcortical areas reporting that direction. Ungraded 1992 dots remain open, and their hover text names the projection direction. Grades are not averaged across studies. |
 | Reporting studies | When all study options are selected, **Number of reporting studies** sizes a dot by the number of distinct papers reporting that connection. It is available for both species. |
 | Area details | Hover over a browser dot or click a MATLAB dot for the selected supporting studies and any selected reports of absence. Human LO1, LO2, and LO3 share one display dot labeled `LO1-3`; their evidence rows remain separate. Macaque Felleman and Van Essen (1991) V3 reports share the dorsal-colored `V3d` dot with newer V3d reports; the original area name remains in the source table. |
 
@@ -66,7 +66,7 @@ python -m pip install .
 python -m fst_connectivity --data-dir . --output FST_connectivity_explorer_python.html --no-open
 ```
 
-The [prebuilt wheel](dist/fst_connectivity-0.1.12-py3-none-any.whl) is an alternative to installing from source. It bundles the repository evidence for use outside this folder. See [PYTHON_PACKAGE.md](PYTHON_PACKAGE.md) for more options.
+The [prebuilt wheel](dist/fst_connectivity-0.1.13-py3-none-any.whl) is an alternative to installing from source. It bundles the repository evidence for use outside this folder. See [PYTHON_PACKAGE.md](PYTHON_PACKAGE.md) for more options.
 
 ## Motion stimuli
 

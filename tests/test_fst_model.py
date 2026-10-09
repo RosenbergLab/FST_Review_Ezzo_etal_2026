@@ -129,6 +129,18 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(mt["2_affiliate_to_main_strength_score_1to3"], "2.5")
         self.assertEqual(mt["1_main_to_affiliate_positive_cases"], "2/2")
 
+    def test_boussaoud_1992_subcortical_directions(self):
+        events = [event for event in self.macaque["events"]
+                  if event["study"] == "Bou92"]
+        positive = {"weak", "moderate", "strong", "present", "broad"}
+        afferent = {event["target"] for event in events
+                    if event["direction"] == "in" and event["grade"] in positive}
+        efferent = {event["target"] for event in events
+                    if event["direction"] == "out" and event["grade"] in positive}
+        self.assertEqual(afferent, {"basalfore", "pulvinar", "claustrum"})
+        self.assertEqual(efferent, {"TRN", "pulvinar", "claustrum",
+                                    "striatum", "pretectum", "pons"})
+
     def test_ungerleider_and_barone_corrections_are_ungraded(self):
         events = self.macaque["events"]
         barone = [event for event in events if event["study"] == "Bar00"]

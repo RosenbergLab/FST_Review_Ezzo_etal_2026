@@ -1757,6 +1757,7 @@ if ~isempty(selectedModeIndex) && nnz(checked) == 1
     selectedStudy = find(checked, 1);
     numericMode = any(state.Studies.codes{selectedStudy} == "Bou90");
 end
+directionFilter = numericMode && ismember(sizeMode, ["afferent", "efferent"]);
 if sizeMode == "studycount"
     state.StrengthLegend.Visible = 'off';
     state.NumericStrengthLegend.Visible = 'off';
@@ -1777,8 +1778,8 @@ else
         state.Note.String = sprintf(['Uniform dots are open; no strength grade is shown.\n' ...
             'Select one study to size dots by connection strength.']);
     elseif numericMode
-        state.Note.String = sprintf(['Boussaoud (1990) median positive tracer grade, 1–3.\n' ...
-            'Intermediate values keep their size; no workbook grade = open.']);
+        state.Note.String = sprintf(['1990 tracer score: 1–3, with intermediate sizes.\n' ...
+            '1992 subcortical dots: selected direction only; open = ungraded.']);
     else
         state.Note.String = sprintf(['Dots remain visible for all selected studies.\n' ...
             'Filled dots show graded connection strength.']);
@@ -1793,6 +1794,10 @@ for k = 1:numel(state.NodeLabels)
     nodeClasses = reportClasses(nodeMatch);
     positive = ismember(nodeReports.grade, positiveGrades);
     shown = label == state.Seed || any(positive);
+    if directionFilter && any(nodeReports.study == "Bou92")
+        shown = label == state.Seed || any(positive & ...
+            nodeReports.study == "Bou92" & nodeClasses == sizeMode);
+    end
     if ~shown
         state.NodeHandles(k).Visible = 'off';
         state.TextHandles(k).Visible = 'off';
@@ -1880,6 +1885,21 @@ for k = 1:numel(state.NodeLabels)
                 "Selected reports of absence: " + ...
                 strjoin(absentNames, ', ');
         end
+        bou92 = positive & nodeReports.study == "Bou92";
+        if any(bou92)
+            hasOut = any(bou92 & nodeReports.direction == "out");
+            hasIn = any(bou92 & nodeReports.direction == "in");
+            areaName = displayAreaLabel(label);
+            if hasOut && hasIn
+                projection = "FST ↔ " + areaName;
+            elseif hasOut
+                projection = "FST → " + areaName;
+            else
+                projection = areaName + " → FST";
+            end
+            description = description + newline + ...
+                "Boussaoud et al. (1992) projection: " + projection;
+        end
         if label == "V3d" && any(positive & nodeReports.study == "Fel91")
             description = description + newline + ...
                 "Felleman & Van Essen (1991) named this pathway V3; " + ...
@@ -1916,7 +1936,9 @@ for k = 1:numel(state.NodeLabels)
 end
 for k = 1:numel(state.EdgeHandles)
     target = state.EdgeTargets(k);
-    active = any(reports.target == target & ismember(reports.grade, positiveGrades));
+    nodeIndex = find(state.NodeLabels == target, 1);
+    active = ~isempty(nodeIndex) && ...
+        strcmp(state.NodeHandles(nodeIndex).Visible, 'on');
     if active
         state.EdgeHandles(k).Visible = 'on';
     else

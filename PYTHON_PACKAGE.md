@@ -11,7 +11,7 @@ python -m pip install .
 fst-connectivity
 ```
 
-If you received only the built wheel, install it with `python -m pip install fst_connectivity-0.1.12-py3-none-any.whl` and then run `fst-connectivity`.
+If you received only the built wheel, install it with `python -m pip install fst_connectivity-0.1.13-py3-none-any.whl` and then run `fst-connectivity`.
 
 You can also run `python -m fst_connectivity`. Both commands create one self-contained HTML file and open it in your default browser. The **Species** menu switches views without reloading. Study selections are kept separately for macaques and humans.
 
@@ -37,7 +37,7 @@ Use `--data-dir PATH` or `render_html(..., data_dir=PATH)` to read updated `huma
 
 - Paper-style lateral brain backgrounds at 50% opacity, pathway dot colors, inset areas, and hover evidence. The human dot positions match the reference-mapped MATLAB figure.
 - Study checkboxes, **Only**, **Select all**, and **Clear** for each species. The macaque Boussaoud and Bogadhi papers have the same grouped options as MATLAB; Barone et al. (2000) joins the other ungraded tracer reports under **Mixed tracer evidence**.
-- Macaque dot-size choices: uniform, connection strength by afferent/efferent/unspecified projection, or the number of distinct supporting papers. Uniform connection dots are open because no strength grade is displayed; FST stays filled. Strength sizing is available only for one eligible study selection, with filled dots for graded reports and open dots where that selection has no grade. Boussaoud et al. (1990) uses its Table 1 median positive tracer score on a continuous 1–3 scale, including 1.5 and 2.5; the grouped 1992 reports have no numeric grade. The human view offers Uniform and Number of reporting studies; Baker's DTI and rs-fMRI reports count as one paper per area.
+- Macaque dot-size choices: uniform, connection strength by afferent/efferent/unspecified projection, or the number of distinct supporting papers. Uniform connection dots are open because no strength grade is displayed; FST stays filled. Strength sizing is available only for one eligible study selection, with filled dots for graded reports and open dots where that selection has no grade. Boussaoud et al. (1990) uses its Table 1 median positive tracer score on a continuous 1–3 scale, including 1.5 and 2.5. For the grouped Boussaoud selection, afferent/efferent modes filter the ungraded 1992 subcortical nodes by reported direction; hover text states that direction. The human view offers Uniform and Number of reporting studies; Baker's DTI and rs-fMRI reports count as one paper per area.
 - Human LO1, LO2, and LO3 appear as one `LO1-3` display dot. Their individual rows remain in the source `human/evidence.csv`. In the macaque view, Felleman and Van Essen's V3 reports share the dorsal-colored `V3d` dot with newer V3d reports; the original label stays in `macaque/fel91_fst_connections.csv`.
 
 The package reads only the FST evidence used by the paper-style views.

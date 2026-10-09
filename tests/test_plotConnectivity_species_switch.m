@@ -239,13 +239,23 @@ for k = 1:numel(state.CheckBoxes)
     state.CheckBoxes(k).Value = k == studyIndex;
 end
 runCallback(state.CheckBoxes(studyIndex));
+labels = string(state.NodeLabels);
+isVisible = @(name) strcmp(state.NodeHandles(find(labels == name, 1)).Visible, 'on');
+assert(isVisible("basalfore") && isVisible("striatum") && ...
+    ~isVisible("SC"), 'Uniform Boussaoud mode should show both directions.');
 
 state.SizeGroup.SelectedObject = state.StrengthButtons(2); % efferent
 callback = state.SizeGroup.SelectionChangedFcn;
 callback(state.SizeGroup, []);
 assert(strcmp(state.NumericStrengthLegend.Visible, 'on'));
 assert(strcmp(state.StrengthLegend.Visible, 'off'));
-labels = string(state.NodeLabels);
+for area = ["TRN", "pulvinar", "claustrum", "striatum", ...
+        "pretectum", "pons"]
+    assert(isVisible(area), 'Missing efferent Bou92 area %s.', area);
+end
+assert(~isVisible("basalfore") && ~isVisible("SC") && isVisible("MT"));
+basalEdge = state.EdgeHandles(find(state.EdgeTargets == "basalfore", 1));
+assert(strcmp(basalEdge.Visible, 'off'));
 sizeOf = @(name) state.NodeHandles(find(labels == name, 1)).SizeData;
 assert(abs(sizeOf("MT") - (0.75 * 22)^2) < 1e-9);
 assert(abs(sizeOf("VIP") - (0.75 * 18.5)^2) < 1e-9);
@@ -255,6 +265,13 @@ assert(isequal(state.NodeHandles(find(labels == "TRN", 1)).MarkerFaceColor, 'non
 
 state.SizeGroup.SelectedObject = state.StrengthButtons(1); % afferent
 callback(state.SizeGroup, []);
+for area = ["basalfore", "pulvinar", "claustrum"]
+    assert(isVisible(area), 'Missing afferent Bou92 area %s.', area);
+end
+for area = ["TRN", "striatum", "pretectum", "pons", "SC"]
+    assert(~isVisible(area), 'Unexpected afferent Bou92 area %s.', area);
+end
+assert(isVisible("MT") && strcmp(basalEdge.Visible, 'on'));
 assert(abs(sizeOf("MT") - (0.75 * 18.5)^2) < 1e-9);
 assert(abs(sizeOf("VIP") - (0.75 * 12)^2) < 1e-9);
 assert(abs(sizeOf("V3d") - (0.75 * 9)^2) < 1e-9);

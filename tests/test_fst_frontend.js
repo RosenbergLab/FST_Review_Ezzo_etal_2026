@@ -170,6 +170,20 @@ const rows = all(macaque, el => el.className === 'study-row');
 const rowFor = phrase => rows.find(row => all(row, el =>
   el.className === 'label-text' && el.textContent.includes(phrase)).length);
 one(rowFor('Boussaoud'), el => el.className === 'only-button').listeners.click();
+const bouUniform = one(macaque, el => el.tag === 'input' && el.value === 'uniform');
+for (const radio of all(macaque, el => el.tag === 'input' && el.type === 'radio'))
+  radio.checked = radio === bouUniform;
+bouUniform.listeners.change();
+const bouMarker = name => one(macaque, el => el.tag === 'circle' &&
+  el.attributes['aria-label'] === (name === 'basalfore' ? 'basal forebrain' : name));
+const subcortical = ['TRN', 'pulvinar', 'claustrum', 'striatum',
+  'basalfore', 'pretectum', 'SC', 'pons'];
+const visibleSubcortical = () => subcortical.filter(name =>
+  bouMarker(name).style.display !== 'none').sort();
+assert.deepEqual(visibleSubcortical(), subcortical.filter(name => name !== 'SC').sort());
+assert.match(bouMarker('basalfore')._tooltip, /basal forebrain → FST/);
+assert.match(bouMarker('striatum')._tooltip, /FST → striatum/);
+assert.match(bouMarker('pulvinar')._tooltip, /FST ↔ pulvinar/);
 const efferent = one(macaque, el => el.tag === 'input' && el.value === 'efferent');
 assert.equal(efferent.disabled, false);
 for (const radio of all(macaque, el => el.tag === 'input' && el.type === 'radio'))
@@ -178,8 +192,8 @@ efferent.listeners.change();
 assert.equal(one(macaque, el => el.className === 'legend-title').textContent,
   'Tracer score (1–3)');
 assert.equal(all(macaque, el => el.className === 'legend-entry').length, 6);
-const bouMarker = name => one(macaque, el => el.tag === 'circle' &&
-  el.attributes['aria-label'] === name);
+assert.deepEqual(visibleSubcortical(),
+  ['TRN', 'pulvinar', 'claustrum', 'striatum', 'pretectum', 'pons'].sort());
 assert.ok(Number(bouMarker('MT').attributes.r) > Number(bouMarker('VIP').attributes.r));
 assert.ok(Number(bouMarker('VIP').attributes.r) > Number(bouMarker('V4t').attributes.r));
 assert.match(bouMarker('VIP')._tooltip, /2\.5\/3/);
@@ -189,6 +203,8 @@ const afferent = one(macaque, el => el.tag === 'input' && el.value === 'afferent
 for (const radio of all(macaque, el => el.tag === 'input' && el.type === 'radio'))
   radio.checked = radio === afferent;
 afferent.listeners.change();
+assert.deepEqual(visibleSubcortical(), ['pulvinar', 'claustrum', 'basalfore'].sort());
+assert.notEqual(bouMarker('MT').style.display, 'none');
 assert.match(bouMarker('MT')._tooltip, /2\.5\/3/);
 assert.match(bouMarker('VIP')._tooltip, /1\.5\/3/);
 assert.match(bouMarker('V3d')._tooltip, /1\/3/);

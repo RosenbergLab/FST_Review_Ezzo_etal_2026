@@ -353,7 +353,7 @@
           : mode === 'uniform'
             ? 'Uniform dots are open; no strength grade is shown.\nSelect one study to size dots by connection strength.'
             : numericMode
-              ? 'Boussaoud (1990) median positive tracer grade, 1–3.\nIntermediate values keep their own dot size; no workbook grade = open.'
+              ? '1990 tracer score: 1–3, with intermediate sizes.\n1992 subcortical dots: selected direction only; open = ungraded.'
             : 'Dots remain visible for all selected studies.\nFilled dots show graded connection strength.';
         updateLegend(view, countMode, numericMode);
       } else {
@@ -368,12 +368,18 @@
           : 'Select all studies to size dots by number of reporting studies.';
         if (mode === 'studycount') updateLegend(view, true);
       }
+      const directionFilter = payload.species === 'macaque' &&
+        ['afferent', 'efferent'].includes(mode) && checkedGroups.length === 1 &&
+        checkedGroups[0].codes.includes('Bou92');
       let connected = 0;
       for (const {node, circle, label} of Object.values(plot.markers)) {
         const targetReports = reports.filter(event => event.target === node.label);
         const positive = targetReports.filter(event => positiveGrades.has(event.grade));
+        const bou92Positive = positive.filter(event => event.study === 'Bou92');
         const isSeed = node.label === 'FST';
-        const shown = isSeed || positive.length > 0;
+        const shown = isSeed || (directionFilter && targetReports.some(e => e.study === 'Bou92')
+          ? bou92Positive.some(event => projectionClass(event) === mode)
+          : positive.length > 0);
         circle.style.display = shown ? '' : 'none';
         label.style.display = shown ? '' : 'none';
         if (!shown) continue;
@@ -421,6 +427,14 @@
             description += '\nGraded connection strength: ' + strength;
           }
           if (absent.length) description += '\nSelected reports of absence: ' + absent.join(', ');
+          if (bou92Positive.length) {
+            const hasOut = bou92Positive.some(event => event.direction === 'out');
+            const hasIn = bou92Positive.some(event => event.direction === 'in');
+            const direction = hasOut && hasIn ? 'FST ↔ ' + node.display_label
+              : hasOut ? 'FST → ' + node.display_label
+              : node.display_label + ' → FST';
+            description += '\nBoussaoud et al. (1992) projection: ' + direction;
+          }
           if (payload.species === 'macaque' && node.label === 'V3d' &&
               positive.some(event => event.study === 'Fel91'))
             description += '\nFelleman & Van Essen (1991) named this pathway V3; shown here with V3d.';
