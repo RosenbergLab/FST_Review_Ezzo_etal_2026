@@ -307,6 +307,18 @@ def load_species(species: str, data_dir: Path) -> dict:
         and (_value(row, OUT_GRADE).lower() not in {"", "absent"}
              or _value(row, IN_GRADE).lower() not in {"", "absent"})
     }
+    fel91_path = (species_dir / "fel91_fst_connections.csv"
+                  if species == "macaque" else None)
+    if fel91_path is not None:
+        # A direct Felleman pathway can remain after a newer evidence table
+        # assigns a different area label to its other reports (V3/V3d).
+        for row in _read_csv(fel91_path):
+            source = _value(row, "from_area")
+            destination = _value(row, "to_area")
+            if source == "FST" and destination in all_labels:
+                edge_targets.add(destination)
+            elif destination == "FST" and source in all_labels:
+                edge_targets.add(source)
     nodes = [
         {
             "id": int(_value(node, "id")),
@@ -322,8 +334,6 @@ def load_species(species: str, data_dir: Path) -> dict:
     ]
     available_labels = {node["label"] for node in nodes}
     citations = _read_citations(species_dir / "citations.txt")
-    fel91_path = (species_dir / "fel91_fst_connections.csv"
-                  if species == "macaque" else None)
     events, source_studies = _study_events(
         evidence, available_labels, citations, fel91_path
     )

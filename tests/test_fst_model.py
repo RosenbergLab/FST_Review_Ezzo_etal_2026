@@ -106,6 +106,17 @@ class ModelTests(unittest.TestCase):
         self.assertTrue(all(event["grade"] == "present"
                             and event["strengthGrade"] == "" for event in fel91))
 
+    def test_ruan_v3d_and_felleman_v3_remain_distinct(self):
+        labels = {node["label"] for node in self.macaque["nodes"]}
+        self.assertTrue({"V3", "V3d"}.issubset(labels))
+        ruan_targets = {event["target"] for event in self.macaque["events"]
+                        if event["study"] == "Rua25"}
+        self.assertIn("V3d", ruan_targets)
+        self.assertNotIn("V3", ruan_targets)
+        fel91_targets = {event["target"] for event in self.macaque["events"]
+                         if event["study"] == "Fel91"}
+        self.assertIn("V3", fel91_targets)
+
     def test_invalid_species_has_a_clear_error(self):
         with self.assertRaisesRegex(ValueError, "macaque"):
             load_species("gorilla", DATA)

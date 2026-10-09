@@ -143,6 +143,17 @@ toMain = lower(cleanColumn(evidence, "2_affiliate_to_main_projection"));
 positiveRow = ~((toAffiliate == "" | toAffiliate == "absent") & ...
     (toMain == "" | toMain == "absent"));
 edgeTargets = unique(affiliate(positiveRow & affiliate ~= ""), 'sorted');
+fel91Targets = strings(0, 1);
+if enableStudySelector && species == "macaque"
+    fel91 = readtable(fullfile(speciesDir, 'fel91_fst_connections.csv'), ...
+        'TextType', 'string', 'VariableNamingRule', 'preserve');
+    fromArea = cleanColumn(fel91, "from_area");
+    toArea = cleanColumn(fel91, "to_area");
+    fel91Targets = unique([toArea(fromArea == roi); ...
+        fromArea(toArea == roi)], 'sorted');
+    fel91Targets = fel91Targets(ismember(fel91Targets, allLabels));
+end
+edgeTargets = unique([edgeTargets; fel91Targets], 'sorted');
 missingTargets = edgeTargets(~ismember(edgeTargets, allLabels));
 if ~isempty(missingTargets)
     warning('plotConnectivity:MissingAffiliates', ...
@@ -181,6 +192,21 @@ for k = 1:edgeCount
     else
         connectivitystrength(k) = receiveStrength;
     end
+    if evidencecount(k) == 0 && any(fel91Targets == label)
+        % The direct Felleman table can be the sole source for an area.
+        % Preserve its V3 edge when Ruan's report moves to V3d.
+        hasOut = any(fromArea == roi & toArea == label);
+        hasIn = any(toArea == roi & fromArea == label);
+        evidencecount(k) = 1;
+        if hasOut && hasIn
+            projections(k) = "bidirectional";
+        elseif hasOut
+            projections(k) = "mainsend";
+        else
+            projections(k) = "mainreceive";
+        end
+        connectivitystrength(k) = "present";
+    end
     if sendCertainty == "conflicting" && receiveCertainty == "conflicting"
         certainty(k) = "conflicting";
     else
@@ -217,7 +243,9 @@ for k = 1:height(nodes)
 end
 nodes.(char(commentColumn)) = comments;
 if options.RemoveUnconnectedNodes
-    keepNodes = ismember(allLabels, [edgeTargets; roi]);
+    % Keep direct Felleman pathways even when the updated evidence table
+    % assigns its other reports to a more specific area (V3 versus V3d).
+    keepNodes = ismember(allLabels, [edgeTargets; fel91Targets; roi]);
     nodes = nodes(keepNodes, :);
 end
 studyEvents = table(strings(0, 1), strings(0, 1), strings(0, 1), ...

@@ -6,7 +6,7 @@ FST,V1,anesthetized,tracer,NF,absent,,Bou90,absent,,Bou90,lower,meta-analysis co
 FST,V2,anesthetized,DTI tractography,NR,moderate,,Rua25,moderate,,,lower,meta-analysis constraints,Fel91,Yes,Indirect measure
 FST,V2,anesthetized,tracer,NR,moderate,retrograde from V2 injections indicating projections to V2 but no layer data reported,Mark14,,,,lower,meta-analysis constraints,Fel91,Yes,
 FST,V2,anesthetized,tracer,NF,absent,,Bou90,absent,Weak and inconsistent results but one light signal for retro tracer in FST lights up V2 and end in supragranular layers (negligible) suggesting V2 might be feeding forward to FST,Bou90,lower,meta-analysis constraints,Fel91,Yes,
-FST,V3,anesthetized,DTI tractography,NR,strong,,Rua25,strong,,,lower,meta-analysis constraints,Fel91,Yes,Indirect measure
+FST,V3d,anesthetized,DTI tractography,NR,strong,,Rua25,strong,,,lower,meta-analysis constraints,Fel91,No - V3,Indirect measure
 FST,V3d,anesthetized,tracer,NF,weak,weak anterograde signals from FST to V3d that ends avoiding layer 4 indicating feedback,Bou90,tentative,Weak and inconsistent retrograde label in V3d upon FST injection to supragranular layers indicating possible feedback to V3d,Bou90,lower,laminar termination,Bou90,Yes,
 FST,V3A,anesthetized,DTI tractography,NR,strong,,Rua25,strong,,,lower,meta-analysis constraints,Fel91,Yes,Indirect measure
 FST,V3A,anesthetized,tracer,antero,weak,weak and inconsistent anterograde signals from FST to V3A that ends avoiding layer 4 indicating feedback,Bou90,weak,Weak retrograde found in V3A supragrandular layers supporting V3A is feedforward signals to FST ,Bou90,lower,laminar termination,Bou90,Yes,
@@ -103,7 +103,7 @@ MSTm,V1,anesthetized,tracer,NF,absent,no evidence for projections from V2 to MST
 MSTm,V2,anesthetized,DTI tractography,NR,moderate,,Rua25,moderate,,Rua25,lower,meta-analysis constraints,Fel91,No- MST,indirect measure. Note same data for MSTl and MSTd
 MSTm,V2,anesthetized,tracer,NR,moderate,retrograde from V2 injections indicating projections to V2 but no layer data reported,Mark14,,,,lower,meta-analysis constraints,Fel91,No- MST,Note same data for MSTl and MSTd
 MSTm,V2,anesthetized,tracer,retro?,weak,weak anterograde tracer from MSTp to V2 is weak and terminals avoid layer 4 indicating possible feedback projections from MST to V2,Bou90,strong,strong retrograde label found in V2 supragranular layer indicating feedforward projections to MST,Bou90,lower,laminar termination,Bou90,No- MSTp,
-MSTm,V3,anesthetized,DTI tractography,NR,weak,,Rua25,weak,,Rua25,lower,meta-analysis constraints,Fel91,No- MST,indirect measure. Note same data for MSTl and MSTd
+MSTm,V3d,anesthetized,DTI tractography,NR,weak,,Rua25,weak,,Rua25,lower,meta-analysis constraints,Fel91,No- V3 and MST,indirect measure. Note same data for MSTl and MSTd
 MSTm,V3d,anesthetized,tracer,NF,absent,,Bou90,absent,,Bou90,lower,meta-analysis constraints,Fel91,No- MSTp,
 MSTm,V3A,anesthetized,DTI tractography,NR,strong,,Rua25,strong,,Rua25,lower,meta-analysis constraints,Fel91,No- MST,indirect measure. Note same data for MSTl and MSTd
 MSTm,V3A,anesthetized,tracer,NF,moderate,anterograde tracer avoiding layer 4 in V3A consistent with feedback to this area,Bou90,weak,weak retrograde tracer to supra- and infra-granular layers in V3A indicating feedback to this area,Bou90,lower,laminar termination,Bou90,No- MSTp,
@@ -187,8 +187,8 @@ MSTd,V1,anesthetized,tracer,NF,absent,,Bou90,absent,,Bou90,lower,meta-analysis c
 MSTd,V2,anesthetized,DTI tractography,NR,moderate,,Rua25,moderate,,Rua25,lower,meta-analysis constraints,Fel91,No- MST,indirect measure. Note same data for MSTl and MSTd
 MSTd,V2,anesthetized,tracer,NR,moderate,retrograde from V2 injections indicating projections to V2 but no layer data reported,Mark14,,,,lower,meta-analysis constraints,Fel91,No- MST,Note same data for MSTl and MSTd
 MSTd,V2,anesthetized,tracer,NF,moderate,moderate anterograde projections whose terminals avoid layer 4 indicating feedback to V2,Bou90,moderate,moderate retrograde signals from V2 to MST that come from supragranular layers in V2 indicating feedback from MST,Bou90,lower,laminar termination,Bou90,No- MSTc,
-MSTd,V3,anesthetized,DTI tractography,NR,weak,,Rua25,weak,,Rua25,lower,meta-analysis constraints,Fel91,No- MST,indirect measure. Note same data for MSTl and MSTd
-MSTd,V3d,anesthetized,tracer,NF,absent,,Bou90,absent,weak and inconsistent retrograde to FST traces to V3d supragranular layers which could indicate feedback to this area,Bou90,lower,meta-analysis constraints,Fel91,No- MSTc and V3d,
+MSTd,V3d,anesthetized,DTI tractography,NR,weak,,Rua25,weak,,Rua25,lower,meta-analysis constraints,Fel91,No- MST and V3,indirect measure. Note same data for MSTl and MSTd
+MSTd,V3d,anesthetized,tracer,NF,absent,,Bou90,absent,weak and inconsistent retrograde to FST traces to V3d supragranular layers which could indicate feedback to this area,Bou90,lower,meta-analysis constraints,Fel91,No- MSTc,
 MSTd,V3A,anesthetized,DTI tractography,NR,strong,,Rua25,strong,,Rua25,lower,meta-analysis constraints,Fel91,No- MST,indirect measure. Note same data for MSTl and MSTd
 MSTd,V3A,anesthetized,tracer,antero and retro,moderate,anterograde tracer avoiding layer 4 in V3A consistent with feedback to this area,Bou90,moderate,moderate retrograde signals stemming from supra- and infra-granular layers in V3A indicating V3A is feedforward to MST,Bou90,lower,laminar termination,Bou90,No- MSTc,
 MSTd,V4,anesthetized,DTI tractography,NR,moderate,,Rua25,moderate,,Rua25,lower,meta-analysis constraints,Fel91,No- MST,indirect measure. Note same data for MSTl and MSTd
@@ -275,7 +275,7 @@ MT,V1,anesthetized,tracer,NR,,,,weak,retrograde tracer in infragranular (V/VI) s
 MT,V1,anesthetized,tracer,NR,,,,strong,retrograde tracer Eeenly distributed across supragranular (II/III) and infragranular (V/VI),Bar00,equal,laminar and meta-analysis constraints,Bar00,Yes,
 MT,V2,anesthetized,DTI tractography,NR,moderate,,Rua25,moderate,,Rua25,lower,meta-analysis constraints,Fel91,Yes,indirect measure
 MT,V2,anesthetized,tracer,NR,strong,retrograde from V2 injections indicating projections to V2 but no layer data reported,Mark14,,,,lower,meta-analysis constraints,Fel91,Yes,
-MT,V3,anesthetized,DTI tractography,NR,moderate,,Rua25,moderate,,Rua25,lower,meta-analysis constraints,Fel91,Yes,indirect measure
+MT,V3d,anesthetized,DTI tractography,NR,moderate,,Rua25,moderate,,Rua25,lower,meta-analysis constraints,Fel91,No - V3,indirect measure
 MT,V3A,anesthetized,DTI tractography,NR,strong,,Rua25,strong,,Rua25,lower,meta-analysis constraints,Fel91,Yes,indirect measure
 MT,V4,anesthetized,DTI tractography,NR,strong,,Rua25,strong,,Rua25,lower,meta-analysis constraints,Fel91,Yes,indirect measure
 MT,V4,anesthetized,tracer,NR,strong,retrograde from V4 injections indicating projections to V4 but no layer data reported,Mark14,,,,lower,meta-analysis constraints,Fel91,Yes,
