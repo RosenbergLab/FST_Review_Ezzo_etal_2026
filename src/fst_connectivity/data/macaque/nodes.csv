@@ -4,7 +4,7 @@ id,x,y,label,color,size,center_x,center_y,FSTcomments
 2,1810,500,V3,black,5,0.00,0.47,FSTcomments
 3,1900,380,V3A,blue,5,0.05,0.50,FSTcomments
 4,1670,760,V4,green,5,-0.025,0.60,FSTcomments
-5,1900,550,V3d,black,5,0.05,0.50,FSTcomments
+5,1900,550,V3d,blue,5,0.05,0.50,FSTcomments
 6,1575,690,V4t,green,5,-0.025,0.70,FSTcomments
 7,1540,580,MT,blue,5,0.025,0.70,FSTcomments
 8,1450,500,MSTm,blue,5,0.025,0.80,FSTcomments

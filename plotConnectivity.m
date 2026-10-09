@@ -136,6 +136,11 @@ if isempty(evidence)
     warning('plotConnectivity:NoEvidence', ...
         'No evidence rows match %s %s and the requested study types.', species, roi);
 end
+if species == "macaque" && roi == "FST"
+    % Display the older V3 pathway with V3d without editing the source CSV.
+    sourceAreas = cleanColumn(evidence, "Affiliate");
+    evidence.Affiliate(sourceAreas == "V3") = "V3d";
+end
 
 affiliate = cleanColumn(evidence, "Affiliate");
 toAffiliate = lower(cleanColumn(evidence, "1_main_to_affiliate_projection"));
@@ -149,6 +154,8 @@ if enableStudySelector && species == "macaque"
         'TextType', 'string', 'VariableNamingRule', 'preserve');
     fromArea = cleanColumn(fel91, "from_area");
     toArea = cleanColumn(fel91, "to_area");
+    fromArea(fromArea == "V3") = "V3d";
+    toArea(toArea == "V3") = "V3d";
     fel91Targets = unique([toArea(fromArea == roi); ...
         fromArea(toArea == roi)], 'sorted');
     fel91Targets = fel91Targets(ismember(fel91Targets, allLabels));
@@ -194,7 +201,7 @@ for k = 1:edgeCount
     end
     if evidencecount(k) == 0 && any(fel91Targets == label)
         % The direct Felleman table can be the sole source for an area.
-        % Preserve its V3 edge when Ruan's report moves to V3d.
+        % Keep a direct Felleman edge if no positive CSV report uses its dot.
         hasOut = any(fromArea == roi & toArea == label);
         hasIn = any(toArea == roi & fromArea == label);
         evidencecount(k) = 1;
@@ -243,8 +250,7 @@ for k = 1:height(nodes)
 end
 nodes.(char(commentColumn)) = comments;
 if options.RemoveUnconnectedNodes
-    % Keep direct Felleman pathways even when the updated evidence table
-    % assigns its other reports to a more specific area (V3 versus V3d).
+    % Keep direct Felleman pathways when no CSV report uses their display dot.
     keepNodes = ismember(allLabels, [edgeTargets; fel91Targets; roi]);
     nodes = nodes(keepNodes, :);
 end
@@ -1126,6 +1132,8 @@ if fel91Path ~= ""
         'VariableNamingRule', 'preserve');
     fromArea = cleanColumn(fel, "from_area");
     toArea = cleanColumn(fel, "to_area");
+    fromArea(fromArea == "V3") = "V3d";
+    toArea(toArea == "V3") = "V3d";
     for r = 1:height(fel)
         if fromArea(r) == "FST" && ismember(toArea(r), availableLabels)
             target = toArea(r);
@@ -1787,6 +1795,11 @@ for k = 1:numel(state.NodeLabels)
             description = description + newline + ...
                 "Selected reports of absence: " + ...
                 strjoin(absentNames, ', ');
+        end
+        if label == "V3d" && any(positive & nodeReports.study == "Fel91")
+            description = description + newline + ...
+                "Felleman & Van Essen (1991) named this pathway V3; " + ...
+                "shown here with V3d.";
         end
     end
     marker = state.NodeHandles(k);

@@ -29,7 +29,7 @@ class ModelTests(unittest.TestCase):
 
     def test_payloads_are_json_ready_and_cover_current_fst_views(self):
         for payload, species, node_count in (
-            (self.macaque, "macaque", 49),
+            (self.macaque, "macaque", 48),
             (self.human, "human", 56),
         ):
             self.assertEqual(payload["species"], species)
@@ -117,20 +117,33 @@ class ModelTests(unittest.TestCase):
                  if event["study"] == "Fel91"]
         self.assertEqual({event["target"] for event in fel91},
                          {"7a", "FEF", "LIP", "MSTd", "MT", "STPp", "TF",
-                          "V2", "V3", "V3A", "V4", "V4t", "VIP"})
+                          "V2", "V3d", "V3A", "V4", "V4t", "VIP"})
         self.assertTrue(all(event["grade"] == "present"
                             and event["strengthGrade"] == "" for event in fel91))
 
-    def test_ruan_v3d_and_felleman_v3_remain_distinct(self):
+    def test_felleman_v3_and_newer_v3d_share_one_display_dot(self):
         labels = {node["label"] for node in self.macaque["nodes"]}
-        self.assertTrue({"V3", "V3d"}.issubset(labels))
+        self.assertIn("V3d", labels)
+        self.assertNotIn("V3", labels)
+        node = next(node for node in self.macaque["nodes"]
+                    if node["label"] == "V3d")
+        self.assertEqual(node["color"], "blue")
         ruan_targets = {event["target"] for event in self.macaque["events"]
                         if event["study"] == "Rua25"}
         self.assertIn("V3d", ruan_targets)
         self.assertNotIn("V3", ruan_targets)
         fel91_targets = {event["target"] for event in self.macaque["events"]
                          if event["study"] == "Fel91"}
-        self.assertIn("V3", fel91_targets)
+        self.assertIn("V3d", fel91_targets)
+        self.assertNotIn("V3", fel91_targets)
+        self.assertEqual({event["study"] for event in self.macaque["events"]
+                          if event["target"] == "V3d" and event["grade"] != "absent"},
+                         {"Rua25", "Bou90", "Fel91"})
+        with (DATA / "macaque" / "fel91_fst_connections.csv").open(
+                newline="", encoding="utf-8-sig") as stream:
+            raw = list(csv.DictReader(stream))
+        self.assertTrue(any(row["from_area"] == "FST" and
+                            row["to_area"] == "V3" for row in raw))
 
     def test_invalid_species_has_a_clear_error(self):
         with self.assertRaisesRegex(ValueError, "macaque"):

@@ -33,7 +33,7 @@ class RenderTests(unittest.TestCase):
             ).group(1)
             payload = json.loads(encoded)
             self.assertEqual(payload["initial_species"], "human")
-            self.assertEqual(len(payload["macaque"]["nodes"]), 49)
+            self.assertEqual(len(payload["macaque"]["nodes"]), 48)
             self.assertEqual(len(payload["human"]["nodes"]), 56)
             for species in ("macaque", "human"):
                 image = payload[species]["image"]

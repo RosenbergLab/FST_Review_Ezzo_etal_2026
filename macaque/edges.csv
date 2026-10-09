@@ -1,7 +1,6 @@
 source,targetid,targetname,evidencecount,projections,connectivitystrength,certainty,hierarchy
 9,0,V1,3,bidirectional,strong,conflicting,lower
 9,1,V2,2,bidirectional,moderate,conflicting,lower
-9,2,V3,1,bidirectional,present,certain,
 9,3,V3A,2,bidirectional,moderate,certain,lower
 9,4,V4,6,bidirectional,moderate,certain,lower
 9,5,V3d,2,bidirectional,strong,certain,lower

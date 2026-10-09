@@ -400,6 +400,9 @@
             description += '\nGraded connection strength: ' + strength;
           }
           if (absent.length) description += '\nSelected reports of absence: ' + absent.join(', ');
+          if (payload.species === 'macaque' && node.label === 'V3d' &&
+              positive.some(event => event.study === 'Fel91'))
+            description += '\nFelleman & Van Essen (1991) named this pathway V3; shown here with V3d.';
         }
         const radius = .75 * diameter / (2 * plot.ratio);
         circle.setAttribute('r', String(radius));

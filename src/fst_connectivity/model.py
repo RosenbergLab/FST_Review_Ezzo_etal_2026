@@ -27,6 +27,11 @@ OUT_REF = "1_main_to_affiliate_ref"
 IN_REF = "2_affiliate_to_main_ref"
 
 
+def _macaque_display_area(area: str) -> str:
+    """Combine the older V3 pathway with V3d in the macaque FST view."""
+    return "V3d" if area == "V3" else area
+
+
 def _read_csv(path: Path) -> list[dict[str, str]]:
     with path.open(newline="", encoding="utf-8-sig") as stream:
         return [dict(row) for row in csv.DictReader(stream)]
@@ -163,8 +168,8 @@ def _study_events(
 
     if fel91_path is not None:
         for row in _read_csv(fel91_path):
-            source = _value(row, "from_area")
-            destination = _value(row, "to_area")
+            source = _macaque_display_area(_value(row, "from_area"))
+            destination = _macaque_display_area(_value(row, "to_area"))
             if source == "FST" and destination in available_labels:
                 target, direction = destination, "out"
             elif destination == "FST" and source in available_labels:
@@ -290,6 +295,10 @@ def load_species(species: str, data_dir: Path) -> dict:
         raw_nodes, raw_evidence = _merge_human_lo(raw_nodes, raw_evidence)
     else:
         _correct_macaque_legacy_evidence(raw_evidence)
+        for row in raw_evidence:
+            if _value(row, "Main") == "FST":
+                row["Affiliate"] = _macaque_display_area(
+                    _value(row, "Affiliate"))
 
     allowed_types = ({"tracer", "DTI tractography", "inactivation"}
                      if species == "macaque" else {"DTI tractography", "rs-fMRI"})
@@ -310,11 +319,10 @@ def load_species(species: str, data_dir: Path) -> dict:
     fel91_path = (species_dir / "fel91_fst_connections.csv"
                   if species == "macaque" else None)
     if fel91_path is not None:
-        # A direct Felleman pathway can remain after a newer evidence table
-        # assigns a different area label to its other reports (V3/V3d).
+        # Fel91's V3 pathway shares the V3d display dot with newer reports.
         for row in _read_csv(fel91_path):
-            source = _value(row, "from_area")
-            destination = _value(row, "to_area")
+            source = _macaque_display_area(_value(row, "from_area"))
+            destination = _macaque_display_area(_value(row, "to_area"))
             if source == "FST" and destination in all_labels:
                 edge_targets.add(destination)
             elif destination == "FST" and source in all_labels:

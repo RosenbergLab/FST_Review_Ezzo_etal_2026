@@ -44,7 +44,7 @@ class LayoutTests(unittest.TestCase):
         self.assertEqual((nodes["pulvinar"]["x"], nodes["pulvinar"]["y"]),
                          (406, 302))
         self.assertEqual((nodes["TRN"]["x"], nodes["TRN"]["y"]), (449, 302))
-        self.assertEqual(nodes["V3d"]["fill"], "#000000")
+        self.assertEqual(nodes["V3d"]["fill"], "#B3E4F8")
         self.assertEqual(nodes["A1"]["fill"], "#000000")
         self.assertFalse({"VOT/TEO", "SEF", "STGp", "PCCa", "PCCp", "thalamus"}
                          & nodes.keys())

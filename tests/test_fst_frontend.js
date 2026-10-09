@@ -67,14 +67,16 @@ if (config.initial_species === 'human') {
 }
 assert.equal(macaque.hidden, false);
 assert.equal(human.hidden, true);
-assert.equal(all(macaque, el => el.tag === 'circle').length, 49);
+assert.equal(all(macaque, el => el.tag === 'circle').length, 48);
+assert.equal(all(macaque, el => el.tag === 'circle' &&
+  el.attributes['aria-label'] === 'V3').length, 0);
 assert.equal(all(human, el => el.tag === 'circle').length, 56);
 assert.equal(config.macaque.studies.length, 6);
 assert.ok(config.macaque.studies.find(study => study.code === 'mixed_tracer')
   .codes.includes('Bar00'));
 
 const macStatus = one(macaque, el => el.className === 'status');
-assert.match(macStatus.textContent, /48 connected regions/);
+assert.match(macStatus.textContent, /47 connected regions/);
 for (const circle of all(macaque, el => el.tag === 'circle')) {
   if (circle.attributes['aria-label'] === 'FST')
     assert.notEqual(circle.attributes.fill, 'none');
@@ -91,7 +93,7 @@ assert.equal(visibleAfterClear[0].attributes['aria-label'], 'FST');
 
 const macAll = one(macaque, el => el.className === 'all-button');
 macAll.listeners.click();
-assert.match(macStatus.textContent, /48 connected regions/);
+assert.match(macStatus.textContent, /47 connected regions/);
 const countRadio = one(macaque, el => el.tag === 'input' && el.value === 'studycount');
 assert.equal(countRadio.disabled, false);
 for (const radio of all(macaque, el => el.tag === 'input' && el.type === 'radio'))
@@ -105,6 +107,11 @@ assert.match(fef._tooltip, /Supporting studies: 4/);
 const pulvinar = one(macaque, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === 'pulvinar');
 assert.match(pulvinar._tooltip, /Supporting studies: 1/);
+const v3d = one(macaque, el => el.tag === 'circle' &&
+  el.attributes['aria-label'] === 'V3d');
+assert.equal(v3d.attributes.stroke, '#B3E4F8');
+assert.match(v3d._tooltip, /Supporting studies: 3/);
+assert.match(v3d._tooltip, /named this pathway V3; shown here with V3d/);
 
 const macSpecies = one(macaque, el => el.className === 'species-choice');
 macSpecies.value = 'human';
@@ -156,6 +163,9 @@ assert.ok(activeMarkers.some(circle => circle.attributes.fill !== 'none'));
 const rows = all(macaque, el => el.className === 'study-row');
 const rowFor = phrase => rows.find(row => all(row, el =>
   el.className === 'label-text' && el.textContent.includes(phrase)).length);
+one(rowFor('Felleman'), el => el.className === 'only-button').listeners.click();
+assert.notEqual(v3d.style.display, 'none');
+assert.match(v3d._tooltip, /named this pathway V3; shown here with V3d/);
 one(rowFor('Mixed tracer evidence'), el => el.className === 'only-button').listeners.click();
 const v1 = one(macaque, el => el.tag === 'circle' && el.attributes['aria-label'] === 'V1');
 assert.notEqual(v1.style.display, 'none');
