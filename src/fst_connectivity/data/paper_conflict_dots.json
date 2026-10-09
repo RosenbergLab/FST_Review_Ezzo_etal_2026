@@ -1,0 +1,12 @@
+{
+  "reference": "Figure3_20261009.tif",
+  "grey": {
+    "macaque": ["FEF", "DP", "V2", "V1", "SC"],
+    "human": [
+      "SMA", "PMd", "M1", "3a/3b", "55b", "IPS0/1", "PFm", "PMv",
+      "op", "PFop", "aud", "insula", "TPOJ3", "V4", "V3", "V2",
+      "TE1p", "TE1m", "TE1a", "TG", "TE2a", "V8", "VMV", "VVC",
+      "MCC", "BA23", "V6", "preSMA", "RSC"
+    ]
+  }
+}

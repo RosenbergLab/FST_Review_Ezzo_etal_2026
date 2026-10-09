@@ -55,6 +55,11 @@ function one(root, predicate) {
   assert.equal(matches.length, 1);
   return matches[0];
 }
+function selectRadio(root, radio) {
+  for (const item of all(root, el => el.tag === 'input' && el.type === 'radio' &&
+    el.name === radio.name)) item.checked = item === radio;
+  radio.listeners.change();
+}
 
 const frame = elements.frame;
 assert.equal(frame.children.length, 2);
@@ -94,13 +99,33 @@ assert.equal(visibleAfterClear[0].attributes['aria-label'], 'FST');
 const macAll = one(macaque, el => el.className === 'all-button');
 macAll.listeners.click();
 assert.match(macStatus.textContent, /47 connected regions/);
+const macColor = one(macaque, el => el.tag === 'input' && el.value === 'conflict');
+const macPathway = one(macaque, el => el.tag === 'input' && el.value === 'pathway');
+assert.equal(macColor.disabled, false);
+assert.equal(macPathway.checked, true);
+selectRadio(macaque, macColor);
+const greyFEF = one(macaque, el => el.tag === 'circle' &&
+  el.attributes['aria-label'] === 'FEF');
+const blackMT = one(macaque, el => el.tag === 'circle' &&
+  el.attributes['aria-label'] === 'MT');
+const macFST = one(macaque, el => el.tag === 'circle' &&
+  el.attributes['aria-label'] === 'FST');
+assert.equal(greyFEF.attributes.stroke, '#A6A6A6');
+assert.equal(blackMT.attributes.stroke, '#000000');
+assert.equal(macFST.attributes.fill, '#000000');
+assert.match(greyFEF._tooltip, /Grey dot:.*conflicting connection results/);
+assert.match(blackMT._tooltip, /Black dot: no conflict is marked/);
+selectRadio(macaque, macPathway);
+assert.equal(greyFEF.attributes.stroke, '#000000');
+assert.equal(blackMT.attributes.stroke, '#B3E4F8');
 const countRadio = one(macaque, el => el.tag === 'input' && el.value === 'studycount');
 assert.equal(countRadio.disabled, false);
-for (const radio of all(macaque, el => el.tag === 'input' && el.type === 'radio'))
-  radio.checked = radio === countRadio;
-countRadio.listeners.change();
+selectRadio(macaque, countRadio);
 assert.equal(one(macaque, el => el.className === 'legend-title').textContent,
   'Number of studies');
+selectRadio(macaque, macColor);
+assert.equal(greyFEF.attributes.stroke, '#A6A6A6');
+selectRadio(macaque, macPathway);
 const fef = one(macaque, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === 'FEF');
 assert.match(fef._tooltip, /Supporting studies: 4/);
@@ -131,9 +156,21 @@ const lo = one(human, el => el.tag === 'circle' &&
 const uniformRadius = Number(lo.attributes.r);
 const humanCount = one(human, el => el.tag === 'input' && el.value === 'studycount');
 assert.equal(humanCount.disabled, false);
-for (const radio of all(human, el => el.tag === 'input' && el.type === 'radio'))
-  radio.checked = radio === humanCount;
-humanCount.listeners.change();
+const humanColor = one(human, el => el.tag === 'input' && el.value === 'conflict');
+const humanPathway = one(human, el => el.tag === 'input' && el.value === 'pathway');
+assert.equal(humanColor.disabled, false);
+selectRadio(human, humanColor);
+const greyPMd = one(human, el => el.tag === 'circle' &&
+  el.attributes['aria-label'] === 'PMd');
+assert.equal(greyPMd.attributes.fill, '#A6A6A6');
+assert.equal(ph.attributes.fill, '#000000');
+assert.match(greyPMd._tooltip, /Grey dot:.*conflicting connection results/);
+selectRadio(human, humanPathway);
+assert.equal(ph.attributes.fill, '#F9F384');
+selectRadio(human, humanCount);
+selectRadio(human, humanColor);
+assert.equal(greyPMd.attributes.fill, '#A6A6A6');
+selectRadio(human, humanPathway);
 assert.ok(Number(lo.attributes.r) > uniformRadius);
 assert.match(lo._tooltip, /Supporting studies: 2/);
 assert.equal(one(human, el => el.className === 'legend-title').textContent,
@@ -143,6 +180,8 @@ one(human, el => el.className === 'clear-button').listeners.click();
 assert.match(humanStatus.textContent, /^0 connected regions/);
 assert.equal(humanCount.disabled, true);
 assert.equal(one(human, el => el.tag === 'input' && el.value === 'uniform').checked, true);
+assert.equal(humanColor.disabled, true);
+assert.equal(humanPathway.checked, true);
 assert.equal(one(human, el => el.className === 'legend').style.display, 'none');
 
 const humanSpecies = one(human, el => el.className === 'species-choice');
@@ -155,12 +194,12 @@ assert.equal(countRadio.checked, true);
 const firstOnly = all(macaque, el => el.className === 'only-button')[0];
 firstOnly.listeners.click();
 assert.equal(countRadio.disabled, true);
+assert.equal(macColor.disabled, true);
+assert.equal(macPathway.checked, true);
 const strength = all(macaque, el => el.tag === 'input' &&
   ['afferent', 'efferent', 'unspecified'].includes(el.value) && !el.disabled)[0];
 assert.ok(strength, 'A single graded study should enable a strength mode');
-for (const radio of all(macaque, el => el.tag === 'input' && el.type === 'radio'))
-  radio.checked = radio === strength;
-strength.listeners.change();
+selectRadio(macaque, strength);
 const activeMarkers = all(macaque, el => el.tag === 'circle')
   .filter(circle => circle.style.display !== 'none' &&
     circle.attributes['aria-label'] !== 'FST');
@@ -171,9 +210,7 @@ const rowFor = phrase => rows.find(row => all(row, el =>
   el.className === 'label-text' && el.textContent.includes(phrase)).length);
 one(rowFor('Boussaoud'), el => el.className === 'only-button').listeners.click();
 const bouUniform = one(macaque, el => el.tag === 'input' && el.value === 'uniform');
-for (const radio of all(macaque, el => el.tag === 'input' && el.type === 'radio'))
-  radio.checked = radio === bouUniform;
-bouUniform.listeners.change();
+selectRadio(macaque, bouUniform);
 const bouMarker = name => one(macaque, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === (name === 'basalfore' ? 'basal forebrain' : name));
 const subcortical = ['TRN', 'pulvinar', 'claustrum', 'striatum',
@@ -186,9 +223,7 @@ assert.match(bouMarker('striatum')._tooltip, /FST → striatum/);
 assert.match(bouMarker('pulvinar')._tooltip, /FST ↔ pulvinar/);
 const efferent = one(macaque, el => el.tag === 'input' && el.value === 'efferent');
 assert.equal(efferent.disabled, false);
-for (const radio of all(macaque, el => el.tag === 'input' && el.type === 'radio'))
-  radio.checked = radio === efferent;
-efferent.listeners.change();
+selectRadio(macaque, efferent);
 assert.equal(one(macaque, el => el.className === 'legend-title').textContent,
   'Tracer score (1–3)');
 assert.equal(all(macaque, el => el.className === 'legend-entry').length, 6);
@@ -200,9 +235,7 @@ assert.match(bouMarker('VIP')._tooltip, /2\.5\/3/);
 assert.equal(bouMarker('CITd').attributes.fill, 'none');
 assert.equal(bouMarker('TRN').attributes.fill, 'none');
 const afferent = one(macaque, el => el.tag === 'input' && el.value === 'afferent');
-for (const radio of all(macaque, el => el.tag === 'input' && el.type === 'radio'))
-  radio.checked = radio === afferent;
-afferent.listeners.change();
+selectRadio(macaque, afferent);
 assert.deepEqual(visibleSubcortical(), ['pulvinar', 'claustrum', 'basalfore'].sort());
 assert.notEqual(bouMarker('MT').style.display, 'none');
 assert.match(bouMarker('MT')._tooltip, /2\.5\/3/);

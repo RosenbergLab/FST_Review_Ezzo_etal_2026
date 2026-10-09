@@ -20,7 +20,7 @@ source,targetid,targetname,evidencecount,projections,connectivitystrength,certai
 9,20,insula,1,bidirectional,moderate,certain,higher
 9,21,MSTd,1,bidirectional,moderate,certain,equal
 9,22,DP,2,mainsend,strong,certain,lower
-9,23,7a,4,bidirectional,moderate,conflicting,higher
+9,23,7a,4,bidirectional,moderate,certain,higher
 9,25,PF,1,bidirectional,weak,certain,equal
 9,26,AIP,1,bidirectional,weak,certain,higher
 9,27,LIP,2,bidirectional,moderate,certain,equal

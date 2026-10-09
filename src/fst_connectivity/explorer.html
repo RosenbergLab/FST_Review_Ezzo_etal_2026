@@ -40,6 +40,14 @@
     .only-button { width: 55px; height: 26px; flex: none; margin-left: 5px; }
     .mixed-detail { position: absolute; top: 354px; left: 12px; right: 12px;
       min-height: 104px; white-space: pre-line; font-size: 12px; line-height: 1.22; }
+    .color-group { position: absolute; top: 289px; left: 12px; width: 476px;
+      height: 59px; border: 1px solid #d7dde3; padding: 2px 10px; }
+    .color-group legend { font-size: 14px; }
+    .color-group label { display: inline-flex; align-items: center; margin-right: 17px;
+      white-space: nowrap; }
+    .color-group input { margin: 0 5px 0 0; }
+    .color-group label.disabled { color: #aeb4bb; }
+    .color-note { margin: 3px 0 0; font-size: 11px; }
     .size-group { position: absolute; top: 469px; left: 12px; width: 476px;
       height: 170px; border: 1px solid #d7dde3; padding: 6px 10px; }
     .size-group legend { font-size: 14px; }
@@ -66,6 +74,7 @@
     .human .size-group { top: 346px; height: 112px; }
     .human .size-note { top: 468px; }
     .human .legend { top: 516px; }
+    .human .color-group { top: 612px; }
     #tooltip { position: fixed; z-index: 20; display: none; pointer-events: none;
       max-width: 340px; padding: 8px 10px; border: 1px solid #8c97a5;
       border-radius: 3px; background: rgba(255,255,255,.98); color: #243246;
@@ -271,6 +280,22 @@
         choices.forEach(choice => { choice.checked = false; });
         update(views[payload.species]);
       });
+      const colorField = htmlElement('fieldset', 'color-group', panel);
+      htmlElement('legend', '', colorField, 'Dot color');
+      const colorInputs = {};
+      for (const [mode, title] of [
+        ['pathway', 'Pathway colors'], ['conflict', 'Grey/black conflict'],
+      ]) {
+        const label = htmlElement('label', '', colorField);
+        const input = htmlElement('input', '', label);
+        input.type = 'radio'; input.name = 'dot-color-' + payload.species;
+        input.value = mode; input.checked = mode === 'pathway';
+        input.addEventListener('change', () => update(views[payload.species]));
+        label.append(title);
+        colorInputs[mode] = {input, label};
+      }
+      htmlElement('div', 'color-note', colorField,
+        'Grey = conflicting reports; black = no conflict marked in the paper figure.');
       let sizeMode = null, sizeInputs = {}, sizeNote = null, legend = null;
       if (payload.species === 'macaque') {
         const mixed = payload.studies.find(study => study.code === 'mixed_tracer');
@@ -317,7 +342,8 @@
       }
       const status = htmlElement('div', 'status', panel);
       status.setAttribute('aria-live', 'polite');
-      return {panel, choices, speciesChoice, sizeInputs, sizeNote, legend, status};
+      return {panel, choices, speciesChoice, colorInputs, sizeInputs, sizeNote,
+        legend, status};
     }
     function update(view) {
       const {data: payload, controls, plot} = view;
@@ -328,6 +354,13 @@
       let mode = 'uniform';
       const available = {};
       const countEnabled = checkedGroups.length > 0 && checkedGroups.length === payload.studies.length;
+      controls.colorInputs.conflict.input.disabled = !countEnabled;
+      controls.colorInputs.conflict.label.classList.toggle('disabled', !countEnabled);
+      if (!countEnabled) {
+        controls.colorInputs.conflict.input.checked = false;
+        controls.colorInputs.pathway.input.checked = true;
+      }
+      const conflictColor = countEnabled && controls.colorInputs.conflict.input.checked;
       controls.sizeInputs.studycount.input.disabled = !countEnabled;
       controls.sizeInputs.studycount.label.classList.toggle('disabled', !countEnabled);
       if (payload.species === 'macaque') {
@@ -438,11 +471,16 @@
           if (payload.species === 'macaque' && node.label === 'V3d' &&
               positive.some(event => event.study === 'Fel91'))
             description += '\nFelleman & Van Essen (1991) named this pathway V3; shown here with V3d.';
+          if (conflictColor) description += node.conflict
+            ? '\nGrey dot: this area has conflicting connection results in the paper figure.'
+            : '\nBlack dot: no conflict is marked for this area in the paper figure.';
         }
         const radius = .75 * diameter / (2 * plot.ratio);
+        const dotColor = conflictColor
+          ? (isSeed || !node.conflict ? '#000000' : '#A6A6A6') : node.fill;
         circle.setAttribute('r', String(radius));
-        circle.setAttribute('fill', open ? 'none' : node.fill);
-        circle.setAttribute('stroke', node.fill);
+        circle.setAttribute('fill', open ? 'none' : dotColor);
+        circle.setAttribute('stroke', dotColor);
         circle.setAttribute('stroke-width', String((open ? 1.8 : 1) / plot.ratio));
         const dataPerPixel = payload.view_box[3] / payload.plot_size[1];
         label.setAttribute('y', String(node.y - (diameter/2 + 8) * dataPerPixel));

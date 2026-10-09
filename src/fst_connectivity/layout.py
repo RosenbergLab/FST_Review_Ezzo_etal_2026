@@ -11,6 +11,9 @@ from pathlib import Path
 
 
 DATA_DIR = Path(__file__).parent / "data"
+PAPER_CONFLICT_DOTS = json.loads(
+    (DATA_DIR / "paper_conflict_dots.json").read_text(encoding="utf-8")
+)["grey"]
 COLORS = {
     "blue": "#B3E4F8",
     "red": "#F2B3D0",
@@ -29,10 +32,12 @@ def _put(by_label: dict, label: str, point: tuple[float, float]) -> None:
         by_label[label]["x"], by_label[label]["y"] = point
 
 
-def _finish(nodes: list[dict], *, y_max: float) -> None:
+def _finish(nodes: list[dict], *, y_max: float, species: str) -> None:
+    grey_labels = set(PAPER_CONFLICT_DOTS[species])
     for node in nodes:
         node["x"] = min(max(node["x"], 5), 529)
         node["y"] = min(max(node["y"], 5), y_max)
+        node["conflict"] = node["label"] in grey_labels
         node["fill"] = COLORS[node["color"].strip().lower()]
         node["display_label"] = (
             "basal forebrain" if node["label"] == "basalfore" else node["label"]
@@ -93,7 +98,7 @@ def _macaque(nodes: list[dict]) -> dict:
     # The paper dots are overridden exactly as in paperConnectivityLayout.m.
     _put(by_label, "V4t", (345, 163))
     _put(by_label, "FST", (313, 153))
-    _finish(nodes, y_max=323)
+    _finish(nodes, y_max=323, species="macaque")
 
     return {
         "species": "macaque",
@@ -169,7 +174,7 @@ def _human(nodes: list[dict]) -> dict:
     for name, x, y in medial_points:
         _put(by_label, name, (x, y))
     _put(by_label, "BA31", (79, 294))
-    _finish(nodes, y_max=425)
+    _finish(nodes, y_max=425, species="human")
 
     return {
         "species": "human",

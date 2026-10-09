@@ -43,6 +43,7 @@ assert(~any(ismember(string(result.Nodes.label), ["LO1", "LO2", "LO3"])));
 verifyHumanFigure(fig);
 verifyStudyFilters(fig, cache.human, 'HumanStudySelectorState');
 verifyHumanCount(fig, cache.human);
+verifyConflictColorToggle(fig, 'HumanStudySelectorState');
 verifyNoCornerLetters(fig);
 
 switchSpecies(fig, 1); % Macaque
@@ -50,6 +51,7 @@ verifySwitch(fig, cache, originalPosition, "macaque", priorFigureCount);
 verifyStudyFilters(fig, cache.macaque, 'StudySelectorState');
 verifyUniformOpen(fig);
 verifyBoussaoudNumericStrength(fig);
+verifyConflictColorToggle(fig, 'StudySelectorState');
 verifyNoCornerLetters(fig);
 
 switchSpecies(fig, 2); % Human, in the same figure again
@@ -280,6 +282,71 @@ for k = 1:numel(state.CheckBoxes)
 end
 runCallback(state.CheckBoxes(1));
 assert(strcmp(state.SizeGroup.SelectedObject.Tag, 'uniform'));
+end
+
+function verifyConflictColorToggle(fig, stateName)
+state = getappdata(fig, stateName);
+assert(all(arrayfun(@(h) h.Value ~= 0, state.CheckBoxes)), ...
+    'Conflict colors should be tested with all studies selected.');
+assert(strcmp(state.ConflictButton.Enable, 'on'));
+assert(strcmp(state.ColorGroup.SelectedObject.Tag, 'pathway'), ...
+    'Pathway colors should be the default.');
+if strcmp(stateName, 'StudySelectorState')
+    greyLabel = "FEF";
+    blackLabel = "VIP";
+else
+    greyLabel = "PMd";
+    blackLabel = "VIP";
+end
+labels = string(state.NodeLabels);
+greyIndex = find(labels == greyLabel, 1);
+blackIndex = find(labels == blackLabel, 1);
+seedIndex = find(labels == "FST", 1);
+assert(~isempty(greyIndex) && ~isempty(blackIndex) && ...
+    state.GreyConflictDots(greyIndex) && ...
+    ~state.GreyConflictDots(blackIndex));
+grey = state.NodeHandles(greyIndex);
+black = state.NodeHandles(blackIndex);
+seed = state.NodeHandles(seedIndex);
+assert(strcmp(grey.Visible, 'on') && strcmp(black.Visible, 'on'));
+pathwayEdge = grey.MarkerEdgeColor;
+originalSizeMode = string(state.SizeGroup.SelectedObject.Tag);
+originalSize = grey.SizeData;
+state.ColorGroup.SelectedObject = state.ConflictButton;
+callback = state.ColorGroup.SelectionChangedFcn;
+callback(state.ColorGroup, []);
+assert(strcmp(state.SizeGroup.SelectedObject.Tag, originalSizeMode), ...
+    'Dot color changed the dot-size selection.');
+assert(grey.SizeData == originalSize, ...
+    'Dot color changed a dot size.');
+assert(max(abs(grey.MarkerEdgeColor - [166, 166, 166] / 255)) < 1e-9, ...
+    'Conflicting dot did not become grey.');
+assert(isequal(black.MarkerEdgeColor, [0, 0, 0]) && ...
+    isequal(seed.MarkerFaceColor, [0, 0, 0]), ...
+    'Nonconflicting dots and FST should become black.');
+if strcmp(stateName, 'HumanStudySelectorState')
+    assert(max(abs(grey.MarkerFaceColor - [166, 166, 166] / 255)) < 1e-9);
+    assert(isequal(black.MarkerFaceColor, [0, 0, 0]));
+else
+    assert(isequal(grey.MarkerFaceColor, 'none') && ...
+        isequal(black.MarkerFaceColor, 'none'), ...
+        'Uniform macaque dots should remain open.');
+end
+state.CheckBoxes(1).Value = 0;
+runCallback(state.CheckBoxes(1));
+assert(strcmp(state.ConflictButton.Enable, 'off') && ...
+    strcmp(state.ColorGroup.SelectedObject.Tag, 'pathway'), ...
+    'A study subset must reset conflict colors to pathway colors.');
+assert(isequal(grey.MarkerEdgeColor, pathwayEdge));
+state.CheckBoxes(1).Value = 1;
+runCallback(state.CheckBoxes(1));
+assert(strcmp(state.ConflictButton.Enable, 'on') && ...
+    strcmp(state.ColorGroup.SelectedObject.Tag, 'pathway'));
+if originalSizeMode == "studycount"
+    state.SizeGroup.SelectedObject = state.CountButton;
+    sizeCallback = state.SizeGroup.SelectionChangedFcn;
+    sizeCallback(state.SizeGroup, []);
+end
 end
 
 function verifySwitch(fig, cache, originalPosition, species, priorFigureCount)

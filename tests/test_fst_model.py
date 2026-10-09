@@ -141,6 +141,28 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(efferent, {"TRN", "pulvinar", "claustrum",
                                     "striatum", "pretectum", "pons"})
 
+    def test_updated_boussaoud_7a_rows_preserve_local_strength_fields(self):
+        with (DATA / "macaque" / "evidence.csv").open(
+                newline="", encoding="utf-8-sig") as stream:
+            rows = list(csv.DictReader(stream))
+        for seed, outbound, inbound in (
+            ("FST", "absent", "weak"),
+            ("MSTm", "weak", "moderate"),
+            ("MSTd", "moderate", "strong"),
+        ):
+            matches = [row for row in rows if row["Main"] == seed
+                       and row["Affiliate"] == "7a"
+                       and row["1_main_to_affiliate_ref"] == "Bou90"]
+            self.assertEqual(len(matches), 1, seed)
+            self.assertEqual(matches[0]["1_main_to_affiliate_projection"],
+                             outbound)
+            self.assertEqual(matches[0]["2_affiliate_to_main_projection"],
+                             inbound)
+        self.assertFalse(any(row["Main"] == "FST" and
+                             row["Affiliate"] == "AITv" and
+                             row["study_type"] == "" for row in rows))
+        self.assertIn("1_main_to_affiliate_strength_score_1to3", rows[0])
+
     def test_ungerleider_and_barone_corrections_are_ungraded(self):
         events = self.macaque["events"]
         barone = [event for event in events if event["study"] == "Bar00"]

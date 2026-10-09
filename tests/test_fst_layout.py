@@ -20,6 +20,22 @@ DATA = ROOT
 
 
 class LayoutTests(unittest.TestCase):
+    def test_conflict_flags_leave_default_pathway_colors_intact(self):
+        macaque = {node["label"]: node for node in layout_species(
+            "macaque", load_species("macaque", DATA)["nodes"])["nodes"]}
+        human = {node["label"]: node for node in layout_species(
+            "human", load_species("human", DATA)["nodes"])["nodes"]}
+        self.assertTrue(macaque["FEF"]["conflict"])
+        self.assertFalse(macaque["MT"]["conflict"])
+        self.assertFalse(macaque["FST"]["conflict"])
+        self.assertEqual(macaque["MT"]["fill"], "#B3E4F8")
+        self.assertEqual(sum(node["conflict"] for node in macaque.values()), 5)
+        self.assertTrue(human["PMd"]["conflict"])
+        self.assertFalse(human["PH"]["conflict"])
+        self.assertFalse(human["FST"]["conflict"])
+        self.assertEqual(human["PH"]["fill"], "#F9F384")
+        self.assertEqual(sum(node["conflict"] for node in human.values()), 29)
+
     def test_macaque_registered_reference_points(self):
         raw = load_species("macaque", DATA)
         view = layout_species("macaque", raw["nodes"])
