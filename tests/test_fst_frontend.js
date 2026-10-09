@@ -120,6 +120,12 @@ assert.equal(macaque.hidden, true);
 assert.equal(human.hidden, false);
 const humanStatus = one(human, el => el.className === 'status');
 assert.match(humanStatus.textContent, /55 connected regions/);
+const ph = one(human, el => el.tag === 'circle' &&
+  el.attributes['aria-label'] === 'PH');
+assert.equal(ph.attributes.stroke, '#F9F384');
+const pht = one(human, el => el.tag === 'circle' &&
+  el.attributes['aria-label'] === 'PHT');
+assert.equal(pht.attributes.stroke, '#F2B3D0');
 const lo = one(human, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === 'LO1-3');
 const uniformRadius = Number(lo.attributes.r);

@@ -82,6 +82,8 @@ class LayoutTests(unittest.TestCase):
         self.assertEqual(nodes["LO1-3"]["fill"], "#F9F384")
         self.assertEqual(nodes["V4t"]["fill"], "#F9F384")
         self.assertEqual(nodes["PIT"]["fill"], "#F9F384")
+        self.assertEqual(nodes["PH"]["fill"], "#F9F384")
+        self.assertEqual(nodes["PHT"]["fill"], "#F2B3D0")
         for name in ("MT", "MST"):
             self.assertEqual(nodes[name]["fill"], "#B3E4F8")
         for name in ("BA1/2", "3a/3b"):
