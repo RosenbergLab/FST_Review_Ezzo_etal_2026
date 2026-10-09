@@ -62,12 +62,10 @@ def _macaque(nodes: list[dict]) -> dict:
                          (81, 253), (113, 253), (51, 275),
                          (96, 275), (51, 297)]
     else:
-        medial_rect = [36, 236, 68, 51]
-        medial_points = [(47, 260), (85, 260), (47, 281), (85, 281),
-                         (47, 260), (85, 260), (47, 281),
-                         (85, 260), (47, 281)]
-    for name, point in zip(medial_names, medial_points):
-        _put(by_label, name, point)
+        medial_rect = [5, 5, 134, 66]
+        medial_points = [(49, 34), (127, 34), (54, 55), (120, 55),
+                         (49, 34), (127, 34), (54, 55),
+                         (127, 34), (54, 55)]
 
     subcortical_names = ["basalfore", "SC", "claustrum", "pons",
                          "striatum", "pretectum", "thalamus", "pulvinar", "TRN"]
@@ -82,17 +80,11 @@ def _macaque(nodes: list[dict]) -> dict:
     )
     for name, point in reference.items():
         _put(by_label, name, tuple(point))
-    if has_extra_medial:
-        for name, point in zip(medial_names, medial_points):
-            _put(by_label, name, point)
+    for name, point in zip(medial_names, medial_points):
+        _put(by_label, name, point)
 
     # The paper dots are overridden exactly as in paperConnectivityLayout.m.
-    for name in ("VIP", "S1"):
-        if name in by_label:
-            node = by_label[name]
-            _put(by_label, name, (offset_x + scale_x * node["native_x"],
-                                  offset_y + scale_y * node["native_y"]))
-    _put(by_label, "V4t", (345, 157))
+    _put(by_label, "V4t", (345, 163))
     _put(by_label, "FST", (313, 153))
     _finish(nodes, y_max=323)
 
@@ -110,7 +102,7 @@ def _macaque(nodes: list[dict]) -> dict:
         ],
         "pathways": [
             {"name": "dorsal pathway", "x": 370, "y": 42},
-            {"name": "lateral pathway", "x": 202, "y": 207},
+            {"name": "lateral pathway", "x": 95, "y": 200},
             {"name": "ventral pathway", "x": 288, "y": 286},
         ],
     }
@@ -139,7 +131,7 @@ def _human(nodes: list[dict]) -> dict:
 
     # Match referenceNames/referencePixels in paperHumanConnectivityLayout.m.
     reference_pixels = (
-        ("PMd", 304, 144), ("SMA", 355, 128), ("FEF", 355, 177),
+        ("PMd", 354, 130), ("SMA", 354, 92), ("FEF", 344, 184),
         ("M1", 405, 165), ("55b", 355, 232), ("3a/3b", 469, 179),
         ("BA1/2", 529, 145), ("AIP", 592, 162), ("VIP", 654, 117),
         ("LIP", 675, 162), ("MIP", 711, 151), ("IPS0/1", 740, 193),
@@ -160,12 +152,12 @@ def _human(nodes: list[dict]) -> dict:
     for name, paper_x, paper_y in reference_pixels:
         _put(by_label, name, paper_point(paper_x, paper_y))
 
-    medial_rect = [44, 192, 93, 110]
+    medial_rect = [33, 229, 95, 72]
     medial_pixels = (
-        ("mPFC", 85, 462), ("BA23", 165, 462),
-        ("V6", 85, 507), ("preSMA", 165, 507),
-        ("RSC", 85, 553), ("BA7", 165, 553),
-        ("precuneus", 125, 590),
+        ("mPFC", 91, 499), ("BA23", 180, 499),
+        ("V6", 65, 527), ("preSMA", 174, 527),
+        ("RSC", 83, 553), ("BA7", 175, 553),
+        ("precuneus", 154, 580),
     )
     for name, paper_x, paper_y in medial_pixels:
         _put(by_label, name, paper_point(paper_x, paper_y))
