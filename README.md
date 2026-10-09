@@ -1,10 +1,15 @@
-# CorticalConnectivity
+# Resources
 
-This repository provides two resources described in the paper: an interactive connectivity figure for macaques and humans, and GIFs of structure-from-motion stimuli.
+This repository provides the two resources described in the paper:
+
+1. [Interactive connectivity figure for macaques and humans](#corticalconnectivity)
+2. [Four GIFs of structure-from-motion stimuli](#motion-stimuli)
+
+## CorticalConnectivity
 
 The connectivity figure summarizes published evidence about structural and functional connectivity, including anatomical tracer, DTI tractography, rs-fMRI, and functional inactivation studies. The current views focus on **FST** (fundus of the superior temporal area). They place areas reported in the literature on a lateral brain view, show their pathway category by dot color, and let readers inspect which studies support each connection. The evidence tables also contain reports for other seed areas; the figures described here are the current FST views.
 
-## Open the FST figures
+### Open the FST figures
 
 | Option | How to use it |
 | --- | --- |
@@ -12,7 +17,7 @@ The connectivity figure summarizes published evidence about structural and funct
 | **MATLAB** | Set MATLAB's current folder to this repository and open [FST_connectivity_explorer.fig](FST_connectivity_explorer.fig). Its **Species** menu switches between macaque and human in one window. Keep the `.m` files and the `human/` and `macaque/` folders with the FIG so the controls can load their data. Separate [human](human_FST_paper_lateral.fig) and [macaque](macaque_FST_paper_lateral.fig) FIGs are also available. |
 | **Python package** | Use the package to generate your own browser file. See the [Python package guide](PYTHON_PACKAGE.md) for installation, command-line use, and the Python API. |
 
-## Read the figure
+### Read the figure
 
 | Feature | Meaning |
 | --- | --- |
@@ -23,7 +28,7 @@ The connectivity figure summarizes published evidence about structural and funct
 | Reporting studies | When all study options are selected, **Number of reporting studies** sizes a dot by the number of distinct papers reporting that connection. It is available for both species. |
 | Area details | Hover over a browser dot or click a MATLAB dot for the selected supporting studies and any selected reports of absence. Human LO1, LO2, and LO3 share one display dot labeled `LO1-3`; their evidence rows remain separate. |
 
-## MATLAB: open or rebuild
+### MATLAB: open or rebuild
 
 To use the saved interactive figure, open [FST_connectivity_explorer.fig](FST_connectivity_explorer.fig) from MATLAB with this repository as the current folder. To rebuild a species view from the current CSV files, run:
 
@@ -34,7 +39,7 @@ plotConnectivity(Species="human");
 
 These calls save `<species>_FST_paper_lateral.fig` and `.pdf` in the repository folder. They also update `<species>/edges.csv` and `<species>/selectnodes.csv`, which are generated tables. Use `WriteTables=false` if you want to rebuild figures without rewriting those tables. The source code is [plotConnectivity.m](plotConnectivity.m), with display positions in [paperConnectivityLayout.m](paperConnectivityLayout.m) and [paperHumanConnectivityLayout.m](paperHumanConnectivityLayout.m).
 
-## Evidence and source files
+### Evidence and source files
 
 The `human/` and `macaque/` folders hold the literature review data and brain images. These files are the sources used to build the FST views:
 
@@ -50,7 +55,7 @@ The `human/` and `macaque/` folders hold the literature review data and brain im
 
 The `evidence.xlsm` files are working review spreadsheets. The CSV files are the inputs used to build the figures.
 
-## Rebuild the browser file with Python
+### Rebuild the browser file with Python
 
 Python 3.10 or newer is needed only to generate a new offline HTML file. From this repository, install the package and render the current CSV data with:
 
@@ -61,7 +66,7 @@ python -m fst_connectivity --data-dir . --output FST_connectivity_explorer_pytho
 
 The [prebuilt wheel](dist/fst_connectivity-0.1.4-py3-none-any.whl) is an alternative to installing from source. It bundles the repository evidence for use outside this folder. See [PYTHON_PACKAGE.md](PYTHON_PACKAGE.md) for more options.
 
-# Motion stimuli
+## Motion stimuli
 
 The [MotionStimuli](MotionStimuli/) folder contains four animated examples illustrating **structure from motion**: moving points or contours reveal the organization of a figure over time.
 
