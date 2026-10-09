@@ -81,24 +81,20 @@ for k = 1:numel(referenceNames)
         referenceNames(k), point);
 end
 
-% Keep the medial areas in an inset with the order used in the reference.
+% Align medial areas on a compact display grid inside the inset.
 medialNames = ["MCC", "BA23", "V6", "preSMA", "RSC", "BA7", ...
     "precuneus"];
-medialPixels = [91 499; 180 499; 65 527; 174 527; ...
-    83 553; 175 553; 154 580];
-medialRect = [33, 229, 95, 72];
+medialPoints = [56 256; 102 256; 56 275; 102 275; ...
+    56 294; 79 275; 102 294];
+medialRect = [40, 228, 80, 72];
 for k = 1:numel(medialNames)
-    point = [lateralBounds(1) + ...
-        (medialPixels(k, 1) - paperBounds(1)) * paperScaleX, ...
-        lateralBounds(2) + ...
-        (medialPixels(k, 2) - paperBounds(2)) * paperScaleY];
     [nodeX, nodeY] = placeNode(labels, nodeX, nodeY, ...
-        medialNames(k), point);
+        medialNames(k), medialPoints(k, :));
 end
 if any(labels == "BA31")
     % No BA31 dot is supplied in the reference figure.
     [nodeX, nodeY] = placeNode(labels, nodeX, nodeY, ...
-        "BA31", [medialRect(1) + medialRect(3) / 2, 275]);
+        "BA31", [79, 294]);
 end
 
 nodeX = min(max(nodeX, 5), 529);

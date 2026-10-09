@@ -38,18 +38,19 @@ class LayoutTests(unittest.TestCase):
         self.assertEqual(nodes["S1"]["fill"], "#000000")
         self.assertEqual((nodes["A1"]["x"], nodes["A1"]["y"]), (254, 131))
         self.assertEqual((nodes["BA23"]["x"], nodes["BA23"]["y"]),
-                         (127, 34))
+                         (68, 34))
         self.assertEqual((nodes["BA31"]["x"], nodes["BA31"]["y"]),
-                         (54, 55))
+                         (28, 54))
         self.assertEqual((nodes["pulvinar"]["x"], nodes["pulvinar"]["y"]),
-                         (394, 306.7))
-        self.assertEqual((nodes["TRN"]["x"], nodes["TRN"]["y"]), (459, 306.7))
+                         (406, 302))
+        self.assertEqual((nodes["TRN"]["x"], nodes["TRN"]["y"]), (449, 302))
         self.assertEqual(nodes["V3d"]["fill"], "#000000")
         self.assertEqual(nodes["A1"]["fill"], "#000000")
         self.assertFalse({"VOT/TEO", "SEF", "STGp", "PCCa", "PCCp", "thalamus"}
                          & nodes.keys())
         self.assertEqual(len(view["boxes"]), 2)
-        self.assertEqual(view["boxes"][0]["rect"], [5, 5, 134, 66])
+        self.assertEqual(view["boxes"][0]["rect"], [12, 6, 72, 56])
+        self.assertEqual(view["boxes"][1]["rect"], [382, 229, 90, 79])
         for label, point in {
             "S1": (223.3, 40.5), "AIP": (245.6, 67.7),
             "VIP": (286.7, 63.6), "V3A": (388, 80),
@@ -88,7 +89,7 @@ class LayoutTests(unittest.TestCase):
         self.assertEqual(nodes["SMA"]["fill"], "#000000")
         self.assertNotIn("SEF", nodes)
         self.assertEqual(view["boxes"], [
-            {"name": "medial cortex", "rect": [33, 229, 95, 72]}])
+            {"name": "medial cortex", "rect": [40, 228, 80, 72]}])
 
         # Compare with the MATLAB source, so a future MATLAB move cannot leave
         # the downloadable browser view silently using the older positions.
@@ -123,17 +124,17 @@ class LayoutTests(unittest.TestCase):
                 self.assertAlmostEqual(nodes[name]["y"], y, places=9)
 
         medial_names = re.findall(r'"([^"]+)"', matlab_array("medialNames"))
-        medial_pixels = list(map(int, re.findall(r'\d+', matlab_array("medialPixels"))))
-        self.assertEqual((len(medial_names), len(medial_pixels)), (7, 14))
+        medial_points = list(map(int, re.findall(r'\d+', matlab_array("medialPoints"))))
+        self.assertEqual((len(medial_names), len(medial_points)), (7, 14))
         medial_anchors = dict(zip(medial_names,
-                                  zip(medial_pixels[::2], medial_pixels[1::2])))
-        self.assertEqual(medial_anchors["MCC"], (91, 499))
-        self.assertEqual(medial_anchors["precuneus"], (154, 580))
+                                  zip(medial_points[::2], medial_points[1::2])))
+        self.assertEqual(medial_anchors["MCC"], (56, 256))
+        self.assertEqual(medial_anchors["BA7"], (79, 275))
+        self.assertEqual(medial_anchors["precuneus"], (102, 294))
         medial_rect = list(map(float, re.findall(r'\d+(?:\.\d+)?', matlab_array("medialRect"))))
         self.assertEqual(view["boxes"], [{"name": "medial cortex", "rect": medial_rect}])
-        for name, px, py in zip(medial_names, medial_pixels[::2], medial_pixels[1::2]):
+        for name, x, y in zip(medial_names, medial_points[::2], medial_points[1::2]):
             with self.subTest(area=name):
-                x, y = plot_point(px, py)
                 self.assertAlmostEqual(nodes[name]["x"], x, places=9)
                 self.assertAlmostEqual(nodes[name]["y"], y, places=9)
 
@@ -143,6 +144,33 @@ class LayoutTests(unittest.TestCase):
         view = layout_species("human", raw["nodes"])
         self.assertEqual(raw["nodes"], original)
         self.assertEqual(layout_species("human", view["nodes"])["nodes"], view["nodes"])
+
+    def test_optional_inset_nodes_have_distinct_slots(self):
+        macaque = load_species("macaque", DATA)["nodes"]
+        extras = ("PCCa", "PCCp", "24c", "7m", "preSMA", "thalamus")
+        macaque += [
+            {"id": 100 + i, "label": label, "x": 0, "y": 0,
+             "color": "black"}
+            for i, label in enumerate(extras)
+        ]
+        nodes = {node["label"]: node for node in
+                 layout_species("macaque", macaque)["nodes"]}
+        medial = ("V6", "PCCa", "PCCp", "RSC", "24c", "7m",
+                  "preSMA", "BA23", "BA31")
+        self.assertEqual(len({(nodes[name]["x"], nodes[name]["y"])
+                              for name in medial}), len(medial))
+        self.assertNotEqual((nodes["thalamus"]["x"], nodes["thalamus"]["y"]),
+                            (nodes["pulvinar"]["x"], nodes["pulvinar"]["y"]))
+
+        human = load_species("human", DATA)["nodes"]
+        human.append({"id": 100, "label": "BA31", "x": 0, "y": 0,
+                      "color": "black"})
+        nodes = {node["label"]: node for node in
+                 layout_species("human", human)["nodes"]}
+        self.assertEqual((nodes["BA31"]["x"], nodes["BA31"]["y"]),
+                         (79, 294))
+        self.assertNotEqual((nodes["BA31"]["x"], nodes["BA31"]["y"]),
+                            (nodes["BA7"]["x"], nodes["BA7"]["y"]))
 
 
 if __name__ == "__main__":

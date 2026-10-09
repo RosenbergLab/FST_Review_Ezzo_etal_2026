@@ -55,32 +55,39 @@ def _macaque(nodes: list[dict]) -> dict:
 
     medial_names = ["V6", "PCCa", "PCCp", "RSC", "24c", "7m", "preSMA",
                     "BA23", "BA31"]
-    has_extra_medial = any(name in by_label for name in ("24c", "7m", "preSMA"))
+    has_extra_medial = any(name in by_label for name in
+                           ("24c", "7m", "preSMA", "PCCa", "PCCp"))
     if has_extra_medial:
-        medial_rect = [36, 220, 93, 85]
-        medial_points = [(51, 253), (96, 275), (51, 297), (96, 297),
-                         (81, 253), (113, 253), (51, 275),
-                         (96, 275), (51, 297)]
+        medial_rect = [36, 220, 88, 83]
+        medial_points = [(52, 247), (80, 269), (52, 291), (108, 291),
+                         (80, 247), (108, 247), (52, 269),
+                         (108, 269), (80, 291)]
     else:
-        medial_rect = [5, 5, 134, 66]
-        medial_points = [(49, 34), (127, 34), (54, 55), (120, 55),
-                         (49, 34), (127, 34), (54, 55),
-                         (127, 34), (54, 55)]
+        medial_rect = [12, 6, 72, 56]
+        medial_points = [(28, 34), (68, 34), (28, 54), (68, 54),
+                         (28, 34), (68, 34), (28, 54),
+                         (68, 34), (28, 54)]
 
     subcortical_names = ["basalfore", "SC", "claustrum", "pons",
                          "striatum", "pretectum", "thalamus", "pulvinar", "TRN"]
-    subcortical_points = [(394, 249), (459, 249), (394, 270), (459, 270),
-                          (394, 290), (459, 290), (394, 310),
-                          (394, 306.7), (459, 306.7)]
-    for name, point in zip(subcortical_names, subcortical_points):
-        _put(by_label, name, point)
-
+    if "thalamus" in by_label and "pulvinar" in by_label:
+        subcortical_rect = [382, 220, 90, 103]
+        subcortical_points = [(406, 245), (449, 245), (406, 263), (449, 263),
+                              (406, 281), (449, 281), (406, 299),
+                              (406, 317), (449, 299)]
+    else:
+        subcortical_rect = [382, 229, 90, 79]
+        subcortical_points = [(406, 254), (449, 254), (406, 270), (449, 270),
+                              (406, 286), (449, 286), (406, 302),
+                              (406, 302), (449, 302)]
     reference = json.loads(
         (DATA_DIR / "macaque_reference_points.json").read_text(encoding="utf-8")
     )
     for name, point in reference.items():
         _put(by_label, name, tuple(point))
     for name, point in zip(medial_names, medial_points):
+        _put(by_label, name, point)
+    for name, point in zip(subcortical_names, subcortical_points):
         _put(by_label, name, point)
 
     # The paper dots are overridden exactly as in paperConnectivityLayout.m.
@@ -98,7 +105,7 @@ def _macaque(nodes: list[dict]) -> dict:
         "image_geometry": [offset_x, offset_y, scale_x * 2249, scale_y * 1325],
         "boxes": [
             {"name": "medial cortex", "rect": medial_rect},
-            {"name": "subcortical", "rect": [371, 227, 107, 85]},
+            {"name": "subcortical", "rect": subcortical_rect},
         ],
         "pathways": [
             {"name": "dorsal pathway", "x": 370, "y": 42},
@@ -152,16 +159,16 @@ def _human(nodes: list[dict]) -> dict:
     for name, paper_x, paper_y in reference_pixels:
         _put(by_label, name, paper_point(paper_x, paper_y))
 
-    medial_rect = [33, 229, 95, 72]
-    medial_pixels = (
-        ("MCC", 91, 499), ("BA23", 180, 499),
-        ("V6", 65, 527), ("preSMA", 174, 527),
-        ("RSC", 83, 553), ("BA7", 175, 553),
-        ("precuneus", 154, 580),
+    medial_rect = [40, 228, 80, 72]
+    medial_points = (
+        ("MCC", 56, 256), ("BA23", 102, 256),
+        ("V6", 56, 275), ("preSMA", 102, 275),
+        ("RSC", 56, 294), ("BA7", 79, 275),
+        ("precuneus", 102, 294),
     )
-    for name, paper_x, paper_y in medial_pixels:
-        _put(by_label, name, paper_point(paper_x, paper_y))
-    _put(by_label, "BA31", (medial_rect[0] + medial_rect[2] / 2, 275))
+    for name, x, y in medial_points:
+        _put(by_label, name, (x, y))
+    _put(by_label, "BA31", (79, 294))
     _finish(nodes, y_max=425)
 
     return {

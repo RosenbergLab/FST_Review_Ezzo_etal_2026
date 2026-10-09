@@ -56,24 +56,29 @@ nodeY = offsetY + scaleY * y;
 
 medialNames = ["V6", "PCCa", "PCCp", "RSC", "24c", "7m", ...
     "preSMA", "BA23", "BA31"];
-hasExtraMedial = any(ismember(labels, ["24c", "7m", "preSMA"]));
+hasExtraMedial = any(ismember(labels, ...
+    ["24c", "7m", "preSMA", "PCCa", "PCCp"]));
 if hasExtraMedial
-    medialRect = [36, 220, 93, 85];
-    medialPoints = [51 253; 96 275; 51 297; 96 297; ...
-        81 253; 113 253; 51 275; 96 275; 51 297];
+    medialRect = [36, 220, 88, 83];
+    medialPoints = [52 247; 80 269; 52 291; 108 291; ...
+        80 247; 108 247; 52 269; 108 269; 80 291];
 else
-    medialRect = [5, 5, 134, 66];
-    medialPoints = [49 34; 127 34; 54 55; 120 55; ...
-        49 34; 127 34; 54 55; 127 34; 54 55];
+    medialRect = [12, 6, 72, 56];
+    medialPoints = [28 34; 68 34; 28 54; 68 54; ...
+        28 34; 68 34; 28 54; 68 34; 28 54];
 end
 
 subcorticalNames = ["basalfore", "SC", "claustrum", "pons", ...
     "striatum", "pretectum", "thalamus", "pulvinar", "TRN"];
-subcorticalPoints = [394 249; 459 249; 394 270; 459 270; ...
-    394 290; 459 290; 394 310; 394 306.7; 459 306.7];
-for k = 1:numel(subcorticalNames)
-    [nodeX, nodeY] = placeNode(labels, nodeX, nodeY, ...
-        subcorticalNames(k), subcorticalPoints(k, :));
+if any(labels == "thalamus") && any(labels == "pulvinar")
+    % Keep both distinct if a non-FST seed includes both source labels.
+    subcorticalRect = [382, 220, 90, 103];
+    subcorticalPoints = [406 245; 449 245; 406 263; 449 263; ...
+        406 281; 449 281; 406 299; 406 317; 449 299];
+else
+    subcorticalRect = [382, 229, 90, 79];
+    subcorticalPoints = [406 254; 449 254; 406 270; 449 270; ...
+        406 286; 449 286; 406 302; 406 302; 449 302];
 end
 
 % Dot centers aligned to the supplied macaque panel. Areas absent from that
@@ -108,6 +113,10 @@ for k = 1:numel(medialNames)
     [nodeX, nodeY] = placeNode(labels, nodeX, nodeY, ...
         medialNames(k), medialPoints(k, :));
 end
+for k = 1:numel(subcorticalNames)
+    [nodeX, nodeY] = placeNode(labels, nodeX, nodeY, ...
+        subcorticalNames(k), subcorticalPoints(k, :));
+end
 [nodeX, nodeY] = placeNode(labels, nodeX, nodeY, 'V3d', [390.5, 107.5]);
 % V4t remains below the dark STS sulcus in the TIFF.
 [nodeX, nodeY] = placeNode(labels, nodeX, nodeY, 'V4t', [345, 163]);
@@ -132,7 +141,7 @@ layout.FigureHeight = 820;
 layout.FSTCenter = [313, 153];
 layout.Boxes = [ ...
     struct('Name', "medial cortex", 'Rect', medialRect), ...
-    struct('Name', "subcortical", 'Rect', [371, 227, 107, 85])];
+    struct('Name', "subcortical", 'Rect', subcorticalRect)];
 layout.PathLabels = [ ...
     struct('Name', "dorsal pathway", 'X', 370, 'Y', 42, ...
         'Color', [179, 228, 248] / 255), ...
