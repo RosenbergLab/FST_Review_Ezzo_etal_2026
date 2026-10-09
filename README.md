@@ -21,6 +21,17 @@ This repository collects published evidence about structural and functional conn
 | Reporting studies | When all study options are selected, **Number of reporting studies** sizes a dot by the number of distinct papers reporting that connection. It is available for both species. |
 | Area details | Hover over a browser dot or click a MATLAB dot for the selected supporting studies and any selected reports of absence. Human LO1, LO2, and LO3 share one display dot labeled `LO1-3`; their evidence rows remain separate. |
 
+## Motion stimuli
+
+The [MotionStimuli](MotionStimuli/) folder contains four animated examples illustrating **structure from motion**: moving points or contours reveal the organization of a figure over time.
+
+- [Point-light walker](MotionStimuli/SfM_PointLightWalker.gif)
+- [Rotating cylinder](MotionStimuli/SfM_RotatingCylinder.gif)
+- [Wire-frame form](MotionStimuli/SfM_WireFrame.gif)
+- [Stereokinetic circles](MotionStimuli/SfM_stereokinetic_circles.gif)
+
+Two `Frames_` GIFs provide brief frame examples for the point-light walker and wire-frame animations.
+
 ## MATLAB: open or rebuild
 
 To use the saved interactive figure, open [FST_connectivity_explorer.fig](FST_connectivity_explorer.fig) from MATLAB with this repository as the current folder. To rebuild a species view from the current CSV files, run:
