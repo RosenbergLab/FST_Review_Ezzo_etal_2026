@@ -127,9 +127,9 @@ end
 nodeX = min(max(nodeX, 5), 529);
 nodeY = min(max(nodeY, 5), 323);
 
-% Keep the TIFF pixels unchanged; the plot blends them with white at 50%.
+% Keep the TIFF pixels unchanged; the plot blends them with white at 30%.
 layout.Image = brain;
-layout.ImageAlpha = 0.5;
+layout.ImageAlpha = 0.3;
 layout.NodeX = nodeX(:);
 layout.NodeY = nodeY(:);
 layout.ImageX = [offsetX, offsetX + scaleX * (width - 1)];

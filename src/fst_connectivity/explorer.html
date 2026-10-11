@@ -165,7 +165,7 @@
       svg.style.top = payload.plot_offset[1] + 'px';
       const image = svgElement('image', {x:payload.image_geometry[0], y:payload.image_geometry[1],
         width:payload.image_geometry[2], height:payload.image_geometry[3],
-        opacity:'.5', preserveAspectRatio:'none'}, svg);
+        opacity:'.3', preserveAspectRatio:'none'}, svg);
       image.setAttribute('href', payload.image);
       const ratio = payload.plot_size[0] / payload.view_box[2];
       const font = payload.species === 'macaque' ? 5.3 : 6.5;

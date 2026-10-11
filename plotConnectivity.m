@@ -1,7 +1,7 @@
 function result = plotConnectivity(options)
 %PLOTCONNECTIVITY Build and explore the connectivity diagram in MATLAB.
 %   RESULT = plotConnectivity() opens a human FST figure over the lateral
-%   TIFF rendered at 50% opacity, with pathway color carried by the dots.
+%   TIFF rendered at 30% opacity, with pathway color carried by the dots.
 %
 %   RESULT = plotConnectivity(DataPath=ROOT, Species="human", MainROI="FST", ...)
 %   reads ROOT/<species>/evidence.csv and nodes.csv. By default ROOT is the

@@ -100,7 +100,7 @@ end
 nodeX = min(max(nodeX, 5), 529);
 nodeY = min(max(nodeY, 5), 425);
 layout.Image = brain;
-layout.ImageAlpha = 0.5;
+layout.ImageAlpha = 0.3;
 layout.NodeX = nodeX(:);
 layout.NodeY = nodeY(:);
 layout.ImageX = [offsetX, offsetX + scale * (width - 1)];
