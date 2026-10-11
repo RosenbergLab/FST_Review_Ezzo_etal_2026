@@ -114,7 +114,7 @@ def _macaque(nodes: list[dict]) -> dict:
         ],
         "pathways": [
             {"name": "dorsal pathway", "x": 370, "y": 42},
-            {"name": "lateral pathway", "x": 95, "y": 200},
+            {"name": "lateral pathway", "x": 125, "y": 200},
             {"name": "ventral pathway", "x": 288, "y": 286},
         ],
     }
@@ -187,7 +187,7 @@ def _human(nodes: list[dict]) -> dict:
         "boxes": [{"name": "medial cortex", "rect": medial_rect}],
         "pathways": [
             {"name": "dorsal pathway", "x": 411, "y": 48},
-            {"name": "lateral pathway", "x": 190, "y": 278},
+            {"name": "lateral pathway", "x": 210, "y": 278},
             {"name": "ventral pathway", "x": 356, "y": 333},
         ],
     }
