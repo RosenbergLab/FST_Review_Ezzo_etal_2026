@@ -366,6 +366,15 @@ end
 function verifyHumanFigure(fig)
 state = getappdata(fig, 'HumanStudySelectorState');
 assert(isstruct(state), 'Human study controls are missing.');
+colorPosition = state.ColorGroup.Position;
+sizePosition = state.SizeGroup.Position;
+statusPosition = state.Status.Position;
+pathwayPosition = state.PathwayButton.Position;
+assert(colorPosition(2) >= sizePosition(2) + sizePosition(4) + 8 && ...
+    colorPosition(2) + colorPosition(4) <= statusPosition(2) - 8, ...
+    'Human Dot color must sit between the status and Dot size without overlap.');
+assert(colorPosition(4) - pathwayPosition(2) - pathwayPosition(4) >= 24, ...
+    'Human Dot color title needs clearance above its first option.');
 labels = string(state.NodeLabels);
 index = find(labels == "LO1-3");
 assert(numel(index) == 1, 'Human LO1-3 must have one node.');

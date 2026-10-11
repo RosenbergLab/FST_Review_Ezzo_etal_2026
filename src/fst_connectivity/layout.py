@@ -114,7 +114,7 @@ def _macaque(nodes: list[dict]) -> dict:
         ],
         "pathways": [
             {"name": "dorsal pathway", "x": 370, "y": 42},
-            {"name": "lateral pathway", "x": 125, "y": 200},
+            {"name": "lateral pathway", "x": 160, "y": 200},
             {"name": "ventral pathway", "x": 288, "y": 286},
         ],
     }
