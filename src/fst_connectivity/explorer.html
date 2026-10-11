@@ -295,7 +295,7 @@
         colorInputs[mode] = {input, label};
       }
       htmlElement('div', 'color-note', colorField,
-        'Grey = conflicting reports; black = no conflict marked in the paper figure.');
+        'Grey: a study reports no connection either way; another reports one.');
       let sizeMode = null, sizeInputs = {}, sizeNote = null, legend = null;
       if (payload.species === 'macaque') {
         const mixed = payload.studies.find(study => study.code === 'mixed_tracer');
@@ -472,7 +472,7 @@
               positive.some(event => event.study === 'Fel91'))
             description += '\nFelleman & Van Essen (1991) named this pathway V3; shown here with V3d.';
           if (conflictColor) description += node.conflict
-            ? '\nGrey dot: this area has conflicting connection results in the paper figure.'
+            ? '\nGrey dot: at least one study reports no FST connection in either direction; another reports a connection.'
             : '\nBlack dot: no conflict is marked for this area in the paper figure.';
         }
         const radius = .75 * diameter / (2 * plot.ratio);

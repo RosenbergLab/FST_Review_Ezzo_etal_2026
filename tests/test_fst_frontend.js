@@ -113,7 +113,7 @@ const macFST = one(macaque, el => el.tag === 'circle' &&
 assert.equal(greyFEF.attributes.stroke, '#A6A6A6');
 assert.equal(blackMT.attributes.stroke, '#000000');
 assert.equal(macFST.attributes.fill, '#000000');
-assert.match(greyFEF._tooltip, /Grey dot:.*conflicting connection results/);
+assert.match(greyFEF._tooltip, /no FST connection in either direction; another reports a connection/);
 assert.match(blackMT._tooltip, /Black dot: no conflict is marked/);
 selectRadio(macaque, macPathway);
 assert.equal(greyFEF.attributes.stroke, '#000000');
@@ -167,7 +167,7 @@ const greyPMd = one(human, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === 'PMd');
 assert.equal(greyPMd.attributes.fill, '#A6A6A6');
 assert.equal(ph.attributes.fill, '#000000');
-assert.match(greyPMd._tooltip, /Grey dot:.*conflicting connection results/);
+assert.match(greyPMd._tooltip, /no FST connection in either direction; another reports a connection/);
 selectRadio(human, humanPathway);
 assert.equal(ph.attributes.fill, '#F9F384');
 selectRadio(human, humanCount);
