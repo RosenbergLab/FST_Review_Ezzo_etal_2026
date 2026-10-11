@@ -73,6 +73,23 @@ class ModelTests(unittest.TestCase):
         self.assertEqual({event["study"] for event in reports}, {"Bak18", "Rol23"})
         self.assertFalse(any(event["study"] == "Rua25" for event in reports))
 
+    def test_human_pfop_keeps_absent_ruan_report_with_positive_studies(self):
+        labels = {node["label"] for node in self.human["nodes"]}
+        self.assertIn("PFop", labels)
+        self.assertNotIn("Pfop", labels)
+        reports = [event for event in self.human["events"]
+                   if event["target"] == "PFop"]
+        self.assertEqual(
+            {(event["study"], event["direction"], event["grade"])
+             for event in reports},
+            {("Rol23", "out", "weak"), ("Rol23", "in", "weak"),
+             ("Bak18", "out", "broad"), ("Bak18", "in", "broad"),
+             ("Rua25", "out", "absent"), ("Rua25", "in", "absent")},
+        )
+        self.assertEqual(len(reports), 6)
+        self.assertFalse(any(event["target"] == "Pfop"
+                             for event in self.human["events"]))
+
     def test_human_mcc_uses_updated_evidence_and_existing_inset_point(self):
         labels = {node["label"] for node in self.human["nodes"]}
         self.assertIn("MCC", labels)

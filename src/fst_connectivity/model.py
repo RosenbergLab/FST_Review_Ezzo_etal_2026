@@ -1,8 +1,8 @@
 """Load the FST connectivity evidence used by the MATLAB explorer.
 
 This module deliberately reads the source CSVs without writing derived tables.
-The display-only LO merge and two macaque paper corrections mirror
-``plotConnectivity.m``; the underlying review data remains untouched.
+The display-only human LO merge/PFop alias and two macaque paper corrections
+support the interactive views; the underlying review data remains untouched.
 """
 
 from __future__ import annotations
@@ -118,6 +118,13 @@ def _merge_human_lo(
             row["Affiliate"] = "LO1-3"
         display_evidence.append(row)
     return display_nodes, display_evidence
+
+
+def _normalize_human_affiliate_aliases(evidence: list[dict[str, str]]) -> None:
+    """Match the FST evidence's ``Pfop`` spelling to its ``PFop`` node."""
+    for row in evidence:
+        if _value(row, "Main") == "FST" and _value(row, "Affiliate") == "Pfop":
+            row["Affiliate"] = "PFop"
 
 
 def _correct_macaque_legacy_evidence(evidence: list[dict[str, str]]) -> None:
@@ -323,6 +330,7 @@ def load_species(species: str, data_dir: Path) -> dict:
     raw_nodes = _read_csv(species_dir / "nodes.csv")
     raw_evidence = _read_csv(species_dir / "evidence.csv")
     if species == "human":
+        _normalize_human_affiliate_aliases(raw_evidence)
         raw_nodes, raw_evidence = _merge_human_lo(raw_nodes, raw_evidence)
     else:
         _correct_macaque_legacy_evidence(raw_evidence)

@@ -102,6 +102,9 @@ evidence = readtable(fullfile(speciesDir, 'evidence.csv'), ...
 nodes = readtable(fullfile(speciesDir, 'nodes.csv'), ...
     'TextType', 'string', 'VariableNamingRule', 'preserve');
 if species == "human" && strcmpi(roi, "FST")
+    % Keep the upstream CSV intact while matching its Pfop spelling to the
+    % canonical PFop node and its other evidence rows.
+    evidence.Affiliate(cleanColumn(evidence, "Affiliate") == "Pfop") = "PFop";
     [nodes, evidence] = mergeHumanLOAreas(nodes, evidence);
 end
 allLabels = cleanColumn(nodes, "label");
@@ -147,8 +150,26 @@ end
 affiliate = cleanColumn(evidence, "Affiliate");
 toAffiliate = lower(cleanColumn(evidence, "1_main_to_affiliate_projection"));
 toMain = lower(cleanColumn(evidence, "2_affiliate_to_main_projection"));
-positiveRow = ~((toAffiliate == "" | toAffiliate == "absent") & ...
-    (toMain == "" | toMain == "absent"));
+positiveGrades = ["weak", "moderate", "strong", "present", "broad"];
+positiveRow = ismember(toAffiliate, positiveGrades) | ...
+    ismember(toMain, positiveGrades);
+if species == "macaque" && roi == "FST"
+    % Bou90 uses scored "tentative" projections as positive evidence.
+    % Unscored tentative and unknown labels are not connection reports.
+    outScores = str2double(optionalCleanColumn(evidence, ...
+        "1_main_to_affiliate_strength_score_1to3"));
+    inScores = str2double(optionalCleanColumn(evidence, ...
+        "2_affiliate_to_main_strength_score_1to3"));
+    outRefs = cleanColumn(evidence, "1_main_to_affiliate_ref");
+    inRefs = cleanColumn(evidence, "2_affiliate_to_main_ref");
+    scoredOut = toAffiliate == "tentative" & ...
+        contains(outRefs, "Bou90") & isfinite(outScores) & ...
+        outScores >= 1 & outScores <= 3;
+    scoredIn = toMain == "tentative" & ...
+        contains(inRefs, "Bou90") & isfinite(inScores) & ...
+        inScores >= 1 & inScores <= 3;
+    positiveRow = positiveRow | scoredOut | scoredIn;
+end
 edgeTargets = unique(affiliate(positiveRow & affiliate ~= ""), 'sorted');
 fel91Targets = strings(0, 1);
 if enableStudySelector && species == "macaque"

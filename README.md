@@ -26,7 +26,7 @@ The connectivity figure summarizes published evidence about structural and funct
 | Study controls | Select studies to show their reported FST connections. **Only** isolates one study, **Select all** restores every option, and **Clear** hides connection dots. Macaque Boussaoud (1990, 1992) and Bogadhi (2019, 2021) papers each have a combined option. Ungraded tracer reports, including Barone (2000) and Ungerleider (2008), appear under **Mixed tracer evidence**. |
 | Dot size | **Uniform** shows no strength grade. Macaque connection dots are open in this mode; the FST seed stays filled. For an eligible single study, macaque dots can show its strength separately for afferent, efferent, or unspecified projections. Boussaoud et al. (1990) uses a numeric 1–3 tracer score, including 1.5 and 2.5; other graded studies retain weak/moderate/strong sizes. With the grouped Boussaoud selection, afferent/efferent modes also show only the 1992 subcortical areas reporting that direction. Ungraded 1992 dots remain open, and their hover text names the projection direction. Grades are not averaged across studies. |
 | Reporting studies | When all study options are selected, **Number of reporting studies** sizes a dot by the number of distinct papers reporting that connection. It is available for both species. |
-| Area details | Hover over a browser dot or click a MATLAB dot for the selected supporting studies and any selected reports of absence. Human LO1, LO2, and LO3 share one display dot labeled `LO1-3`; their evidence rows remain separate. Macaque Felleman and Van Essen (1991) V3 reports share the dorsal-colored `V3d` dot with newer V3d reports; the original area name remains in the source table. |
+| Area details | Hover over a browser dot or click a MATLAB dot for the selected supporting studies and any selected reports of absence. Human LO1, LO2, and LO3 share one display dot labeled `LO1-3`; their evidence rows remain separate. The source spelling `Pfop` maps to the human `PFop` dot. Macaque Felleman and Van Essen (1991) V3 reports share the dorsal-colored `V3d` dot with newer V3d reports; the original area name remains in the source table. |
 
 ### MATLAB: open or rebuild
 
@@ -56,7 +56,11 @@ The `human/` and `macaque/` folders hold the literature review data and brain im
 
 The `evidence.xlsm` files are working review spreadsheets. The CSV files are the inputs used to build the figures.
 
+In generated `edges.csv`, `evidencecount` counts positive evidence rows, with a value of 1 for an edge found only in the Felleman (1991) table. The interactive **Number of reporting studies** counts distinct papers, so the two numbers can differ. The edge table's `certainty` requires conflicting reports in both projection directions; the grey/black dot view uses the paper figure's study-level conflict marking.
+
 For Boussaoud et al. (1990), four extra columns in `macaque/evidence.csv` give the median positive tracer-label score (1–3) and positive/evaluable case count for each projection direction. `+ to ++` is 1.5 and `++ to +++` is 2.5. The numeric score sets dot size for that study; the original descriptive evidence remains in its existing columns. Areas without a single score in the supplied Table 1 summary, and Boussaoud et al. (1992), remain open in strength mode.
+
+Two existing macaque display interpretations differ from literal source cells: Barone et al. (2000) V1/V4 are shown as ungraded FST-to-area reports, and Ungerleider et al. (2008) V4 is shown without a strength grade. The original `evidence.csv` rows are retained for review; these choices are applied when the figures load.
 
 ### Rebuild the browser file with Python
 
@@ -67,7 +71,7 @@ python -m pip install .
 python -m fst_connectivity --data-dir . --output FST_connectivity_explorer_python.html --no-open
 ```
 
-The [prebuilt wheel](dist/fst_connectivity-0.1.16-py3-none-any.whl) is an alternative to installing from source. It bundles the repository evidence for use outside this folder. See [PYTHON_PACKAGE.md](PYTHON_PACKAGE.md) for more options.
+The [prebuilt wheel](dist/fst_connectivity-0.1.17-py3-none-any.whl) is an alternative to installing from source. It bundles the repository evidence for use outside this folder. See [PYTHON_PACKAGE.md](PYTHON_PACKAGE.md) for more options.
 
 ## Motion stimuli
 

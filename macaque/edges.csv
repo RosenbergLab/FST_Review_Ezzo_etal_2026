@@ -14,12 +14,12 @@ source,targetid,targetname,evidencecount,projections,connectivitystrength,certai
 9,14,AITd,2,bidirectional,moderate,certain,higher
 9,15,AITv,1,bidirectional,strong,certain,higher
 9,16,STPp,2,bidirectional,moderate,certain,higher
-9,17,STPa,2,mainsend,moderate,certain,higher
+9,17,STPa,1,mainsend,moderate,certain,higher
 9,18,A1,1,bidirectional,weak,certain,higher
 9,19,STGa,1,mainsend,moderate,certain,higher
 9,20,insula,1,bidirectional,moderate,certain,higher
 9,21,MSTd,1,bidirectional,moderate,certain,equal
-9,22,DP,2,mainsend,strong,certain,lower
+9,22,DP,1,mainsend,strong,certain,lower
 9,23,7a,4,bidirectional,moderate,certain,higher
 9,25,PF,1,bidirectional,weak,certain,equal
 9,26,AIP,1,bidirectional,weak,certain,higher

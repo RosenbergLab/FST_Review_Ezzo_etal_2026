@@ -145,6 +145,9 @@ assert.equal(macaque.hidden, true);
 assert.equal(human.hidden, false);
 const humanStatus = one(human, el => el.className === 'status');
 assert.match(humanStatus.textContent, /55 connected regions/);
+const pfop = one(human, el => el.tag === 'circle' &&
+  el.attributes['aria-label'] === 'PFop');
+assert.match(pfop._tooltip, /Selected reports of absence: [^\n]*Ruan et al/);
 const ph = one(human, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === 'PH');
 assert.equal(ph.attributes.stroke, '#F9F384');

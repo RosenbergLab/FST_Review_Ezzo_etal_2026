@@ -30,7 +30,7 @@ source,targetid,targetname,evidencecount,projections,connectivitystrength,certai
 10,33,TPOJ2,2,bidirectional,moderate,certain,higher
 10,34,TPOJ3,1,bidirectional,moderate,conflicting,higher
 10,35,PFm,2,bidirectional,moderate,conflicting,equal
-10,36,PFop,2,bidirectional,moderate,certain,equal
+10,36,PFop,2,bidirectional,moderate,conflicting,equal
 10,37,op,1,bidirectional,strong,conflicting,higher
 10,38,IPS0/1,2,bidirectional,moderate,conflicting,unknown
 10,39,LIP,3,bidirectional,moderate,certain,equal
