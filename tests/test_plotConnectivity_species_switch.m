@@ -356,8 +356,9 @@ assert(isequal(black.MarkerEdgeColor, [0, 0, 0]) && ...
     isequal(seed.MarkerFaceColor, [0, 0, 0]), ...
     'Nonconflicting dots and FST should become black.');
 if strcmp(stateName, 'HumanStudySelectorState')
-    assert(max(abs(grey.MarkerFaceColor - [166, 166, 166] / 255)) < 1e-9);
-    assert(isequal(black.MarkerFaceColor, [0, 0, 0]));
+    assert(isequal(grey.MarkerFaceColor, 'none') && ...
+        isequal(black.MarkerFaceColor, 'none'), ...
+        'Human connection dots must stay open in conflict colors.');
 else
     assert(isequal(grey.MarkerFaceColor, 'none') && ...
         isequal(black.MarkerFaceColor, 'none'), ...
@@ -397,6 +398,15 @@ end
 function verifyHumanFigure(fig)
 state = getappdata(fig, 'HumanStudySelectorState');
 assert(isstruct(state), 'Human study controls are missing.');
+for k = 1:numel(state.NodeLabels)
+    if state.NodeLabels(k) == "FST"
+        assert(~isequal(state.NodeHandles(k).MarkerFaceColor, 'none'), ...
+            'The human FST seed must stay filled.');
+    elseif strcmp(state.NodeHandles(k).Visible, 'on')
+        assert(isequal(state.NodeHandles(k).MarkerFaceColor, 'none'), ...
+            'Human connection dots must be open.');
+    end
+end
 colorPosition = state.ColorGroup.Position;
 sizePosition = state.SizeGroup.Position;
 statusPosition = state.Status.Position;
@@ -440,6 +450,11 @@ state.SizeGroup.SelectedObject = state.CountButton;
 callback = state.SizeGroup.SelectionChangedFcn;
 callback(state.SizeGroup, []);
 assert(strcmp(state.CountLegend.Visible, 'on'));
+assert(isequal(state.NodeHandles(index).MarkerFaceColor, 'none'));
+legendMarkers = findall(state.CountLegend, 'Type', 'scatter');
+assert(~isempty(legendMarkers) && all(arrayfun(@(h) ...
+    isequal(h.MarkerFaceColor, 'none'), legendMarkers)), ...
+    'Human study-count legend dots must be open.');
 assert(state.NodeHandles(index).SizeData == (0.75 * 10)^2, ...
     'LO1-3 should count Baker and Rolls once each.');
 assert(state.NodeHandles(index).SizeData > uniformSize);

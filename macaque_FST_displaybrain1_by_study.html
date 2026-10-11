@@ -229,7 +229,8 @@
         : [['Weak (small)', 9], ['Moderate (medium)', 15],
            ['Strong (large)', 22], ['No grade (open)', 9, true]];
       if (countMode && view.data.species === 'human')
-        entries = entries.slice(0, Math.min(4, view.data.source_studies.length));
+        entries = entries.slice(0, Math.min(4, view.data.source_studies.length))
+          .map(([label, size]) => [label, size, true]);
       for (const [label, size, open] of entries) {
         const entry = htmlElement('div', 'legend-entry', grid);
         const dot = htmlElement('span', 'legend-dot' + (open ? ' open' : ''), entry);
@@ -397,8 +398,8 @@
         }
         controls.legend.legend.style.display = mode === 'studycount' ? '' : 'none';
         controls.sizeNote.textContent = mode === 'studycount'
-          ? 'Dots count distinct papers with a positive connection.\nBaker et al. (2018) counts once across methods.'
-          : 'Select all studies to size dots by number of reporting studies.';
+          ? 'Open dots count distinct papers with a positive connection.\nBaker et al. (2018) counts once across methods.'
+          : 'Open dots show connections without encoding strength or direction.\nSelect all to size dots by number of reporting studies.';
         if (mode === 'studycount') updateLegend(view, true);
       }
       const directionFilter = payload.species === 'macaque' &&
@@ -423,6 +424,7 @@
           const absent = uniqueNames(targetReports.filter(e => e.grade === 'absent'), sourceNames);
           description = 'Reported by: ' + sources.join(', ');
           if (payload.species === 'human') {
+            open = true;
             if (node.label === 'LO1-3')
               description = 'LO1, LO2, and LO3 shown as one dot.\n' + description;
             if (mode === 'studycount') {

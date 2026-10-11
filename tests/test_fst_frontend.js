@@ -145,6 +145,16 @@ assert.equal(macaque.hidden, true);
 assert.equal(human.hidden, false);
 const humanStatus = one(human, el => el.className === 'status');
 assert.match(humanStatus.textContent, /55 connected regions/);
+const humanFST = one(human, el => el.tag === 'circle' &&
+  el.attributes['aria-label'] === 'FST');
+function assertHumanConnectionDotsOpen() {
+  assert.notEqual(humanFST.attributes.fill, 'none');
+  for (const circle of all(human, el => el.tag === 'circle')) {
+    if (circle !== humanFST && circle.style.display !== 'none')
+      assert.equal(circle.attributes.fill, 'none');
+  }
+}
+assertHumanConnectionDotsOpen();
 const pfop = one(human, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === 'PFop');
 assert.match(pfop._tooltip, /Selected reports of absence: [^\n]*Ruan et al/);
@@ -163,22 +173,26 @@ const humanColor = one(human, el => el.tag === 'input' && el.value === 'conflict
 const humanPathway = one(human, el => el.tag === 'input' && el.value === 'pathway');
 assert.equal(humanColor.disabled, false);
 selectRadio(human, humanColor);
+assertHumanConnectionDotsOpen();
 const greyPMd = one(human, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === 'PMd');
-assert.equal(greyPMd.attributes.fill, '#A6A6A6');
-assert.equal(ph.attributes.fill, '#000000');
+assert.equal(greyPMd.attributes.stroke, '#A6A6A6');
+assert.equal(ph.attributes.stroke, '#000000');
 assert.match(greyPMd._tooltip, /no FST connection in either direction; another reports a connection/);
 selectRadio(human, humanPathway);
-assert.equal(ph.attributes.fill, '#F9F384');
+assert.equal(ph.attributes.stroke, '#F9F384');
 selectRadio(human, humanCount);
+assertHumanConnectionDotsOpen();
 selectRadio(human, humanColor);
-assert.equal(greyPMd.attributes.fill, '#A6A6A6');
+assertHumanConnectionDotsOpen();
+assert.equal(greyPMd.attributes.stroke, '#A6A6A6');
 selectRadio(human, humanPathway);
 assert.ok(Number(lo.attributes.r) > uniformRadius);
 assert.match(lo._tooltip, /Supporting studies: 2/);
 assert.equal(one(human, el => el.className === 'legend-title').textContent,
   'Number of studies');
 assert.equal(all(human, el => el.className === 'legend-entry').length, 3);
+assert.equal(all(human, el => el.className === 'legend-dot open').length, 3);
 one(human, el => el.className === 'clear-button').listeners.click();
 assert.match(humanStatus.textContent, /^0 connected regions/);
 assert.equal(humanCount.disabled, true);

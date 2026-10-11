@@ -458,6 +458,10 @@ if paperMode
                 nodeComments(k) = nodeComments(k) + newline + note;
             end
         end
+    else
+        % Human evidence does not provide a graded anatomical strength for
+        % these display dots. Keep the FST seed filled.
+        openMarker(selectedLabels ~= roi) = true;
     end
     nodeAlpha(:) = 1;
 elseif nodeSizeSource == "tracer_strength"
@@ -1395,7 +1399,7 @@ sizeNote = uicontrol('Parent', panel, 'Style', 'text', ...
     'BackgroundColor', [0.975, 0.985, 1]);
 countLegend = addDotSizeLegend(panel, ...
     [12, 125, panelWidth - 24, 82], false, "count", ...
-    height(sourceStudies));
+    height(sourceStudies), true);
 countLegend.Visible = 'off';
 [colorGroup, pathwayButton, conflictButton] = ...
     addConflictColorControls(panel, [12, 385, panelWidth - 24, 100]);
@@ -1546,12 +1550,12 @@ if sizeMode == "studycount" && ~canSizeByCount
 end
 if sizeMode == "studycount"
     state.CountLegend.Visible = 'on';
-    state.SizeNote.String = sprintf(['Dots count distinct papers with a positive connection.\n' ...
+    state.SizeNote.String = sprintf(['Open dots count papers, not strength or direction.\n' ...
         'Baker et al. (2018) counts once across methods.']);
 else
     state.CountLegend.Visible = 'off';
-    state.SizeNote.String = ...
-        'Select all studies to size dots by number of reporting studies.';
+    state.SizeNote.String = sprintf(['Open dots do not encode strength or direction.\n' ...
+        'Select all to size them by reporting studies.']);
 end
 selectedCodes = strings(0, 1);
 for k = find(checked(:))'
@@ -1606,7 +1610,13 @@ for k = 1:numel(state.NodeLabels)
     marker.SizeData = (0.75 * size)^2;
     markerColor = conflictDisplayColor(conflictColorMode, ...
         state.GreyConflictDots(k), state.NodeColors(k));
-    marker.MarkerFaceColor = markerColor;
+    if label == state.Seed
+        marker.MarkerFaceColor = markerColor;
+        marker.LineWidth = 1;
+    else
+        marker.MarkerFaceColor = 'none';
+        marker.LineWidth = 1.8;
+    end
     marker.MarkerEdgeColor = markerColor;
     position = state.TextHandles(k).Position;
     position(2) = labelPositionY(state.NodeY(k), size, state.Scale);
@@ -2253,12 +2263,15 @@ controls = struct('Panel', panel, 'CheckBoxes', gobjects(0, 1), ...
     'SizeButtons', [uniformButton; strengthButton]);
 end
 
-function key = addDotSizeLegend(parent, position, singleColumn, kind, maxCount)
+function key = addDotSizeLegend(parent, position, singleColumn, kind, maxCount, openAll)
 if nargin < 4
     kind = "strength";
 end
 if nargin < 5
     maxCount = 4;
+end
+if nargin < 6
+    openAll = false;
 end
 if kind == "count"
     legendTitle = 'Number of studies';
@@ -2318,7 +2331,7 @@ for k = 1:numel(labels)
     marker = scatter(keyAx, markerX(k), rowY(k), ...
         (0.75 * diameters(k))^2, [0.25, 0.25, 0.25], 'filled', ...
         'HitTest', 'off');
-    if k == openIndex
+    if k == openIndex || openAll
         marker.MarkerFaceColor = 'none';
         marker.MarkerEdgeColor = [0.25, 0.25, 0.25];
         marker.LineWidth = 1.3;
