@@ -312,6 +312,11 @@ end
 
 function verifyConflictColorToggle(fig, stateName)
 state = getappdata(fig, stateName);
+colorNote = findall(state.ColorGroup, 'Style', 'text');
+assert(numel(colorNote) == 1 && strcmp(colorNote.String, ...
+    'Grey: a study reports no connection either way; another reports at least one.'));
+assert(colorNote.Extent(3) <= colorNote.Position(3), ...
+    'The conflict explanation extends beyond its control.');
 assert(all(arrayfun(@(h) h.Value ~= 0, state.CheckBoxes)), ...
     'Conflict colors should be tested with all studies selected.');
 assert(strcmp(state.ConflictButton.Enable, 'on'));

@@ -295,7 +295,7 @@
         colorInputs[mode] = {input, label};
       }
       htmlElement('div', 'color-note', colorField,
-        'Grey: a study reports no connection either way; another reports one.');
+        'Grey: a study reports no connection either way; another reports at least one.');
       let sizeMode = null, sizeInputs = {}, sizeNote = null, legend = null;
       if (payload.species === 'macaque') {
         const mixed = payload.studies.find(study => study.code === 'mixed_tracer');
