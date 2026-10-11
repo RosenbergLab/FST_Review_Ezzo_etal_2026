@@ -7,7 +7,8 @@ function result = plotConnectivity(options)
 %   reads ROOT/<species>/evidence.csv and nodes.csv. By default ROOT is the
 %   folder containing this function. OutputDir defaults to ROOT. The function
 %   writes <OutputDir>/<species>/edges.csv and selectnodes.csv, plus a MATLAB
-%   .fig and PDF. HTML export for the new paper layout will follow later.
+%   .fig and PDF. Browser HTML is distributed separately; ExportHTML only
+%   warns because MATLAB HTML templates are no longer included.
 %   For macaque and human FST, StudySelector=true adds study controls and a
 %   species menu that switches views in the same MATLAB figure window.
 %   Study checkboxes control which reports are shown. The dot-size selector
@@ -24,12 +25,13 @@ function result = plotConnectivity(options)
 %   Examples:
 %     plotConnectivity;
 %     plotConnectivity(Species="human", NodesOnly=false);
-%     plotConnectivity(Species="human", MainROI="MST", IncludeStudies="all", ...
+%     plotConnectivity(Species="human", MainROI="MST", Medial=false, IncludeStudies="all", ...
 %         OutputDir="C:\EM\Connectivity");
 %     plotConnectivity(MainROI="MSTd");  % macaque labels are MSTd and MSTm
 %
-%   Click nodes in the MATLAB figure for evidence data tips. Human MST/MT
-%   plots retain their previous surface layout.
+%   Click nodes in the MATLAB figure for evidence data tips. Human non-FST
+%   plots can use the retained lateral TIFF with Medial=false; the older
+%   medial montage is not distributed.
 %   Roicoarse, rotateon, and subcortical in the notebook have no implemented
 %   behavior and are therefore omitted here.
 
@@ -347,6 +349,11 @@ else
     end
     imagePath = fullfile(speciesDir, 'surface_snapshots', imageName);
     if ~isfile(imagePath)
+        if options.Medial
+            error('plotConnectivity:MedialImageUnavailable', ...
+                ['The medial montage is not included in this FST-focused ' ...
+                 'repository. Use Medial=false for a lateral non-FST view.']);
+        end
         error('plotConnectivity:MissingImage', 'Missing cortical image: %s', imagePath);
     end
     brainImage = imread(imagePath);
@@ -778,24 +785,10 @@ if options.SaveFigure
     figurePath = basePath + ".fig";
     savefig(fig, figurePath);
 end
-if options.ExportHTML && paperMode
-    warning('plotConnectivity:HTMLPending', ...
-        'HTML export for the paper layout is deferred; MATLAB FIG and PDF were saved.');
-elseif options.ExportHTML
-    payload = makeInteractivePayload(brainImage, options.DisplayBrain, ...
-        figureWidth, figureHeight, xLimits, yLimits, nodeX, nodeY, ...
-        selectedLabels, selectedColors, nodeAlpha, nodeSize, nodeOutline, ...
-        nodeComments, plotEdges, options.NodesOnly, legendLabels, legendSizes);
-    htmlPath = basePath + ".html";
-    writeHTML(htmlPath, payload, 'plotConnectivity_template.html');
-    if enableStudySelector
-        payload.events = table2struct(studyEvents);
-        payload.studies = table2struct(studies);
-        payload.seed = char(roi);
-        studyHTMLPath = basePath + "_by_study.html";
-        writeHTML(studyHTMLPath, payload, ...
-            'plotConnectivity_study_template.html');
-    end
+if options.ExportHTML
+    warning('plotConnectivity:HTMLUnavailable', ...
+        ['MATLAB HTML export is not included. Open ' ...
+         'FST_connectivity_explorer_python.html for the interactive FST views.']);
 end
 
 result = struct('Figure', fig, 'Axes', ax, 'Edges', edges, 'Nodes', nodes, ...

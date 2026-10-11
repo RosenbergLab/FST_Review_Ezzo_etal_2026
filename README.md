@@ -14,7 +14,7 @@ The interactive connectivity figure synthesizes published structural and functio
 | Option | How to use it |
 | --- | --- |
 | **Browser — easiest** | Download [FST_connectivity_explorer_python.html](FST_connectivity_explorer_python.html) and open it in a browser. It includes both species, the brain images, and the evidence in one offline file. **No Python or MATLAB installation is needed.** The filename reflects how the file was generated. GitHub's file viewer does not run the interactive figure, so download the HTML before opening it. |
-| **MATLAB** | Set MATLAB's current folder to this repository and open [FST_connectivity_explorer.fig](FST_connectivity_explorer.fig). Its **Species** menu switches between macaque and human in one window. Keep the repository folders with the FIG so the controls can load their evidence and display settings. Separate [human](human_FST_paper_lateral.fig) and [macaque](macaque_FST_paper_lateral.fig) FIGs are also available. |
+| **MATLAB** | Set MATLAB's current folder to this repository and open [FST_connectivity_explorer.fig](FST_connectivity_explorer.fig). Its **Species** menu switches between macaque and human in one window. Keep the repository folders with the FIG so the controls can load their evidence and display settings. |
 | **Python package** | Use the package to generate your own browser file. See the [Python package guide](PYTHON_PACKAGE.md) for installation, command-line use, and the Python API. |
 
 ### Read the figure
@@ -37,7 +37,7 @@ plotConnectivity(Species="macaque");
 plotConnectivity(Species="human");
 ```
 
-These calls save `<species>_FST_paper_lateral.fig` and `.pdf` in the repository folder. They also update `<species>/edges.csv` and `<species>/selectnodes.csv`, which are generated tables. Use `WriteTables=false` if you want to rebuild figures without rewriting those tables. The source code is [plotConnectivity.m](plotConnectivity.m), with display positions in [paperConnectivityLayout.m](paperConnectivityLayout.m) and [paperHumanConnectivityLayout.m](paperHumanConnectivityLayout.m).
+These calls generate species-specific `.fig` and `.pdf` files locally; only the combined interactive FIG is distributed in this repository. They also update `<species>/edges.csv` and `<species>/selectnodes.csv`, which are generated tables. Use `WriteTables=false` if you want to rebuild figures without rewriting those tables. The source code is [plotConnectivity.m](plotConnectivity.m), with display positions in [paperConnectivityLayout.m](paperConnectivityLayout.m) and [paperHumanConnectivityLayout.m](paperHumanConnectivityLayout.m).
 
 ### Evidence and source files
 
@@ -50,7 +50,7 @@ The `human/` and `macaque/` folders hold the literature review data and brain im
 | [paper_conflict_dots.json](src/fst_connectivity/data/paper_conflict_dots.json) | Grey area labels transcribed from the supplied Figure 3 for the optional grey/black view. The figure uses this fixed list; it does not recompute conflicts from the CSVs. |
 | `human/citations.txt`, `macaque/citations.txt` | Full citations for the reference codes in the evidence tables. |
 | `human/abbreviations.csv`, `macaque/abbreviations.csv` | Expansions of area abbreviations. |
-| `human/surface_snapshots/`, `macaque/surface_snapshots/` | Cortical surface images used behind the dots. |
+| `human/surface_snapshots/`, `macaque/surface_snapshots/` | The lateral white TIFF used behind each current MATLAB FST view. The Python package contains matching PNG backgrounds. |
 | [macaque/fel91_fst_connections.csv](macaque/fel91_fst_connections.csv) | FST pathways transcribed from Felleman and Van Essen (1991). |
 | `<species>/edges.csv`, `<species>/selectnodes.csv` | Generated summaries from MATLAB; edit `evidence.csv` and `nodes.csv` as source data instead. |
 
