@@ -282,7 +282,7 @@ def _group_studies(
         grouped = [row for index, row in enumerate(grouped)
                    if index not in ungraded_indices]
         grouped.append(
-            {"code": "mixed_tracer", "label": "Mixed tracer evidence",
+            {"code": "mixed_tracer", "label": "Combined tracer evidence",
              "detail": combined_detail, "codes": combined_codes}
         )
     return grouped

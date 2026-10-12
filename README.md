@@ -25,10 +25,10 @@ Although the figure focuses on FST, the accompanying evidence tables also cover 
 | Feature | Meaning |
 | --- | --- |
 | Brain and insets | Inset boxes hold medial areas and subcortical areas that are not shown on that surface. |
-| Dot color | **Pathway colors** (default) use light blue for dorsal, pink for lateral, yellow for ventral, and black for neutral areas. With **Select all** active, choose **Grey/black conflict**. Grey means at least one study explicitly reports no FST connection in either direction while another reports a connection; all other dots are black. These fixed colors follow Figure 3 of the paper for both species. |
-| Study controls | Select studies to show their reported FST connections. **Only** isolates one study, **Select all** restores every option, and **Clear** hides connection dots. Macaque Boussaoud (1990, 1992) and Bogadhi (2019, 2021) papers each have a combined option. Ungraded tracer reports, including Barone (2000) and Ungerleider (2008), appear under **Mixed tracer evidence**. |
-| Dot size | **Uniform** shows no strength grade. For an eligible single study, macaque dots can show its strength separately for afferent, efferent, or unspecified projections. Boussaoud et al. (1990) uses a numeric 1–3 tracer score; other graded studies retain weak/moderate/strong sizes. Grades cannot be merged across studies. Human connection dots remain open in both size modes because strength and direction are not encoded; the study-count mode changes size by the number of supporting papers. |
-| Reporting studies | When all study options are selected, **Number of reporting studies** sizes a dot by the number of distinct papers reporting that connection. It is available for both species. |
+| Dot color | **Pathway colors** (default) use light blue for dorsal, pink for lateral, yellow for ventral, and black for neutral areas. With **Select all** active, choose **Grey/black conflict**. Grey: A study explicitly reports no connection, whereas another reports a connection. All other dots are black. These fixed colors follow Figure 3 of the paper for both species. |
+| Study controls | Select studies to show their reported FST connections. **Only** isolates one study, **Select all** restores every option, and **Clear** hides connection dots. Macaque Boussaoud (1990, 1992) and Bogadhi (2019, 2021) papers each have a combined option. Ungraded tracer reports, including Barone (2000) and Ungerleider (2008), appear under **Combined tracer evidence**, with the included studies listed directly below that choice. |
+| Dot size | **No scaling** uses a standard dot size. For an eligible single study, macaque dots can show its strength separately for afferent, efferent, or unspecified projections. Boussaoud et al. (1990) uses a numeric 1–3 tracer score; other graded studies retain weak/moderate/strong sizes. Grades cannot be merged across studies. Human studies do not offer connection-strength sizing. |
+| Reporting studies | When all study options are selected, **Number of reporting studies** sizes filled dots by the number of distinct papers reporting that connection. It is available for both species, including subcortical areas. |
 | Area details | Hover over a browser dot or click a MATLAB dot for the selected supporting studies and any selected reports of absence. |
 
 ### MATLAB: run the interactive figure
@@ -73,7 +73,7 @@ python -m pip install .
 python -m fst_connectivity --data-dir . --output FST_connectivity_explorer_python.html --no-open
 ```
 
-The [prebuilt wheel](FST_Connectivity/dist/fst_connectivity-0.1.22-py3-none-any.whl) is an alternative to installing from source. It bundles the repository evidence for use outside this folder. See [PYTHON_PACKAGE.md](FST_Connectivity/PYTHON_PACKAGE.md) for more options.
+The [prebuilt wheel](FST_Connectivity/dist/fst_connectivity-0.1.23-py3-none-any.whl) is an alternative to installing from source. It bundles the repository evidence for use outside this folder. See [PYTHON_PACKAGE.md](FST_Connectivity/PYTHON_PACKAGE.md) for more options.
 
 ## Motion stimuli
 

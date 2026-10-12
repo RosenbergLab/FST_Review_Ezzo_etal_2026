@@ -17,7 +17,10 @@ class Element {
     this.style = {};
     this.listeners = {};
     this.className = '';
-    this.classList = {toggle: () => {}};
+    this.classList = {
+      add: token => { this.className += ' ' + token; },
+      toggle: () => {},
+    };
     this.textContent = '';
     this.offsetWidth = 300;
     this.offsetHeight = 120;
@@ -80,6 +83,11 @@ assert.equal(config.macaque.studies.length, 5);
 assert.equal(config.macaque.studies.some(study => study.code === 'Fel91'), false);
 assert.ok(config.macaque.studies.find(study => study.code === 'mixed_tracer')
   .codes.includes('Bar00'));
+const combinedRow = one(macaque, el => el.className === 'study-row has-detail');
+assert.match(one(combinedRow, el => el.className === 'label-text').textContent,
+  /Combined tracer evidence/);
+assert.match(one(combinedRow, el => el.className === 'study-detail').textContent,
+  /Barone et al\. \(2000\)/);
 
 const macStatus = one(macaque, el => el.className === 'status');
 assert.match(macStatus.textContent, /47 connected regions/);
@@ -114,7 +122,7 @@ const macFST = one(macaque, el => el.tag === 'circle' &&
 assert.equal(greyFEF.attributes.stroke, '#A6A6A6');
 assert.equal(blackMT.attributes.stroke, '#000000');
 assert.equal(macFST.attributes.fill, '#000000');
-assert.match(greyFEF._tooltip, /no FST connection in either direction; another reports a connection/);
+assert.match(greyFEF._tooltip, /A study explicitly reports no connection, whereas another reports a connection/);
 assert.match(blackMT._tooltip, /Black dot: no conflict is marked/);
 selectRadio(macaque, macPathway);
 assert.equal(greyFEF.attributes.stroke, '#000000');
@@ -124,6 +132,8 @@ assert.equal(countRadio.disabled, false);
 selectRadio(macaque, countRadio);
 assert.equal(one(macaque, el => el.className === 'legend-title').textContent,
   'Number of studies');
+for (const circle of all(macaque, el => el.tag === 'circle' &&
+  el.style.display !== 'none')) assert.notEqual(circle.attributes.fill, 'none');
 selectRadio(macaque, macColor);
 assert.equal(greyFEF.attributes.stroke, '#A6A6A6');
 selectRadio(macaque, macPathway);
@@ -154,6 +164,10 @@ function assertHumanConnectionDotsOpen() {
       assert.equal(circle.attributes.fill, 'none');
   }
 }
+function assertHumanConnectionDotsFilled() {
+  for (const circle of all(human, el => el.tag === 'circle' &&
+    el.style.display !== 'none')) assert.notEqual(circle.attributes.fill, 'none');
+}
 assertHumanConnectionDotsOpen();
 const pfop = one(human, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === 'PFop');
@@ -178,13 +192,13 @@ const greyPMd = one(human, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === 'PMd');
 assert.equal(greyPMd.attributes.stroke, '#A6A6A6');
 assert.equal(ph.attributes.stroke, '#000000');
-assert.match(greyPMd._tooltip, /no FST connection in either direction; another reports a connection/);
+assert.match(greyPMd._tooltip, /A study explicitly reports no connection, whereas another reports a connection/);
 selectRadio(human, humanPathway);
 assert.equal(ph.attributes.stroke, '#F9F384');
 selectRadio(human, humanCount);
-assertHumanConnectionDotsOpen();
+assertHumanConnectionDotsFilled();
 selectRadio(human, humanColor);
-assertHumanConnectionDotsOpen();
+assertHumanConnectionDotsFilled();
 assert.equal(greyPMd.attributes.stroke, '#A6A6A6');
 selectRadio(human, humanPathway);
 assert.ok(Number(lo.attributes.r) > uniformRadius);
@@ -192,7 +206,7 @@ assert.match(lo._tooltip, /Supporting studies: 2/);
 assert.equal(one(human, el => el.className === 'legend-title').textContent,
   'Number of studies');
 assert.equal(all(human, el => el.className === 'legend-entry').length, 3);
-assert.equal(all(human, el => el.className === 'legend-dot open').length, 3);
+assert.equal(all(human, el => el.className === 'legend-dot open').length, 0);
 one(human, el => el.className === 'clear-button').listeners.click();
 assert.match(humanStatus.textContent, /^0 connected regions/);
 assert.equal(humanCount.disabled, true);
@@ -222,7 +236,7 @@ const activeMarkers = all(macaque, el => el.tag === 'circle')
     circle.attributes['aria-label'] !== 'FST');
 assert.ok(activeMarkers.some(circle => circle.attributes.fill === 'none'));
 assert.ok(activeMarkers.some(circle => circle.attributes.fill !== 'none'));
-const rows = all(macaque, el => el.className === 'study-row');
+const rows = all(macaque, el => el.className.split(' ').includes('study-row'));
 const rowFor = phrase => rows.find(row => all(row, el =>
   el.className === 'label-text' && el.textContent.includes(phrase)).length);
 one(rowFor('Boussaoud'), el => el.className === 'only-button').listeners.click();
@@ -258,7 +272,7 @@ assert.notEqual(bouMarker('MT').style.display, 'none');
 assert.match(bouMarker('MT')._tooltip, /2\.5\/3/);
 assert.match(bouMarker('VIP')._tooltip, /1\.5\/3/);
 assert.match(bouMarker('V3d')._tooltip, /1\/3/);
-one(rowFor('Mixed tracer evidence'), el => el.className === 'only-button').listeners.click();
+one(rowFor('Combined tracer evidence'), el => el.className === 'only-button').listeners.click();
 const v1 = one(macaque, el => el.tag === 'circle' && el.attributes['aria-label'] === 'V1');
 assert.notEqual(v1.style.display, 'none');
 assert.match(v1._tooltip, /Barone et al\. \(2000\)/);
