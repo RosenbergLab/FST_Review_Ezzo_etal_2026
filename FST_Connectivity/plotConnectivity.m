@@ -173,19 +173,6 @@ if species == "macaque" && roi == "FST"
     positiveRow = positiveRow | scoredOut | scoredIn;
 end
 edgeTargets = unique(affiliate(positiveRow & affiliate ~= ""), 'sorted');
-fel91Targets = strings(0, 1);
-if enableStudySelector && species == "macaque"
-    fel91 = readtable(fullfile(speciesDir, 'fel91_fst_connections.csv'), ...
-        'TextType', 'string', 'VariableNamingRule', 'preserve');
-    fromArea = cleanColumn(fel91, "from_area");
-    toArea = cleanColumn(fel91, "to_area");
-    fromArea(fromArea == "V3") = "V3d";
-    toArea(toArea == "V3") = "V3d";
-    fel91Targets = unique([toArea(fromArea == roi); ...
-        fromArea(toArea == roi)], 'sorted');
-    fel91Targets = fel91Targets(ismember(fel91Targets, allLabels));
-end
-edgeTargets = unique([edgeTargets; fel91Targets], 'sorted');
 missingTargets = edgeTargets(~ismember(edgeTargets, allLabels));
 if ~isempty(missingTargets)
     warning('plotConnectivity:MissingAffiliates', ...
@@ -224,21 +211,6 @@ for k = 1:edgeCount
     else
         connectivitystrength(k) = receiveStrength;
     end
-    if evidencecount(k) == 0 && any(fel91Targets == label)
-        % The direct Felleman table can be the sole source for an area.
-        % Keep a direct Felleman edge if no positive CSV report uses its dot.
-        hasOut = any(fromArea == roi & toArea == label);
-        hasIn = any(toArea == roi & fromArea == label);
-        evidencecount(k) = 1;
-        if hasOut && hasIn
-            projections(k) = "bidirectional";
-        elseif hasOut
-            projections(k) = "mainsend";
-        else
-            projections(k) = "mainreceive";
-        end
-        connectivitystrength(k) = "present";
-    end
     if sendCertainty == "conflicting" && receiveCertainty == "conflicting"
         certainty(k) = "conflicting";
     else
@@ -275,8 +247,7 @@ for k = 1:height(nodes)
 end
 nodes.(char(commentColumn)) = comments;
 if options.RemoveUnconnectedNodes
-    % Keep direct Felleman pathways when no CSV report uses their display dot.
-    keepNodes = ismember(allLabels, [edgeTargets; fel91Targets; roi]);
+    keepNodes = ismember(allLabels, [edgeTargets; roi]);
     nodes = nodes(keepNodes, :);
 end
 studyEvents = table(strings(0, 1), strings(0, 1), strings(0, 1), ...
@@ -286,13 +257,9 @@ studyEvents = table(strings(0, 1), strings(0, 1), strings(0, 1), ...
 studies = table(strings(0, 1), strings(0, 1), ...
     'VariableNames', {'code', 'label'});
 if enableStudySelector
-    fel91Path = "";
-    if species == "macaque"
-        fel91Path = fullfile(speciesDir, 'fel91_fst_connections.csv');
-    end
     [studyEvents, studies] = buildStudyEvents(evidence, ...
         cleanColumn(nodes, "label"), ...
-        fullfile(speciesDir, 'citations.txt'), fel91Path);
+        fullfile(speciesDir, 'citations.txt'));
 end
 displayStudies = studies;
 if enableStudySelector
@@ -1090,10 +1057,10 @@ end
 end
 
 function [events, studies] = buildStudyEvents(evidence, availableLabels, ...
-    citationsPath, fel91Path)
-if ~isfile(citationsPath) || (fel91Path ~= "" && ~isfile(fel91Path))
+    citationsPath)
+if ~isfile(citationsPath)
     error('plotConnectivity:MissingStudySource', ...
-        'Study selection is missing citations.txt or a required study source.');
+        'Study selection is missing citations.txt.');
 end
 lines = readlines(citationsPath);
 citationCodes = strings(0, 1);
@@ -1112,15 +1079,11 @@ for k = 1:numel(lines)
         continue
     end
     year = str2double(yearToken{1});
-    if code == "Fel91"
-        author = "Felleman & Van Essen";
+    comma = strfind(char(citation), ',');
+    if isempty(comma)
+        author = citation + " et al.";
     else
-        comma = strfind(char(citation), ',');
-        if isempty(comma)
-            author = citation + " et al.";
-        else
-            author = string(extractBefore(citation, comma(1))) + " et al.";
-        end
+        author = string(extractBefore(citation, comma(1))) + " et al.";
     end
     citationCodes(end+1, 1) = code; %#ok<AGROW>
     citationLabels(end+1, 1) = author + ...
@@ -1214,31 +1177,6 @@ for r = 1:height(evidence)
     end
 end
 
-if fel91Path ~= ""
-    fel = readtable(fel91Path, 'TextType', 'string', ...
-        'VariableNamingRule', 'preserve');
-    fromArea = cleanColumn(fel, "from_area");
-    toArea = cleanColumn(fel, "to_area");
-    fromArea(fromArea == "V3") = "V3d";
-    toArea(toArea == "V3") = "V3d";
-    for r = 1:height(fel)
-        if fromArea(r) == "FST" && ismember(toArea(r), availableLabels)
-            target = toArea(r);
-            direction = "out";
-        elseif toArea(r) == "FST" && ismember(fromArea(r), availableLabels)
-            target = fromArea(r);
-            direction = "in";
-        else
-            continue
-        end
-        eventStudy(end+1, 1) = "Fel91"; %#ok<AGROW>
-        eventTarget(end+1, 1) = target; %#ok<AGROW>
-        eventDirection(end+1, 1) = direction; %#ok<AGROW>
-        eventGrade(end+1, 1) = "present"; %#ok<AGROW>
-        eventType(end+1, 1) = "literature synthesis"; %#ok<AGROW>
-        eventStrength(end+1, 1) = ""; %#ok<AGROW>
-    end
-end
 events = table(eventStudy, eventTarget, eventDirection, eventGrade, ...
     eventType, eventStrength, ...
     'VariableNames', {'study', 'target', 'direction', 'grade', ...
@@ -1256,7 +1194,6 @@ for k = 1:numel(usedCodes)
     methods(methods == "tracer") = "Tracer";
     methods(methods == "inactivation") = "Functional inactivation";
     methods(methods == "functional inactivation") = "Functional inactivation";
-    methods(methods == "literature synthesis") = "Literature synthesis";
     displayLabels(k) = strjoin(methods, ' + ') + ": " + displayLabels(k);
 end
 ordered = table(usedCodes, displayLabels, citationYears(used), ...
@@ -2013,11 +1950,6 @@ for k = 1:numel(state.NodeLabels)
             description = description + newline + ...
                 "Boussaoud et al. (1992) projection: " + projection;
         end
-        if label == "V3d" && any(positive & nodeReports.study == "Fel91")
-            description = description + newline + ...
-                "Felleman & Van Essen (1991) named this pathway V3; " + ...
-                "shown here with V3d.";
-        end
         if conflictColorMode && state.GreyConflictDots(k)
             description = description + newline + ...
                 "Grey dot: at least one study reports no FST connection " + ...
@@ -2089,7 +2021,7 @@ function classes = projectionClasses(events)
 classes = repmat("unspecified", height(events), 1);
 for k = 1:height(events)
     method = lower(events.type(k));
-    if method ~= "tracer" && method ~= "literature synthesis"
+    if method ~= "tracer"
         continue
     end
     direction = events.direction(k);

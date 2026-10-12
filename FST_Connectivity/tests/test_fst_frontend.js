@@ -76,7 +76,8 @@ assert.equal(all(macaque, el => el.tag === 'circle').length, 48);
 assert.equal(all(macaque, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === 'V3').length, 0);
 assert.equal(all(human, el => el.tag === 'circle').length, 56);
-assert.equal(config.macaque.studies.length, 6);
+assert.equal(config.macaque.studies.length, 5);
+assert.equal(config.macaque.studies.some(study => study.code === 'Fel91'), false);
 assert.ok(config.macaque.studies.find(study => study.code === 'mixed_tracer')
   .codes.includes('Bar00'));
 
@@ -128,15 +129,14 @@ assert.equal(greyFEF.attributes.stroke, '#A6A6A6');
 selectRadio(macaque, macPathway);
 const fef = one(macaque, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === 'FEF');
-assert.match(fef._tooltip, /Supporting studies: 4/);
+assert.match(fef._tooltip, /Supporting studies: 3/);
 const pulvinar = one(macaque, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === 'pulvinar');
 assert.match(pulvinar._tooltip, /Supporting studies: 1/);
 const v3d = one(macaque, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === 'V3d');
 assert.equal(v3d.attributes.stroke, '#B3E4F8');
-assert.match(v3d._tooltip, /Supporting studies: 3/);
-assert.match(v3d._tooltip, /named this pathway V3; shown here with V3d/);
+assert.match(v3d._tooltip, /Supporting studies: 2/);
 
 const macSpecies = one(macaque, el => el.className === 'species-choice');
 macSpecies.value = 'human';
@@ -258,9 +258,6 @@ assert.notEqual(bouMarker('MT').style.display, 'none');
 assert.match(bouMarker('MT')._tooltip, /2\.5\/3/);
 assert.match(bouMarker('VIP')._tooltip, /1\.5\/3/);
 assert.match(bouMarker('V3d')._tooltip, /1\/3/);
-one(rowFor('Felleman'), el => el.className === 'only-button').listeners.click();
-assert.notEqual(v3d.style.display, 'none');
-assert.match(v3d._tooltip, /named this pathway V3; shown here with V3d/);
 one(rowFor('Mixed tracer evidence'), el => el.className === 'only-button').listeners.click();
 const v1 = one(macaque, el => el.tag === 'circle' && el.attributes['aria-label'] === 'V1');
 assert.notEqual(v1.style.display, 'none');

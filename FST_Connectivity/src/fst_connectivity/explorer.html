@@ -470,9 +470,6 @@
               : node.display_label + ' → FST';
             description += '\nBoussaoud et al. (1992) projection: ' + direction;
           }
-          if (payload.species === 'macaque' && node.label === 'V3d' &&
-              positive.some(event => event.study === 'Fel91'))
-            description += '\nFelleman & Van Essen (1991) named this pathway V3; shown here with V3d.';
           if (conflictColor) description += node.conflict
             ? '\nGrey dot: at least one study reports no FST connection in either direction; another reports a connection.'
             : '\nBlack dot: no conflict is marked for this area in the paper figure.';

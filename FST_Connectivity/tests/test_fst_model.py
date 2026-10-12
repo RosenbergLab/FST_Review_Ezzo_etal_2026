@@ -107,13 +107,15 @@ class ModelTests(unittest.TestCase):
 
     def test_macaque_study_groups_match_matlab_controls(self):
         groups = {row["code"]: row for row in self.macaque["studies"]}
-        self.assertEqual(len(groups), 6)
+        self.assertEqual(len(groups), 5)
         self.assertEqual(groups["Bou90+Bou92"]["codes"], ["Bou90", "Bou92"])
         self.assertEqual(groups["Bog19+Bog21"]["codes"], ["Bog19", "Bog21"])
         self.assertEqual(groups["mixed_tracer"]["codes"],
                          ["And90", "Sel96", "Fel97", "Bar00", "Ung08"])
         self.assertNotIn("Bar00", groups)
-        self.assertEqual(len(self.macaque["source_studies"]), 12)
+        self.assertEqual(len(self.macaque["source_studies"]), 11)
+        self.assertFalse(any(event["study"] == "Fel91"
+                             for event in self.macaque["events"]))
         self.assertEqual([row["code"] for row in self.human["studies"]],
                          ["Bak18", "Rol23", "Rua25"])
 
@@ -192,16 +194,7 @@ class ModelTests(unittest.TestCase):
                           for event in ungerleider}, {("V4", "out"), ("V4", "in")})
         self.assertTrue(all(event["strengthGrade"] == "" for event in ungerleider))
 
-    def test_fel91_uses_direct_table_three_paths(self):
-        fel91 = [event for event in self.macaque["events"]
-                 if event["study"] == "Fel91"]
-        self.assertEqual({event["target"] for event in fel91},
-                         {"7a", "FEF", "LIP", "MSTd", "MT", "STPp", "TF",
-                          "V2", "V3d", "V3A", "V4", "V4t", "VIP"})
-        self.assertTrue(all(event["grade"] == "present"
-                            and event["strengthGrade"] == "" for event in fel91))
-
-    def test_felleman_v3_and_newer_v3d_share_one_display_dot(self):
+    def test_v3d_evidence_uses_one_dorsal_display_dot(self):
         labels = {node["label"] for node in self.macaque["nodes"]}
         self.assertIn("V3d", labels)
         self.assertNotIn("V3", labels)
@@ -212,18 +205,9 @@ class ModelTests(unittest.TestCase):
                         if event["study"] == "Rua25"}
         self.assertIn("V3d", ruan_targets)
         self.assertNotIn("V3", ruan_targets)
-        fel91_targets = {event["target"] for event in self.macaque["events"]
-                         if event["study"] == "Fel91"}
-        self.assertIn("V3d", fel91_targets)
-        self.assertNotIn("V3", fel91_targets)
         self.assertEqual({event["study"] for event in self.macaque["events"]
                           if event["target"] == "V3d" and event["grade"] != "absent"},
-                         {"Rua25", "Bou90", "Fel91"})
-        with (DATA / "macaque" / "fel91_fst_connections.csv").open(
-                newline="", encoding="utf-8-sig") as stream:
-            raw = list(csv.DictReader(stream))
-        self.assertTrue(any(row["from_area"] == "FST" and
-                            row["to_area"] == "V3" for row in raw))
+                         {"Rua25", "Bou90"})
 
     def test_invalid_species_has_a_clear_error(self):
         with self.assertRaisesRegex(ValueError, "macaque"):

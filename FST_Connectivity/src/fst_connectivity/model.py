@@ -50,7 +50,7 @@ def _numeric_strength(value: str) -> str:
 
 
 def _macaque_display_area(area: str) -> str:
-    """Combine the older V3 pathway with V3d in the macaque FST view."""
+    """Show any legacy V3 evidence at the macaque V3d display dot."""
     return "V3d" if area == "V3" else area
 
 
@@ -72,11 +72,7 @@ def _read_citations(path: Path) -> list[dict[str, str | int]]:
         year_match = YEAR_PATTERN.search(citation)
         if year_match is None:
             continue
-        author = (
-            "Felleman & Van Essen"
-            if code == "Fel91"
-            else citation.split(",", 1)[0] + " et al."
-        )
+        author = citation.split(",", 1)[0] + " et al."
         citations.append(
             {
                 "code": code,
@@ -159,7 +155,6 @@ def _study_events(
     evidence: list[dict[str, str]],
     available_labels: set[str],
     citations: list[dict[str, str | int]],
-    fel91_path: Path | None,
 ) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     known = {str(citation["code"]) for citation in citations}
     events: list[dict[str, str]] = []
@@ -204,27 +199,6 @@ def _study_events(
                     }
                 )
 
-    if fel91_path is not None:
-        for row in _read_csv(fel91_path):
-            source = _macaque_display_area(_value(row, "from_area"))
-            destination = _macaque_display_area(_value(row, "to_area"))
-            if source == "FST" and destination in available_labels:
-                target, direction = destination, "out"
-            elif destination == "FST" and source in available_labels:
-                target, direction = source, "in"
-            else:
-                continue
-            events.append(
-                {
-                    "study": "Fel91",
-                    "target": target,
-                    "direction": direction,
-                    "grade": "present",
-                    "type": "literature synthesis",
-                    "strengthGrade": "",
-                }
-            )
-
     unknown = {event["study"] for event in events} - known
     if unknown:
         raise ValueError(f"Event citations are missing: {', '.join(sorted(unknown))}")
@@ -241,8 +215,7 @@ def _study_events(
         ))
         methods = [
             {"tracer": "Tracer", "inactivation": "Functional inactivation",
-             "functional inactivation": "Functional inactivation",
-             "literature synthesis": "Literature synthesis"}.get(method, method)
+             "functional inactivation": "Functional inactivation"}.get(method, method)
             for method in methods
         ]
         source_studies.append(
@@ -355,17 +328,6 @@ def load_species(species: str, data_dir: Path) -> dict:
         and (_value(row, OUT_GRADE).lower() not in {"", "absent"}
              or _value(row, IN_GRADE).lower() not in {"", "absent"})
     }
-    fel91_path = (species_dir / "fel91_fst_connections.csv"
-                  if species == "macaque" else None)
-    if fel91_path is not None:
-        # Fel91's V3 pathway shares the V3d display dot with newer reports.
-        for row in _read_csv(fel91_path):
-            source = _macaque_display_area(_value(row, "from_area"))
-            destination = _macaque_display_area(_value(row, "to_area"))
-            if source == "FST" and destination in all_labels:
-                edge_targets.add(destination)
-            elif destination == "FST" and source in all_labels:
-                edge_targets.add(source)
     nodes = [
         {
             "id": int(_value(node, "id")),
@@ -381,9 +343,7 @@ def load_species(species: str, data_dir: Path) -> dict:
     ]
     available_labels = {node["label"] for node in nodes}
     citations = _read_citations(species_dir / "citations.txt")
-    events, source_studies = _study_events(
-        evidence, available_labels, citations, fel91_path
-    )
+    events, source_studies = _study_events(evidence, available_labels, citations)
     studies = _group_studies(source_studies, events)
     return {
         "species": species,

@@ -54,12 +54,11 @@ Inside `FST_Connectivity`, the `human/` and `macaque/` folders hold the literatu
 | [human/citations.txt](FST_Connectivity/human/citations.txt), [macaque/citations.txt](FST_Connectivity/macaque/citations.txt) | Full citations for the reference codes in the evidence tables. |
 | [human/abbreviations.csv](FST_Connectivity/human/abbreviations.csv), [macaque/abbreviations.csv](FST_Connectivity/macaque/abbreviations.csv) | Expansions of area abbreviations. |
 | [human/surface_snapshots/veryinflated_lat_white.tif](FST_Connectivity/human/surface_snapshots/veryinflated_lat_white.tif), [macaque/surface_snapshots/veryinflated_lat_white.tif](FST_Connectivity/macaque/surface_snapshots/veryinflated_lat_white.tif) | The TIFF files used as the lateral background in MATLAB. The Python package contains matching PNG backgrounds. |
-| [macaque/fel91_fst_connections.csv](FST_Connectivity/macaque/fel91_fst_connections.csv) | FST pathways transcribed from Felleman and Van Essen (1991). |
 | `<species>/edges.csv`, `<species>/selectnodes.csv` | Generated summaries from MATLAB; edit `evidence.csv` and `nodes.csv` as source data instead. |
 
 The `evidence.xlsm` files are working review spreadsheets. The CSV files are the inputs used to build the figures.
 
-In generated `edges.csv`, `evidencecount` counts positive evidence rows, with a value of 1 for an edge found only in the Felleman (1991) table. The interactive **Number of reporting studies** counts distinct papers, so the two numbers can differ. The edge table's `certainty` requires conflicting reports in both projection directions; the grey/black dot view uses the paper figure's study-level conflict marking.
+In generated `edges.csv`, `evidencecount` counts positive evidence rows. The interactive **Number of reporting studies** counts distinct papers, so the two numbers can differ. The edge table's `certainty` requires conflicting reports in both projection directions; the grey/black dot view uses the paper figure's study-level conflict marking.
 
 For Boussaoud et al. (1990), four extra columns in `macaque/evidence.csv` give the median positive tracer-label score (1–3) and positive/evaluable case count for each projection direction. `+ to ++` is 1.5 and `++ to +++` is 2.5. The numeric score sets dot size for that study; the original descriptive evidence remains in its existing columns. Areas without a single score in the supplied Table 1 summary, and Boussaoud et al. (1992), remain open in strength mode.
 
@@ -73,7 +72,7 @@ python -m pip install .
 python -m fst_connectivity --data-dir . --output FST_connectivity_explorer_python.html --no-open
 ```
 
-The [prebuilt wheel](FST_Connectivity/dist/fst_connectivity-0.1.21-py3-none-any.whl) is an alternative to installing from source. It bundles the repository evidence for use outside this folder. See [PYTHON_PACKAGE.md](FST_Connectivity/PYTHON_PACKAGE.md) for more options.
+The [prebuilt wheel](FST_Connectivity/dist/fst_connectivity-0.1.22-py3-none-any.whl) is an alternative to installing from source. It bundles the repository evidence for use outside this folder. See [PYTHON_PACKAGE.md](FST_Connectivity/PYTHON_PACKAGE.md) for more options.
 
 ## Motion stimuli
 
