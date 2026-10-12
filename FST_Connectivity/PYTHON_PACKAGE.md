@@ -1,6 +1,6 @@
 # FST connectivity for Python
 
-This package opens a macaque and human FST connectivity explorer in a browser. It includes the curated evidence tables, study citations, schematic paper coordinates, and lateral brain backgrounds. Dot positions are not exact anatomical coordinates. It has no runtime plotting dependencies and does not require MATLAB.
+This package opens a macaque and human FST connectivity explorer in a browser. 
 
 ## Check Python
 
@@ -11,7 +11,7 @@ The ready-made [browser figure](FST_connectivity_explorer_python.html) opens wit
 | Windows PowerShell | `py --version` (or `python --version` if `py` is unavailable) |
 | macOS or Linux terminal | `python3 --version` |
 
-If Python is missing or older than 3.10, install a currently supported release from [Python.org](https://www.python.org/downloads/) on Windows or macOS, or through your Linux distribution. Open a new terminal and check again. In the commands below, use the command that showed the correct version (`py`, `python3`, or `python`) in place of `python`.
+If Python is missing or older than 3.10, install a currently supported release from [Python.org](https://www.python.org/downloads/).
 
 ## Install and open
 
