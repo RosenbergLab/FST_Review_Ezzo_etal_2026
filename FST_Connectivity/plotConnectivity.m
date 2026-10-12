@@ -1244,8 +1244,15 @@ for k = 1:height(grouped)
         ~any(ismember(grouped.codes{k}, gradedCodes));
 end
 if any(ungraded)
-    sourceCodes = vertcat(grouped.codes{ungraded});
-    sourceLabels = regexprep(grouped.label(ungraded), '^Tracer: ', '');
+    % These scored tracer papers remain selectable on their own, but also
+    % contribute to the broad combined tracer view. Keep the paper codes
+    % unique because an individual and the combined choice can overlap.
+    separatelySelectable = ["Bou90"; "Bou92"; "Mark14"];
+    includedCodes = [vertcat(grouped.codes{ungraded}); ...
+        separatelySelectable(ismember(separatelySelectable, studies.code))];
+    sourceCodes = studies.code(ismember(studies.code, includedCodes));
+    sourceLabels = regexprep(studies.label( ...
+        ismember(studies.code, sourceCodes)), '^Tracer: ', '');
     row = grouped(find(ungraded, 1), :);
     row.code = "mixed_tracer";
     row.label = "Combined tracer evidence";
@@ -1605,18 +1612,29 @@ for k = 1:height(studies)
         'Position', [430, y, 55, 25], 'String', 'Only', ...
         'Callback', @(src, ~) selectOnlyStudy(ancestor(src, 'figure'), k));
 end
-ungradedDetail = studies.detail(studies.code == "mixed_tracer");
-if ~isempty(ungradedDetail)
+combinedDetail = studies.detail(studies.code == "mixed_tracer");
+if ~isempty(combinedDetail)
     combinedIndex = find(studies.code == "mixed_tracer", 1);
     combinedY = firstY - (combinedIndex - 1) * rowHeight;
-    detailHeight = 17 * numel(splitlines(ungradedDetail)) + 4;
-    uicontrol('Parent', panel, 'Style', 'text', ...
-        'Position', [22, combinedY - detailHeight, ...
-        panelWidth - 38, detailHeight], ...
-        'String', char(ungradedDetail), 'Tag', 'CombinedTracerStudyList', ...
-        'FontSize', 8, ...
-        'HorizontalAlignment', 'left', ...
-        'BackgroundColor', [0.975, 0.985, 1]);
+    paperNames = splitlines(string(combinedDetail));
+    paperNames(paperNames == "") = [];
+    namesPerColumn = ceil(numel(paperNames) / 2);
+    detailHeight = 16 * namesPerColumn + 4;
+    for column = 1:2
+        indices = (column - 1) * namesPerColumn + ...
+            (1:namesPerColumn);
+        indices(indices > numel(paperNames)) = [];
+        if isempty(indices)
+            continue
+        end
+        uicontrol('Parent', panel, 'Style', 'text', ...
+            'Position', [22 + (column - 1) * 230, ...
+            combinedY - detailHeight, 226, detailHeight], ...
+            'String', char(strjoin(paperNames(indices), newline)), ...
+            'Tag', 'CombinedTracerStudyList', 'FontSize', 8, ...
+            'HorizontalAlignment', 'left', ...
+            'BackgroundColor', [0.975, 0.985, 1]);
+    end
 end
 [colorGroup, pathwayButton, conflictButton, conflictCaption] = ...
     addConflictColorControls(panel, [12, 355, panelWidth - 24, 120]);
@@ -1710,7 +1728,7 @@ conflictButton = uicontrol('Parent', group, 'Style', 'radiobutton', ...
     'Position', [10, 45, 440, 24], ...
     'String', 'Conflicting studies', ...
     'Tag', 'conflict', ...
-    'TooltipString', 'Available with Select all.', ...
+    'TooltipString', 'Available when all source papers are included.', ...
     'BackgroundColor', [0.975, 0.985, 1]);
 caption = uicontrol('Parent', group, 'Style', 'text', ...
     'Position', [8, 2, 460, 40], ...
@@ -1758,6 +1776,7 @@ selectedCodes = strings(0, 1);
 for k = find(checked(:))'
     selectedCodes = [selectedCodes; state.Studies.codes{k}(:)]; %#ok<AGROW>
 end
+selectedCodes = unique(selectedCodes, 'stable');
 reports = state.Events(ismember(state.Events.study, selectedCodes), :);
 reportClasses = projectionClasses(reports);
 reportScores = arrayfun(@gradedStrengthScore, reports.strengthGrade);
@@ -1772,14 +1791,16 @@ for modeIndex = 1:numel(strengthModes)
     sources = unique(reports.study(eligibleStrength & ...
         reportClasses == strengthModes(modeIndex)));
     availableSources{modeIndex} = sources;
-    canSizeByMode(modeIndex) = nnz(checked) == 1 && numel(sources) == 1;
+    canSizeByMode(modeIndex) = nnz(checked) == 1 && ...
+        state.Studies.code(checked) ~= "mixed_tracer" && ...
+        numel(sources) == 1;
     if canSizeByMode(modeIndex)
         state.StrengthButtons(modeIndex).Enable = 'on';
     else
         state.StrengthButtons(modeIndex).Enable = 'off';
     end
 end
-canSizeByCount = ~isempty(checked) && all(checked);
+canSizeByCount = all(ismember(state.SourceStudies.code, selectedCodes));
 if canSizeByCount
     state.ConflictButton.Enable = 'on';
 else
@@ -1827,21 +1848,17 @@ if sizeMode == "studycount"
     state.CountLegend.Visible = 'on';
     state.Note.String = '';
 else
-    state.StrengthLegend.Visible = 'on';
-    if numericMode
-        state.StrengthLegend.Visible = 'off';
-    end
+    state.StrengthLegend.Visible = 'off';
     state.NumericStrengthLegend.Visible = 'off';
-    if numericMode
-        state.NumericStrengthLegend.Visible = 'on';
-    end
     state.CountLegend.Visible = 'off';
     if sizeMode == "uniform"
         state.Note.String = '';
     elseif numericMode
+        state.NumericStrengthLegend.Visible = 'on';
         state.Note.String = sprintf(['1990 tracer score: 1–3, with intermediate sizes.\n' ...
             '1992 subcortical dots: selected direction only; open = ungraded.']);
     else
+        state.StrengthLegend.Visible = 'on';
         state.Note.String = sprintf(['Dots remain visible for all selected studies.\n' ...
             'Filled dots show graded connection strength.']);
     end
@@ -2179,11 +2196,12 @@ uicontrol('Parent', panel, 'Style', 'text', ...
     'Position', [12, plotHeight - 245, panelWidth - 24, 78], ...
     'String', note, 'HorizontalAlignment', 'left', ...
     'BackgroundColor', [0.975, 0.985, 1]);
-addDotSizeLegend(panel, ...
+sizeLegend = addDotSizeLegend(panel, ...
     [12, plotHeight - 400, panelWidth - 24, 135], true);
 state = struct('SizeGroup', group, 'NodeHandles', nodeHandles, ...
     'TextHandles', textHandles, 'NodeY', nodeY, ...
     'StrengthSize', strengthSize, 'Scale', scale, ...
+    'SizeLegend', sizeLegend, ...
     'SeedIndex', find(roi == "FST" & nodeLabels == "FST", 1));
 setappdata(fig, 'PaperSizeState', state);
 group.SelectionChangedFcn = @(src, ~) refreshPaperSizeMode(ancestor(src, 'figure'));
@@ -2294,8 +2312,10 @@ state = getappdata(fig, 'PaperSizeState');
 mode = string(state.SizeGroup.SelectedObject.Tag);
 if mode == "uniform"
     sizes = 9 * ones(size(state.StrengthSize));
+    state.SizeLegend.Visible = 'off';
 else
     sizes = state.StrengthSize;
+    state.SizeLegend.Visible = 'on';
 end
 for k = 1:numel(state.NodeHandles)
     if ~isempty(state.SeedIndex) && k == state.SeedIndex

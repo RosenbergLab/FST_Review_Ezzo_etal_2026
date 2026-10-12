@@ -274,14 +274,21 @@ def _group_studies(
         if source_types == {"tracer"} and not (codes & graded_codes):
             ungraded_indices.append(index)
     if ungraded_indices:
-        combined_codes = [
-            code for index in ungraded_indices for code in grouped[index]["codes"]
+        # This broad option also contains the graded Boussaoud and Markov
+        # papers. Their individual choices remain available for strength
+        # sizing; overlapping choices still refer to the same source papers.
+        tracer_codes = {
+            event["study"] for event in events if event["type"] == "tracer"
+        }
+        combined_sources = [
+            study for study in source_studies if study["code"] in tracer_codes
         ]
-        # The group title supplies the method, so keep constituent names
-        # concise while preserving method prefixes on other study choices.
+        combined_codes = [str(study["code"]) for study in combined_sources]
+        # The group title supplies the method, so list each paper once without
+        # repeating its Tracer prefix.
         combined_detail = "\n".join(
-            str(grouped[index]["label"]).removeprefix("Tracer: ")
-            for index in ungraded_indices
+            str(study["label"]).removeprefix("Tracer: ")
+            for study in combined_sources
         )
         grouped = [row for index, row in enumerate(grouped)
                    if index not in ungraded_indices]

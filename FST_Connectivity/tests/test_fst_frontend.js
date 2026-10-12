@@ -82,6 +82,7 @@ assert.ok(macSizeField.children.indexOf(macLegend) <
   macSizeField.children.indexOf(macGuidance));
 assert.notEqual(macGuidance.style.display, 'none');
 assert.equal(one(macSizeField, el => el.className === 'size-note').textContent, '');
+assert.equal(macLegend.style.display, 'none');
 for (const root of [macaque, human]) {
   assert.equal(one(root, el => el.className === 'color-note').textContent,
     'Black/Grey. Grey: A study explicitly reports no connection, whereas another reports a connection.');
@@ -115,16 +116,19 @@ assert.equal(config.macaque.studies.length, 5);
 assert.equal(config.macaque.studies.some(study => study.code === 'Fel91'), false);
 assert.ok(config.macaque.studies.find(study => study.code === 'mixed_tracer')
   .codes.includes('Bar00'));
+assert.match(html, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
 const combinedRow = one(macaque, el => el.className === 'study-row has-detail');
 assert.match(one(combinedRow, el => el.className === 'label-text').textContent,
   /Combined tracer evidence/);
-assert.equal(one(combinedRow, el => el.className === 'study-detail').textContent,
-  ['Andersen et al. (1990)', 'Seltzer et al. (1996)',
+assert.deepEqual(one(combinedRow, el => el.className === 'study-detail')
+  .children.map(item => item.textContent),
+  ['Andersen et al. (1990)', 'Boussaoud et al. (1990)',
+   'Boussaoud et al. (1992)', 'Seltzer et al. (1996)',
    'Felleman et al. (1997)', 'Barone et al. (2000)',
-   'Ungerleider et al. (2008)'].join('\n'));
+   'Ungerleider et al. (2008)', 'Markov et al. (2014)']);
 assert.deepEqual(Array.from(config.macaque.studies.find(study =>
   study.code === 'mixed_tracer').codes),
-  ['And90', 'Sel96', 'Fel97', 'Bar00', 'Ung08']);
+  ['And90', 'Bou90', 'Bou92', 'Sel96', 'Fel97', 'Bar00', 'Ung08', 'Mark14']);
 
 const macStatus = one(macaque, el => el.className === 'status');
 assert.match(macStatus.textContent, /47 connected regions/);
@@ -137,6 +141,7 @@ for (const circle of all(macaque, el => el.tag === 'circle')) {
 const macClear = one(macaque, el => el.className === 'clear-button');
 macClear.listeners.click();
 assert.match(macStatus.textContent, /^0 connected regions/);
+assert.equal(macLegend.style.display, 'none');
 const visibleAfterClear = all(macaque, el => el.tag === 'circle')
   .filter(circle => circle.style.display !== 'none');
 assert.equal(visibleAfterClear.length, 1);
@@ -145,6 +150,23 @@ assert.equal(visibleAfterClear[0].attributes['aria-label'], 'FST');
 const macAll = one(macaque, el => el.className === 'all-button');
 macAll.listeners.click();
 assert.match(macStatus.textContent, /47 connected regions/);
+assert.match(macStatus.textContent, /\(11 papers\)/);
+assert.equal(macLegend.style.display, 'none');
+const macRows = all(macaque, el => el.className.split(' ').includes('study-row'));
+const macRowFor = phrase => macRows.find(row => all(row, el =>
+  el.className === 'label-text' && el.textContent.includes(phrase)).length);
+for (const name of ['Boussaoud', 'Markov']) {
+  const row = macRowFor(name);
+  one(row, el => el.tag === 'input' && el.type === 'checkbox').checked = false;
+}
+one(macRowFor('Markov'), el => el.tag === 'input' && el.type === 'checkbox')
+  .listeners.change();
+assert.match(macStatus.textContent, /\(11 papers\)/);
+assert.equal(one(macaque, el => el.tag === 'input' && el.value === 'studycount').disabled,
+  false);
+assert.equal(one(macaque, el => el.tag === 'input' && el.value === 'conflict').disabled,
+  false);
+macAll.listeners.click();
 const macColor = one(macaque, el => el.tag === 'input' && el.value === 'conflict');
 const macPathway = one(macaque, el => el.tag === 'input' && el.value === 'pathway');
 assert.equal(macColor.disabled, false);
@@ -169,6 +191,7 @@ assert.equal(blackMT.attributes.stroke, '#B3E4F8');
 const countRadio = one(macaque, el => el.tag === 'input' && el.value === 'studycount');
 assert.equal(countRadio.disabled, false);
 selectRadio(macaque, countRadio);
+assert.equal(macLegend.style.display, '');
 assert.notEqual(macGuidance.style.display, 'none');
 assert.deepEqual(areaLabelPositions(macaque), macaqueLabels);
 assert.equal(one(macaque, el => el.className === 'legend-title').textContent,
@@ -301,6 +324,7 @@ const rowFor = phrase => rows.find(row => all(row, el =>
 one(rowFor('Boussaoud'), el => el.className === 'only-button').listeners.click();
 const bouUniform = one(macaque, el => el.tag === 'input' && el.value === 'uniform');
 selectRadio(macaque, bouUniform);
+assert.equal(macLegend.style.display, 'none');
 const bouMarker = name => one(macaque, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === (name === 'basalfore' ? 'basal forebrain' : name));
 const subcortical = ['TRN', 'pulvinar', 'claustrum', 'striatum',
@@ -314,6 +338,7 @@ assert.match(bouMarker('pulvinar')._tooltip, /FST ↔ pulvinar/);
 const efferent = one(macaque, el => el.tag === 'input' && el.value === 'efferent');
 assert.equal(efferent.disabled, false);
 selectRadio(macaque, efferent);
+assert.equal(macLegend.style.display, '');
 assert.deepEqual(areaLabelPositions(macaque), macaqueLabels);
 assert.equal(one(macaque, el => el.className === 'legend-title').textContent,
   'Tracer score (1–3)');
@@ -339,6 +364,11 @@ assert.match(bouMarker('MT')._tooltip, /2\.5\/3/);
 assert.match(bouMarker('VIP')._tooltip, /1\.5\/3/);
 assert.match(bouMarker('V3d')._tooltip, /1\/3/);
 one(rowFor('Combined tracer evidence'), el => el.className === 'only-button').listeners.click();
+assert.match(macStatus.textContent, /\(8 papers\)/);
+for (const key of ['afferent', 'efferent', 'unspecified'])
+  assert.equal(one(macaque, el => el.tag === 'input' && el.value === key).disabled,
+    true);
+assert.equal(macLegend.style.display, 'none');
 const v1 = one(macaque, el => el.tag === 'circle' && el.attributes['aria-label'] === 'V1');
 assert.notEqual(v1.style.display, 'none');
 assert.match(v1._tooltip, /Barone et al\. \(2000\)/);

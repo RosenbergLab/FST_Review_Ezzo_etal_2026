@@ -111,7 +111,9 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(groups["Bou90+Bou92"]["codes"], ["Bou90", "Bou92"])
         self.assertEqual(groups["Bog19+Bog21"]["codes"], ["Bog19", "Bog21"])
         self.assertEqual(groups["mixed_tracer"]["codes"],
-                         ["And90", "Sel96", "Fel97", "Bar00", "Ung08"])
+                         ["And90", "Bou90", "Bou92", "Sel96", "Fel97",
+                          "Bar00", "Ung08", "Mark14"])
+        self.assertEqual(groups["Mark14"]["codes"], ["Mark14"])
         self.assertNotIn("Bar00", groups)
         self.assertEqual(len(self.macaque["source_studies"]), 11)
         self.assertFalse(any(event["study"] == "Fel91"
@@ -124,14 +126,26 @@ class ModelTests(unittest.TestCase):
                         if row["code"] == "mixed_tracer")
         self.assertEqual(combined["label"], "Combined tracer evidence")
         self.assertEqual(combined["codes"],
-                         ["And90", "Sel96", "Fel97", "Bar00", "Ung08"])
+                         ["And90", "Bou90", "Bou92", "Sel96", "Fel97",
+                          "Bar00", "Ung08", "Mark14"])
         self.assertEqual(combined["detail"], "\n".join([
             "Andersen et al. (1990)",
+            "Boussaoud et al. (1990)",
+            "Boussaoud et al. (1992)",
             "Seltzer et al. (1996)",
             "Felleman et al. (1997)",
             "Barone et al. (2000)",
             "Ungerleider et al. (2008)",
+            "Markov et al. (2014)",
         ]))
+        # Individual strength selections and the broad tracer selection may
+        # overlap, but they represent the same eight source papers.
+        selected = set(combined["codes"])
+        selected.update(next(row for row in self.macaque["studies"]
+                             if row["code"] == "Bou90+Bou92")["codes"])
+        selected.update(next(row for row in self.macaque["studies"]
+                             if row["code"] == "Mark14")["codes"])
+        self.assertEqual(len(selected), 8)
         # Paper labels still carry their method outside this combined list.
         self.assertTrue(next(row for row in self.macaque["source_studies"]
                              if row["code"] == "Bar00")["label"].startswith("Tracer: "))
