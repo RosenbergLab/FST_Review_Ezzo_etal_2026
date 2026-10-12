@@ -79,9 +79,6 @@
     .size-guidance { margin: 8px 0 0; }
     .status { position: absolute; top: 751px; left: 12px; right: 12px;
       min-height: 40px; font-weight: 600; }
-    .human-note { position: absolute; top: 226px; left: 12px; right: 12px;
-      line-height: 1.25; }
-    .human .status { top: 290px; }
     .human .color-group { top: 341px; height: 84px; }
     .human .size-group { top: 438px; height: 222px; }
     #tooltip { position: fixed; z-index: 20; display: none; pointer-events: none;
@@ -346,8 +343,6 @@
         htmlElement('div', 'size-guidance', field,
           'Select one study to size dots by connection strength.');
       } else {
-        htmlElement('div', 'human-note', panel,
-          'Choose studies to show their FST connections.');
         const field = htmlElement('fieldset', 'size-group', panel);
         htmlElement('legend', '', field, 'Dot size');
         for (const [mode, title] of [
@@ -425,9 +420,8 @@
           mode = 'uniform';
         }
         controls.legend.legend.style.display = mode === 'studycount' ? '' : 'none';
-        controls.sizeNote.textContent = mode === 'studycount'
-          ? 'Baker et al. (2018) counts once across methods.'
-          : countEnabled ? '' : 'Select all to size them by number of studies.';
+        controls.sizeNote.textContent = countEnabled
+          ? '' : 'Select all to size them by number of studies.';
         if (mode === 'studycount') updateLegend(view, true);
       }
       const directionFilter = payload.species === 'macaque' &&
