@@ -16,7 +16,7 @@ Although the figure focuses on FST, the accompanying evidence tables also cover 
 
 | Option | How to use it |
 | --- | --- |
-| **Browser — easiest** | Download [FST_connectivity_explorer_python.html](FST_connectivity_explorer_python.html) and open it in a browser. It includes both species, the brain images, and the evidence in one offline file. **No Python or MATLAB installation is needed.** |
+| **Browser — easiest** | Download [FST_connectivity_explorer_python.html](FST_connectivity_explorer_python.html) and open it in a browser. **No Python or MATLAB installation is needed.** |
 | **MATLAB** | Set MATLAB's current folder to this repository and open [FST_connectivity_explorer.fig](FST_connectivity_explorer.fig). Its **Species** menu switches between macaque and human in one window.|
 | **Python package** | Use the package to generate your own browser file. See the [Python package guide](PYTHON_PACKAGE.md) for installation, command-line use, and the Python API. |
 
