@@ -17,7 +17,7 @@ Although the figure focuses on FST, the accompanying evidence tables also cover 
 | Option | How to use it |
 | --- | --- |
 | **Browser — easiest** | Download [FST_connectivity_explorer_python.html](FST_Connectivity/FST_connectivity_explorer_python.html) and open it in a browser. **No Python or MATLAB installation is needed.** |
-| **MATLAB** | Set MATLAB's current folder to `FST_Connectivity` and open [FST_connectivity_explorer.fig](FST_Connectivity/FST_connectivity_explorer.fig). |
+| **MATLAB** | Set MATLAB's current folder to `FST_Connectivity` and run `plotConnectivity`. The **Species** menu switches between macaque and human in the same window. |
 | **Python package** | Use the package to generate your own browser file. See the [Python package guide](FST_Connectivity/PYTHON_PACKAGE.md) for installation, command-line use, and the Python API. |
 
 ### Read the figure
@@ -31,16 +31,15 @@ Although the figure focuses on FST, the accompanying evidence tables also cover 
 | Reporting studies | When all study options are selected, **Number of reporting studies** sizes a dot by the number of distinct papers reporting that connection. It is available for both species. |
 | Area details | Hover over a browser dot or click a MATLAB dot for the selected supporting studies and any selected reports of absence. |
 
-### MATLAB: open or rebuild
+### MATLAB: run the interactive figure
 
-To use the saved interactive figure, set MATLAB's current folder to `FST_Connectivity` and open [FST_connectivity_explorer.fig](FST_Connectivity/FST_connectivity_explorer.fig). To rebuild a species view from the current CSV files, run:
+Set MATLAB's current folder to `FST_Connectivity`, then run:
 
 ```matlab
-plotConnectivity(Species="macaque");
-plotConnectivity(Species="human");
+plotConnectivity;
 ```
 
-Each call saves a species-named `.fig` with the menu to switch between both species, plus a `.pdf` showing the selected species. Only [FST_connectivity_explorer.fig](FST_Connectivity/FST_connectivity_explorer.fig) is distributed as a prebuilt MATLAB figure. The calls also update `<species>/edges.csv` and `<species>/selectnodes.csv` inside `FST_Connectivity`, which are generated tables. Use `WriteTables=false` to rebuild the figures without rewriting those tables. The source code is [plotConnectivity.m](FST_Connectivity/plotConnectivity.m), with display positions in [paperConnectivityLayout.m](FST_Connectivity/paperConnectivityLayout.m) and [paperHumanConnectivityLayout.m](FST_Connectivity/paperHumanConnectivityLayout.m).
+The human view opens first; choose **Macaque** from the **Species** menu to switch views. To start with macaque, run `plotConnectivity(Species="macaque")`. The function reads the current CSV files and opens the interactive plot without writing new files. To export a PDF or regenerate `<species>/edges.csv` and `<species>/selectnodes.csv`, explicitly set `ExportPDF=true` or `WriteTables=true`. The source code is [plotConnectivity.m](FST_Connectivity/plotConnectivity.m), with display positions in [paperConnectivityLayout.m](FST_Connectivity/paperConnectivityLayout.m) and [paperHumanConnectivityLayout.m](FST_Connectivity/paperHumanConnectivityLayout.m).
 
 ### Evidence and source files
 
@@ -54,9 +53,9 @@ Inside `FST_Connectivity`, the `human/` and `macaque/` folders hold the literatu
 | [human/citations.txt](FST_Connectivity/human/citations.txt), [macaque/citations.txt](FST_Connectivity/macaque/citations.txt) | Full citations for the reference codes in the evidence tables. |
 | [human/abbreviations.csv](FST_Connectivity/human/abbreviations.csv), [macaque/abbreviations.csv](FST_Connectivity/macaque/abbreviations.csv) | Expansions of area abbreviations. |
 | [human/surface_snapshots/veryinflated_lat_white.tif](FST_Connectivity/human/surface_snapshots/veryinflated_lat_white.tif), [macaque/surface_snapshots/veryinflated_lat_white.tif](FST_Connectivity/macaque/surface_snapshots/veryinflated_lat_white.tif) | The TIFF files used as the lateral background in MATLAB. The Python package contains matching PNG backgrounds. |
-| `<species>/edges.csv`, `<species>/selectnodes.csv` | Generated summaries from MATLAB; edit `evidence.csv` and `nodes.csv` as source data instead. |
+| `<species>/edges.csv`, `<species>/selectnodes.csv` | Existing MATLAB-generated summaries. Regenerate them with `WriteTables=true`; edit `evidence.csv` and `nodes.csv` as source data instead. |
 
-The `evidence.xlsm` files are working review spreadsheets. The CSV files are the inputs used to build the figures.
+The `evidence.xlsm` files are working review spreadsheets. The `evidence.csv` and `nodes.csv` files are the inputs used to build the figures.
 
 In generated `edges.csv`, `evidencecount` counts positive evidence rows. The interactive **Number of reporting studies** counts distinct papers, so the two numbers can differ. The edge table's `certainty` requires conflicting reports in both projection directions; the grey/black dot view uses the paper figure's study-level conflict marking.
 

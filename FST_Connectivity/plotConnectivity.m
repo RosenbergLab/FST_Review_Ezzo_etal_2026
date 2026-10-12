@@ -5,10 +5,10 @@ function result = plotConnectivity(options)
 %
 %   RESULT = plotConnectivity(DataPath=ROOT, Species="human", MainROI="FST", ...)
 %   reads ROOT/<species>/evidence.csv and nodes.csv. By default ROOT is the
-%   folder containing this function. OutputDir defaults to ROOT. The function
-%   writes <OutputDir>/<species>/edges.csv and selectnodes.csv, plus a MATLAB
-%   .fig and PDF. Browser HTML is distributed separately; ExportHTML only
-%   warns because MATLAB HTML templates are no longer included.
+%   folder containing this function. The figure opens without saving files.
+%   OutputDir defaults to ROOT when WriteTables, SaveFigure, or ExportPDF is
+%   requested explicitly. Browser HTML is distributed separately; ExportHTML
+%   only warns because MATLAB HTML templates are no longer included.
 %   For macaque and human FST, StudySelector=true adds study controls and a
 %   species menu that switches views in the same MATLAB figure window.
 %   Study checkboxes control which reports are shown. The dot-size selector
@@ -49,10 +49,10 @@ arguments
     options.Medial (1,1) logical = true
     options.RemoveUnconnectedNodes (1,1) logical = true
     options.StudySelector (1,1) logical = true
-    options.ExportPDF (1,1) logical = true
+    options.ExportPDF (1,1) logical = false
     options.ExportHTML (1,1) logical = false
-    options.SaveFigure (1,1) logical = true
-    options.WriteTables (1,1) logical = true
+    options.SaveFigure (1,1) logical = false
+    options.WriteTables (1,1) logical = false
     options.Visible (1,1) string = "on"
     options.ReuseFigure = []
     options.PreloadSpecies (1,1) logical = true

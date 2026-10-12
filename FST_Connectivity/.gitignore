@@ -1,5 +1,6 @@
 # generated figure exports
 *.pdf
+FST_connectivity_explorer.fig
 human_FST_paper_lateral.fig
 macaque_FST_paper_lateral.fig
 human_FST_displaybrain1.fig

@@ -25,13 +25,14 @@ mkdir(outputDir);
 priorFigureCount = numel(findall(groot, 'Type', 'figure'));
 
 result = plotConnectivity(DataPath=string(dataDir), ...
-    OutputDir=string(outputDir), Species="human", MainROI="FST", ...
-    NodesOnly=false, StudySelector=true, WriteTables=false, ...
-    ExportPDF=false, SaveFigure=false, Visible="off");
+    OutputDir=string(outputDir), NodesOnly=false, Visible="off");
 fig = result.Figure;
 figureCleanup = onCleanup(@() closeFigureIfValid(fig)); %#ok<NASGU>
 assert(isgraphics(fig, 'figure'));
 assert(numel(findall(groot, 'Type', 'figure')) == priorFigureCount + 1);
+assert(result.FigurePath == "" && result.PDFPath == "", ...
+    'A default call should not save a FIG or PDF.');
+assertNoOutputFiles(outputDir);
 originalPosition = fig.Position;
 assert(isequal(originalPosition(3:4), [1835 820]), ...
     'Both species must use the same 1835-by-820 window.');
@@ -81,20 +82,10 @@ switchSpecies(fig, 1);
 assert(all(arrayfun(@(h) h.Value == 0, mac.CheckBoxes)), ...
     'Macaque study selection was lost while its view was hidden.');
 
-% The saved FIG must retain both views and their working switch callbacks.
-savedFigurePath = fullfile(outputDir, 'species_switch_roundtrip.fig');
-savefig(fig, savedFigurePath);
-reopened = openfig(savedFigurePath, 'invisible');
-reopenedCleanup = onCleanup(@() closeFigureIfValid(reopened)); %#ok<NASGU>
-reopenedCache = verifyCache(reopened);
-verifyActiveView(reopened, reopenedCache, "macaque");
-savedPosition = reopened.Position;
-switchSpecies(reopened, 2);
-verifySwitch(reopened, reopenedCache, savedPosition, "human", ...
-    priorFigureCount + 1);
-verifyHumanFigure(reopened);
+% A species switch also must not write figure exports or summary tables.
+assertNoOutputFiles(outputDir);
 
-% Unsupported projection labels cannot inflate the exported edge counts.
+% Unsupported projection labels cannot inflate the computed edge counts.
 macaqueResult = plotConnectivity(DataPath=string(dataDir), ...
     OutputDir=string(outputDir), Species="macaque", MainROI="FST", ...
     NodesOnly=true, StudySelector=true, WriteTables=false, ...
@@ -113,9 +104,17 @@ assert(height(v3dEdge) == 1 && v3dEdge.evidencecount == 2, ...
 close(macaqueResult.Figure);
 
 fprintf(['PASS: LO1-3, matching 1835-by-820 windows, centered human axes, ' ...
-    'cached same-figure switches, retained study filters, saved FIG, ' ...
+    'cached same-figure switches, retained study filters, no default exports, ' ...
     'and no panel letters.\n']);
 fprintf('Temporary output: %s\n', outputDir);
+
+function assertNoOutputFiles(outputDir)
+contents = dir(outputDir);
+names = string({contents.name});
+contents = contents(~ismember(names, [".", ".."]));
+assert(isempty(contents), ...
+    'Plotting and switching species should not create output files.');
+end
 
 function cache = verifyCache(fig)
 cache = getappdata(fig, 'ConnectivityViewCache');
