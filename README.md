@@ -5,7 +5,7 @@ This repository provides the two resources described in the paper:
 1. [Interactive connectivity figure for macaques and humans](FST_Connectivity/)
 2. [Four GIFs of structure-from-motion stimuli](MotionStimuli/)
 
-## CorticalConnectivity
+## FST Connectivity
 
 This interactive connectivity figure brings together published structural and functional evidence on area **FST** in macaques and humans from anatomical tracer studies, DTI tractography, resting-state fMRI, and functional inactivation. Dots on the lateral brain views position represent areas schematically. Readers can choose to check visual pathway assignments, supporting studies, connection-strength grades where available, the number of studies reporting each connection, and conflicting findings. 
 
