@@ -10,6 +10,7 @@ assert.equal(html.includes('1990 tracer score: 1–3, with intermediate sizes.')
 assert.equal(html.includes('1992 subcortical dots: selected direction only; open = no connection strength.'), false);
 assert.equal(html.includes('Choose studies to show their FST connections.'), false);
 assert.equal(html.includes('Baker et al. (2018) counts once across methods.'), false);
+assert.equal(html.includes('Select one study to size dots by connection strength.'), false);
 assert.equal(html.includes('.human .status'), false);
 const payload = html.match(/<script id="connectivity-data"[^>]*>([\s\S]*?)<\/script>/)[1];
 const config = JSON.parse(payload);
@@ -80,12 +81,7 @@ assert.equal(frame.children.length, 2);
 const [macaque, human] = frame.children;
 const macSizeField = one(macaque, el => el.className === 'size-group');
 const macLegend = one(macSizeField, el => el.className === 'legend');
-const macGuidance = one(macSizeField, el => el.className === 'size-guidance');
-assert.equal(macGuidance.textContent,
-  'Select one study to size dots by connection strength.');
-assert.ok(macSizeField.children.indexOf(macLegend) <
-  macSizeField.children.indexOf(macGuidance));
-assert.notEqual(macGuidance.style.display, 'none');
+assert.equal(all(macSizeField, el => el.className === 'size-guidance').length, 0);
 assert.equal(one(macSizeField, el => el.className === 'size-note').textContent, '');
 assert.equal(macLegend.style.display, 'none');
 for (const root of [macaque, human]) {
@@ -199,7 +195,6 @@ assert.ok(one(macaque, el => el.tag === 'label' &&
   el.children.includes(countRadio)).children.includes('Number of studies'));
 selectRadio(macaque, countRadio);
 assert.equal(macLegend.style.display, '');
-assert.notEqual(macGuidance.style.display, 'none');
 assert.deepEqual(areaLabelPositions(macaque), macaqueLabels);
 assert.equal(one(macaque, el => el.className === 'legend-title').textContent,
   '');
@@ -318,7 +313,6 @@ assert.equal(countRadio.checked, true);
 const firstOnly = all(macaque, el => el.className === 'only-button')[0];
 selectRadio(macaque, macColor);
 firstOnly.listeners.click();
-assert.notEqual(macGuidance.style.display, 'none');
 assert.equal(countRadio.disabled, true);
 assert.equal(macColor.disabled, true);
 assert.equal(macPathway.checked, true);
@@ -327,7 +321,6 @@ const strength = all(macaque, el => el.tag === 'input' &&
   ['afferent', 'efferent', 'unspecified'].includes(el.value) && !el.disabled)[0];
 assert.ok(strength, 'A single graded study should enable a strength mode');
 selectRadio(macaque, strength);
-assert.notEqual(macGuidance.style.display, 'none');
 assert.equal(all(macaque, el => el.tag === 'span' &&
   el.textContent === 'No connection strength reported (open)').length, 1);
 const activeMarkers = all(macaque, el => el.tag === 'circle')

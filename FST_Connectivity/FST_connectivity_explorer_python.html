@@ -76,7 +76,6 @@
     .legend.numeric .legend-entry { height: 22px; white-space: nowrap; }
     .legend-dot { display: inline-block; flex: none; border-radius: 50%; background: #444; }
     .legend-dot.open { background: transparent; border: 1.5px solid #444; }
-    .size-guidance { margin: 8px 0 0; }
     .status { position: absolute; top: 751px; left: 12px; right: 12px;
       min-height: 40px; font-weight: 600; }
     .human .color-group { top: 341px; height: 84px; }
@@ -340,8 +339,6 @@
         }
         sizeNote = htmlElement('div', 'size-note', field);
         legend = addLegend(field);
-        htmlElement('div', 'size-guidance', field,
-          'Select one study to size dots by connection strength.');
       } else {
         const field = htmlElement('fieldset', 'size-group', panel);
         htmlElement('legend', '', field, 'Dot size');
