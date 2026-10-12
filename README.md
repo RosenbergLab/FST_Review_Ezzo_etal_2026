@@ -7,9 +7,9 @@ This repository provides the two resources described in the paper:
 
 ## CorticalConnectivity
 
-This interactive connectivity figure brings together published structural and functional evidence on area **FST** in macaques and humans from anatomical tracer studies, DTI tractography, resting-state fMRI, and functional inactivation. Readers can explore pathway assignments, supporting studies, connection-strength grades where available, the number of studies reporting each connection, and conflicting findings. 
+This interactive connectivity figure brings together published structural and functional evidence on area **FST** in macaques and humans from anatomical tracer studies, DTI tractography, resting-state fMRI, and functional inactivation. Dots on the lateral brain views position represent areas schematically. Readers can choose to check visual pathway assignments, supporting studies, connection-strength grades where available, the number of studies reporting each connection, and conflicting findings. 
 
-The lateral brain views position reported areas schematically. Although the figure focuses on FST, the accompanying evidence tables also cover MT, MSTd, and MSTm in macaques and MT and MST in humans. Differences in parcellation, localization, and nomenclature across studies required difficult but inevitable choices about when to merge or separate reported areas. These choices make comparisons possible but may simplify distinctions in the original literature. The specific merging and separation of areas are listed in the evidence tables. Reconciling these labels cost the postdocs and graduate students a small piece of their souls; its anatomical location remains disputed.
+Although the figure focuses on FST, the accompanying evidence tables also cover MT, MSTd, and MSTm in macaques and MT and MST in humans. Differences in parcellation, localization, and nomenclature across studies required difficult but inevitable choices about when to merge or separate reported areas. These choices make comparisons possible but may simplify distinctions in the original literature. The specific merging and separation of areas are listed in the evidence tables. Reconciling these labels cost the postdocs and graduate students a small piece of their souls; its anatomical location remains disputed.
 
 
 ### Open the FST figures
