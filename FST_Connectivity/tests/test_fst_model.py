@@ -119,6 +119,23 @@ class ModelTests(unittest.TestCase):
         self.assertEqual([row["code"] for row in self.human["studies"]],
                          ["Bak18", "Rol23", "Rua25"])
 
+    def test_combined_tracer_list_omits_repeated_method_prefix(self):
+        combined = next(row for row in self.macaque["studies"]
+                        if row["code"] == "mixed_tracer")
+        self.assertEqual(combined["label"], "Combined tracer evidence")
+        self.assertEqual(combined["codes"],
+                         ["And90", "Sel96", "Fel97", "Bar00", "Ung08"])
+        self.assertEqual(combined["detail"], "\n".join([
+            "Andersen et al. (1990)",
+            "Seltzer et al. (1996)",
+            "Felleman et al. (1997)",
+            "Barone et al. (2000)",
+            "Ungerleider et al. (2008)",
+        ]))
+        # Paper labels still carry their method outside this combined list.
+        self.assertTrue(next(row for row in self.macaque["source_studies"]
+                             if row["code"] == "Bar00")["label"].startswith("Tracer: "))
+
     def test_boussaoud_1990_uses_workbook_numeric_strength(self):
         scores = {(event["target"], event["direction"]): event["strengthGrade"]
                   for event in self.macaque["events"] if event["study"] == "Bou90"}

@@ -101,8 +101,13 @@ assert.ok(config.macaque.studies.find(study => study.code === 'mixed_tracer')
 const combinedRow = one(macaque, el => el.className === 'study-row has-detail');
 assert.match(one(combinedRow, el => el.className === 'label-text').textContent,
   /Combined tracer evidence/);
-assert.match(one(combinedRow, el => el.className === 'study-detail').textContent,
-  /Barone et al\. \(2000\)/);
+assert.equal(one(combinedRow, el => el.className === 'study-detail').textContent,
+  ['Andersen et al. (1990)', 'Seltzer et al. (1996)',
+   'Felleman et al. (1997)', 'Barone et al. (2000)',
+   'Ungerleider et al. (2008)'].join('\n'));
+assert.deepEqual(Array.from(config.macaque.studies.find(study =>
+  study.code === 'mixed_tracer').codes),
+  ['And90', 'Sel96', 'Fel97', 'Bar00', 'Ung08']);
 
 const macStatus = one(macaque, el => el.className === 'status');
 assert.match(macStatus.textContent, /47 connected regions/);

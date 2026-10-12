@@ -277,8 +277,12 @@ def _group_studies(
         combined_codes = [
             code for index in ungraded_indices for code in grouped[index]["codes"]
         ]
-        combined_detail = "\n".join(str(grouped[index]["label"])
-                                    for index in ungraded_indices)
+        # The group title supplies the method, so keep constituent names
+        # concise while preserving method prefixes on other study choices.
+        combined_detail = "\n".join(
+            str(grouped[index]["label"]).removeprefix("Tracer: ")
+            for index in ungraded_indices
+        )
         grouped = [row for index, row in enumerate(grouped)
                    if index not in ungraded_indices]
         grouped.append(

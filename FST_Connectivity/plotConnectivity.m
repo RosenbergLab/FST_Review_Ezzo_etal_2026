@@ -1245,7 +1245,7 @@ for k = 1:height(grouped)
 end
 if any(ungraded)
     sourceCodes = vertcat(grouped.codes{ungraded});
-    sourceLabels = grouped.label(ungraded);
+    sourceLabels = regexprep(grouped.label(ungraded), '^Tracer: ', '');
     row = grouped(find(ungraded, 1), :);
     row.code = "mixed_tracer";
     row.label = "Combined tracer evidence";
