@@ -324,12 +324,16 @@ function verifyConflictColorToggle(fig, stateName)
 state = getappdata(fig, stateName);
 colorNote = findall(state.ColorGroup, 'Style', 'text');
 assert(numel(colorNote) == 1);
+assert(isequal(colorNote, state.ConflictCaption));
+assert(strcmp(state.ConflictButton.String, 'Conflicting studies'));
 noteLines = strtrim(splitlines(strjoin(string(colorNote.String), newline)));
 noteLines(noteLines == "") = [];
 assert(strjoin(noteLines, " ") == ...
-    "Grey: A study explicitly reports no connection, whereas another reports a connection.");
+    "Black/Grey. Grey: A study explicitly reports no connection, whereas another reports a connection.");
 assert(colorNote.Extent(3) <= colorNote.Position(3), ...
     'The conflict explanation extends beyond its control.');
+assert(strcmp(colorNote.Visible, 'off'), ...
+    'The conflict explanation should be hidden in pathway-color mode.');
 assert(all(arrayfun(@(h) h.Value ~= 0, state.CheckBoxes)), ...
     'Conflict colors should be tested with all studies selected.');
 assert(strcmp(state.ConflictButton.Enable, 'on'));
@@ -359,6 +363,18 @@ originalSize = grey.SizeData;
 state.ColorGroup.SelectedObject = state.ConflictButton;
 callback = state.ColorGroup.SelectionChangedFcn;
 callback(state.ColorGroup, []);
+assert(strcmp(colorNote.Visible, 'on'), ...
+    'The conflict explanation should appear in conflicting-studies mode.');
+assert(colorNote.Extent(3) <= colorNote.Position(3) && ...
+    colorNote.Extent(4) <= colorNote.Position(4), ...
+    'The selected conflict explanation must fit inside its text control: extent %s, position %s.', ...
+    mat2str(colorNote.Extent), mat2str(colorNote.Position));
+assert(colorNote.Position(2) > 0 && ...
+    colorNote.Position(2) + colorNote.Position(4) < ...
+    state.ConflictButton.Position(2) && ...
+    state.ColorGroup.Position(2) >= ...
+    state.SizeGroup.Position(2) + state.SizeGroup.Position(4), ...
+    'The conflict explanation overlaps an option or the Dot size box.');
 for marker = [grey, black]
     rows = marker.DataTipTemplate.DataTipRows;
     values = strings(numel(rows), 1);
@@ -391,11 +407,21 @@ else
         isequal(black.MarkerFaceColor, 'none'), ...
         'Uniform macaque dots should remain open.');
 end
+state.ColorGroup.SelectedObject = state.PathwayButton;
+callback(state.ColorGroup, []);
+assert(strcmp(colorNote.Visible, 'off') && ...
+    isequal(grey.MarkerEdgeColor, pathwayEdge), ...
+    'Returning to pathway colors should hide the conflict explanation.');
+state.ColorGroup.SelectedObject = state.ConflictButton;
+callback(state.ColorGroup, []);
+assert(strcmp(colorNote.Visible, 'on'));
 state.CheckBoxes(1).Value = 0;
 runCallback(state.CheckBoxes(1));
 assert(strcmp(state.ConflictButton.Enable, 'off') && ...
     strcmp(state.ColorGroup.SelectedObject.Tag, 'pathway'), ...
     'A study subset must reset conflict colors to pathway colors.');
+assert(strcmp(colorNote.Visible, 'off'), ...
+    'A study subset should hide the conflict explanation.');
 assert(isequal(grey.MarkerEdgeColor, pathwayEdge));
 state.CheckBoxes(1).Value = 1;
 runCallback(state.CheckBoxes(1));
@@ -426,6 +452,11 @@ function verifyHumanFigure(fig)
 state = getappdata(fig, 'HumanStudySelectorState');
 assert(isstruct(state), 'Human study controls are missing.');
 assert(strcmp(state.UniformButton.String, 'No scaling'));
+if strcmp(state.SizeGroup.SelectedObject.Tag, 'uniform') && ...
+        all(arrayfun(@(h) h.Value ~= 0, state.CheckBoxes))
+    assert(isempty(char(state.SizeNote.String)), ...
+        'The all-studies human view should not show no-scaling guidance.');
+end
 assert(isequal(state.SizeNote.Parent, state.SizeGroup) && ...
     isequal(state.CountLegend.Parent, state.SizeGroup), ...
     'Human dot-size guidance and legend must be inside the Dot size box.');
@@ -480,6 +511,7 @@ state = getappdata(fig, 'HumanStudySelectorState');
 originalLabels = areaLabelPositions(state);
 assert(strcmp(state.CountButton.Enable, 'on'));
 assert(strcmp(state.SizeGroup.SelectedObject.Tag, 'uniform'));
+assert(isempty(char(state.SizeNote.String)));
 index = find(string(state.NodeLabels) == "LO1-3", 1);
 uniformSize = state.NodeHandles(index).SizeData;
 state.SizeGroup.SelectedObject = state.CountButton;
@@ -487,6 +519,8 @@ callback = state.SizeGroup.SelectionChangedFcn;
 callback(state.SizeGroup, []);
 assertAreaLabelsFixed(state, originalLabels, 'human study count');
 assert(strcmp(state.CountLegend.Visible, 'on'));
+assert(~any(contains(string(state.SizeNote.String), ...
+    'Select all to size them by reporting studies.')));
 assert(~isequal(state.NodeHandles(index).MarkerFaceColor, 'none'));
 legendMarkers = findall(state.CountLegend, 'Type', 'scatter');
 assert(~isempty(legendMarkers) && all(arrayfun(@(h) ...
@@ -501,10 +535,16 @@ assertAreaLabelsFixed(state, originalLabels, 'human study subset');
 assert(strcmp(state.CountButton.Enable, 'off'));
 assert(strcmp(state.SizeGroup.SelectedObject.Tag, 'uniform'));
 assert(strcmp(state.CountLegend.Visible, 'off'));
+assert(strcmp(state.SizeNote.String, ...
+    'Select all to size them by reporting studies.'));
 runCallback(findButton(view, 'Select all'));
+assert(isempty(char(state.SizeNote.String)), ...
+    'Selecting all studies should hide the Select all instruction.');
 state.SizeGroup.SelectedObject = state.CountButton;
 callback(state.SizeGroup, []);
 assert(strcmp(state.SizeGroup.SelectedObject.Tag, 'studycount'));
+assert(~any(contains(string(state.SizeNote.String), ...
+    'Select all to size them by reporting studies.')));
 assertAreaLabelsFixed(state, originalLabels, 'human study count restored');
 end
 

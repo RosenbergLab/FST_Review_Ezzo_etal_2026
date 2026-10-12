@@ -299,7 +299,7 @@
       htmlElement('legend', '', colorField, 'Dot color');
       const colorInputs = {};
       for (const [mode, title] of [
-        ['pathway', 'Pathway colors'], ['conflict', 'Grey/black conflict'],
+        ['pathway', 'Pathway colors'], ['conflict', 'Conflicting studies'],
       ]) {
         const label = htmlElement('label', '', colorField);
         const input = htmlElement('input', '', label);
@@ -309,8 +309,8 @@
         label.append(title);
         colorInputs[mode] = {input, label};
       }
-      htmlElement('div', 'color-note', colorField,
-        'Grey: A study explicitly reports no connection, whereas another reports a connection.');
+      const colorNote = htmlElement('div', 'color-note', colorField,
+        'Black/Grey. Grey: A study explicitly reports no connection, whereas another reports a connection.');
       let sizeInputs = {}, sizeNote = null, legend = null;
       if (payload.species === 'macaque') {
         const field = htmlElement('fieldset', 'size-group', panel);
@@ -357,7 +357,7 @@
       }
       const status = htmlElement('div', 'status', panel);
       status.setAttribute('aria-live', 'polite');
-      return {panel, choices, speciesChoice, colorInputs, sizeInputs, sizeNote,
+      return {panel, choices, speciesChoice, colorInputs, colorNote, sizeInputs, sizeNote,
         legend, status};
     }
     function update(view) {
@@ -376,6 +376,7 @@
         controls.colorInputs.pathway.input.checked = true;
       }
       const conflictColor = countEnabled && controls.colorInputs.conflict.input.checked;
+      controls.colorNote.style.display = conflictColor ? '' : 'none';
       controls.sizeInputs.studycount.input.disabled = !countEnabled;
       controls.sizeInputs.studycount.label.classList.toggle('disabled', !countEnabled);
       if (payload.species === 'macaque') {
@@ -413,7 +414,7 @@
         controls.legend.legend.style.display = mode === 'studycount' ? '' : 'none';
         controls.sizeNote.textContent = mode === 'studycount'
           ? 'Baker et al. (2018) counts once across methods.'
-          : 'Select all to size dots by number of reporting studies.';
+          : countEnabled ? '' : 'Select all to size them by reporting studies.';
         if (mode === 'studycount') updateLegend(view, true);
       }
       const directionFilter = payload.species === 'macaque' &&

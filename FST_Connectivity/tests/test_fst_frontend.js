@@ -84,7 +84,10 @@ assert.notEqual(macGuidance.style.display, 'none');
 assert.equal(one(macSizeField, el => el.className === 'size-note').textContent, '');
 for (const root of [macaque, human]) {
   assert.equal(one(root, el => el.className === 'color-note').textContent,
-    'Grey: A study explicitly reports no connection, whereas another reports a connection.');
+    'Black/Grey. Grey: A study explicitly reports no connection, whereas another reports a connection.');
+  assert.equal(one(root, el => el.className === 'color-note').style.display, 'none');
+  one(root, el => el.tag === 'label' &&
+    el.children.includes('Conflicting studies'));
 }
 const macaqueLabels = areaLabelPositions(macaque);
 const humanLabels = areaLabelPositions(human);
@@ -147,6 +150,7 @@ const macPathway = one(macaque, el => el.tag === 'input' && el.value === 'pathwa
 assert.equal(macColor.disabled, false);
 assert.equal(macPathway.checked, true);
 selectRadio(macaque, macColor);
+assert.equal(one(macaque, el => el.className === 'color-note').style.display, '');
 const greyFEF = one(macaque, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === 'FEF');
 const blackMT = one(macaque, el => el.tag === 'circle' &&
@@ -159,6 +163,7 @@ assert.equal(macFST.attributes.fill, '#000000');
 assert.doesNotMatch(greyFEF._tooltip, /Grey:|A study explicitly reports no connection/);
 assert.doesNotMatch(blackMT._tooltip, /Black dot:|no conflict is marked/);
 selectRadio(macaque, macPathway);
+assert.equal(one(macaque, el => el.className === 'color-note').style.display, 'none');
 assert.equal(greyFEF.attributes.stroke, '#000000');
 assert.equal(blackMT.attributes.stroke, '#B3E4F8');
 const countRadio = one(macaque, el => el.tag === 'input' && el.value === 'studycount');
@@ -223,6 +228,7 @@ const humanColor = one(human, el => el.tag === 'input' && el.value === 'conflict
 const humanPathway = one(human, el => el.tag === 'input' && el.value === 'pathway');
 assert.equal(humanColor.disabled, false);
 selectRadio(human, humanColor);
+assert.equal(one(human, el => el.className === 'color-note').style.display, '');
 assertHumanConnectionDotsOpen();
 const greyPMd = one(human, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === 'PMd');
@@ -230,6 +236,7 @@ assert.equal(greyPMd.attributes.stroke, '#A6A6A6');
 assert.equal(ph.attributes.stroke, '#000000');
 assert.doesNotMatch(greyPMd._tooltip, /Grey:|A study explicitly reports no connection/);
 selectRadio(human, humanPathway);
+assert.equal(one(human, el => el.className === 'color-note').style.display, 'none');
 assert.equal(ph.attributes.stroke, '#F9F384');
 selectRadio(human, humanCount);
 assert.equal(one(human, el => el.className === 'size-note').textContent,
@@ -246,13 +253,20 @@ assert.equal(one(human, el => el.className === 'legend-title').textContent,
   'Number of studies');
 assert.equal(all(human, el => el.className === 'legend-entry').length, 3);
 assert.equal(all(human, el => el.className === 'legend-dot open').length, 0);
+selectRadio(human, humanColor);
 one(human, el => el.className === 'clear-button').listeners.click();
 assert.match(humanStatus.textContent, /^0 connected regions/);
 assert.equal(humanCount.disabled, true);
 assert.equal(one(human, el => el.tag === 'input' && el.value === 'uniform').checked, true);
 assert.equal(humanColor.disabled, true);
 assert.equal(humanPathway.checked, true);
+assert.equal(one(human, el => el.className === 'color-note').style.display, 'none');
+assert.equal(one(human, el => el.className === 'size-note').textContent,
+  'Select all to size them by reporting studies.');
 assert.equal(one(human, el => el.className === 'legend').style.display, 'none');
+selectRadio(human, one(human, el => el.tag === 'input' && el.value === 'uniform'));
+one(human, el => el.className === 'all-button').listeners.click();
+assert.equal(one(human, el => el.className === 'size-note').textContent, '');
 
 const humanSpecies = one(human, el => el.className === 'species-choice');
 humanSpecies.value = 'macaque';
@@ -262,11 +276,13 @@ assert.equal(human.hidden, true);
 assert.equal(macSpecies.value, 'macaque');
 assert.equal(countRadio.checked, true);
 const firstOnly = all(macaque, el => el.className === 'only-button')[0];
+selectRadio(macaque, macColor);
 firstOnly.listeners.click();
 assert.notEqual(macGuidance.style.display, 'none');
 assert.equal(countRadio.disabled, true);
 assert.equal(macColor.disabled, true);
 assert.equal(macPathway.checked, true);
+assert.equal(one(macaque, el => el.className === 'color-note').style.display, 'none');
 const strength = all(macaque, el => el.tag === 'input' &&
   ['afferent', 'efferent', 'unspecified'].includes(el.value) && !el.disabled)[0];
 assert.ok(strength, 'A single graded study should enable a strength mode');
