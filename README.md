@@ -28,7 +28,7 @@ Although the figure focuses on FST, the accompanying evidence tables also cover 
 | Dot color | **Pathway colors** (default) use light blue for dorsal, pink for lateral, yellow for ventral, and black for neutral areas. With **Select all** active, choose **Conflicting studies** for the fixed black/grey colors from Figure 3 of the paper. Its caption appears only when selected: “Black/Grey. Grey: A study explicitly reports no connection, whereas another reports a connection.” All other dots are black. |
 | Study controls | Select studies to show their reported FST connections. **Only** isolates one study, **Select all** restores every option, and **Clear** hides connection dots. Macaque Boussaoud (1990, 1992) and Bogadhi (2019, 2021) papers each have a grouped option. **Combined tracer evidence** includes all macaque tracer papers, while the existing Boussaoud and Markov selections remain available. The included papers are listed directly below that choice. |
 | Dot size | **No scaling** uses a standard dot size and hides the macaque size legend. For an eligible single study, macaque dots can show its strength separately for afferent, efferent, or unspecified projections. Boussaoud et al. (1990) uses a numeric 1–3 tracer score; other graded studies retain weak/moderate/strong sizes. Grades cannot be merged across studies. Human studies do not offer connection-strength sizing. Area labels stay in place when dot sizes change. |
-| Reporting studies | When all source papers are selected, **Number of reporting studies** sizes filled dots by the number of distinct papers reporting that connection. Papers included in both an individual option and **Combined tracer evidence** count once. It is available for both species, including subcortical areas. |
+| Number of studies | When all source papers are selected, **Number of studies** sizes filled dots by the number of distinct papers reporting that connection. Papers included in both an individual option and **Combined tracer evidence** count once. It is available for both species, including subcortical areas. |
 | Area details | Hover over a browser dot or click a MATLAB dot for the selected supporting studies and any selected reports of absence. |
 
 ### MATLAB: run the interactive figure
@@ -57,7 +57,7 @@ Inside `FST_Connectivity`, the `human/` and `macaque/` folders hold the literatu
 
 The `evidence.xlsm` files are working review spreadsheets. The `evidence.csv` and `nodes.csv` files are the inputs used to build the figures.
 
-In generated `edges.csv`, `evidencecount` counts positive evidence rows. The interactive **Number of reporting studies** counts distinct papers, so the two numbers can differ. The edge table's `certainty` requires conflicting reports in both projection directions; the grey/black dot view uses the paper figure's study-level conflict marking.
+In generated `edges.csv`, `evidencecount` counts positive evidence rows. The interactive **Number of studies** counts distinct papers, so the two numbers can differ. The edge table's `certainty` requires conflicting reports in both projection directions; the grey/black dot view uses the paper figure's study-level conflict marking.
 
 For Boussaoud et al. (1990), four extra columns in `macaque/evidence.csv` give the median positive tracer-label score (1–3) and positive/evaluable case count for each projection direction. `+ to ++` is 1.5 and `++ to +++` is 2.5. The numeric score sets dot size for that study; the original descriptive evidence remains in its existing columns. Areas without a single score in the supplied Table 1 summary, and Boussaoud et al. (1992), remain open in strength mode.
 
@@ -73,7 +73,7 @@ python -m pip install .
 python -m fst_connectivity --data-dir . --output FST_connectivity_explorer_python.html --no-open
 ```
 
-The [prebuilt wheel](FST_Connectivity/dist/fst_connectivity-0.1.30-py3-none-any.whl) is an alternative to installing from source. It bundles the repository evidence for use outside this folder. See [PYTHON_PACKAGE.md](FST_Connectivity/PYTHON_PACKAGE.md) for more options.
+The [prebuilt wheel](FST_Connectivity/dist/fst_connectivity-0.1.31-py3-none-any.whl) is an alternative to installing from source. It bundles the repository evidence for use outside this folder. See [PYTHON_PACKAGE.md](FST_Connectivity/PYTHON_PACKAGE.md) for more options.
 
 ## Motion stimuli
 

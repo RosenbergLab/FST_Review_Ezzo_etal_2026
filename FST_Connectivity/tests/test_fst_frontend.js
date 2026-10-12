@@ -192,12 +192,16 @@ assert.equal(greyFEF.attributes.stroke, '#000000');
 assert.equal(blackMT.attributes.stroke, '#B3E4F8');
 const countRadio = one(macaque, el => el.tag === 'input' && el.value === 'studycount');
 assert.equal(countRadio.disabled, false);
+assert.ok(one(macaque, el => el.tag === 'label' &&
+  el.children.includes(countRadio)).children.includes('Number of studies'));
 selectRadio(macaque, countRadio);
 assert.equal(macLegend.style.display, '');
 assert.notEqual(macGuidance.style.display, 'none');
 assert.deepEqual(areaLabelPositions(macaque), macaqueLabels);
 assert.equal(one(macaque, el => el.className === 'legend-title').textContent,
-  'Number of studies');
+  '');
+assert.equal(macLegend.style.marginTop, '0');
+assert.equal(macLegend.style.borderTop, 'none');
 for (const circle of all(macaque, el => el.tag === 'circle' &&
   el.style.display !== 'none')) assert.notEqual(circle.attributes.fill, 'none');
 selectRadio(macaque, macColor);
@@ -249,6 +253,13 @@ const lo = one(human, el => el.tag === 'circle' &&
 const uniformRadius = Number(lo.attributes.r);
 const humanCount = one(human, el => el.tag === 'input' && el.value === 'studycount');
 assert.equal(humanCount.disabled, false);
+assert.ok(one(human, el => el.tag === 'label' &&
+  el.children.includes(humanCount)).children.includes('Number of studies'));
+const humanSizeField = one(human, el => el.className === 'size-group');
+const humanLegend = one(humanSizeField, el => el.className === 'legend');
+const humanSizeNote = one(humanSizeField, el => el.className === 'size-note');
+assert.ok(humanSizeField.children.indexOf(humanLegend) <
+  humanSizeField.children.indexOf(humanSizeNote));
 const humanColor = one(human, el => el.tag === 'input' && el.value === 'conflict');
 const humanPathway = one(human, el => el.tag === 'input' && el.value === 'pathway');
 assert.equal(humanColor.disabled, false);
@@ -275,7 +286,9 @@ selectRadio(human, humanPathway);
 assert.ok(Number(lo.attributes.r) > uniformRadius);
 assert.match(lo._tooltip, /Supporting studies: 2/);
 assert.equal(one(human, el => el.className === 'legend-title').textContent,
-  'Number of studies');
+  '');
+assert.equal(humanLegend.style.marginTop, '0');
+assert.equal(humanLegend.style.borderTop, 'none');
 assert.equal(all(human, el => el.className === 'legend-entry').length, 3);
 assert.equal(all(human, el => el.className === 'legend-dot open').length, 0);
 selectRadio(human, humanColor);
@@ -287,7 +300,7 @@ assert.equal(humanColor.disabled, true);
 assert.equal(humanPathway.checked, true);
 assert.equal(one(human, el => el.className === 'color-note').style.display, 'none');
 assert.equal(one(human, el => el.className === 'size-note').textContent,
-  'Select all to size them by reporting studies.');
+  'Select all to size them by number of studies.');
 assert.equal(one(human, el => el.className === 'legend').style.display, 'none');
 selectRadio(human, one(human, el => el.tag === 'input' && el.value === 'uniform'));
 one(human, el => el.className === 'all-button').listeners.click();

@@ -231,7 +231,12 @@
     function updateLegend(view, countMode, numericMode = false) {
       const {legend, title, grid} = view.controls.legend;
       legend.classList.toggle('numeric', numericMode);
-      title.textContent = countMode ? 'Number of studies'
+      legend.style.marginTop = countMode ? '0' : '';
+      legend.style.borderTop = countMode ? 'none' : '';
+      legend.style.paddingTop = countMode ? '0' : '';
+      grid.style.paddingTop = countMode ? '0' : '';
+      title.style.display = countMode ? 'none' : '';
+      title.textContent = countMode ? ''
         : numericMode ? 'Tracer score (1–3)' : 'Dot size legend';
       grid.replaceChildren();
       let entries = countMode
@@ -325,7 +330,7 @@
           ['afferent', 'Connection strength (afferent)'],
           ['efferent', 'Connection strength (efferent)'],
           ['unspecified', 'Connection strength (unspecified)'],
-          ['studycount', 'Number of reporting studies'],
+          ['studycount', 'Number of studies'],
         ];
         for (const [mode, title] of modes) {
           const label = htmlElement('label', '', field);
@@ -346,7 +351,7 @@
         const field = htmlElement('fieldset', 'size-group', panel);
         htmlElement('legend', '', field, 'Dot size');
         for (const [mode, title] of [
-          ['uniform', 'No scaling'], ['studycount', 'Number of reporting studies'],
+          ['uniform', 'No scaling'], ['studycount', 'Number of studies'],
         ]) {
           const label = htmlElement('label', '', field);
           const input = htmlElement('input', '', label);
@@ -356,9 +361,9 @@
           label.append(title);
           sizeInputs[mode] = {input, label};
         }
-        sizeNote = htmlElement('div', 'size-note', field);
         legend = addLegend(field);
         legend.legend.style.display = 'none';
+        sizeNote = htmlElement('div', 'size-note', field);
       }
       const status = htmlElement('div', 'status', panel);
       status.setAttribute('aria-live', 'polite');
@@ -422,7 +427,7 @@
         controls.legend.legend.style.display = mode === 'studycount' ? '' : 'none';
         controls.sizeNote.textContent = mode === 'studycount'
           ? 'Baker et al. (2018) counts once across methods.'
-          : countEnabled ? '' : 'Select all to size them by reporting studies.';
+          : countEnabled ? '' : 'Select all to size them by number of studies.';
         if (mode === 'studycount') updateLegend(view, true);
       }
       const directionFilter = payload.species === 'macaque' &&

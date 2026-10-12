@@ -504,6 +504,7 @@ function verifyHumanFigure(fig)
 state = getappdata(fig, 'HumanStudySelectorState');
 assert(isstruct(state), 'Human study controls are missing.');
 assert(strcmp(state.UniformButton.String, 'No scaling'));
+assert(strcmp(state.CountButton.String, 'Number of studies'));
 if strcmp(state.SizeGroup.SelectedObject.Tag, 'uniform') && ...
         all(arrayfun(@(h) h.Value ~= 0, state.CheckBoxes))
     assert(isempty(char(state.SizeNote.String)), ...
@@ -571,8 +572,12 @@ callback = state.SizeGroup.SelectionChangedFcn;
 callback(state.SizeGroup, []);
 assertAreaLabelsFixed(state, originalLabels, 'human study count');
 assert(strcmp(state.CountLegend.Visible, 'on'));
+assertCountLegendNearButton(state.CountLegend, state.CountButton);
+assert(state.SizeNote.Position(2) + state.SizeNote.Position(4) < ...
+    state.CountLegend.Position(2), ...
+    'Human study-count note must sit below the legend.');
 assert(~any(contains(string(state.SizeNote.String), ...
-    'Select all to size them by reporting studies.')));
+    'Select all to size them by number of studies.')));
 assert(~isequal(state.NodeHandles(index).MarkerFaceColor, 'none'));
 legendMarkers = findall(state.CountLegend, 'Type', 'scatter');
 assert(~isempty(legendMarkers) && all(arrayfun(@(h) ...
@@ -588,7 +593,7 @@ assert(strcmp(state.CountButton.Enable, 'off'));
 assert(strcmp(state.SizeGroup.SelectedObject.Tag, 'uniform'));
 assert(strcmp(state.CountLegend.Visible, 'off'));
 assert(strcmp(state.SizeNote.String, ...
-    'Select all to size them by reporting studies.'));
+    'Select all to size them by number of studies.'));
 runCallback(findButton(view, 'Select all'));
 assert(isempty(char(state.SizeNote.String)), ...
     'Selecting all studies should hide the Select all instruction.');
@@ -596,7 +601,7 @@ state.SizeGroup.SelectedObject = state.CountButton;
 callback(state.SizeGroup, []);
 assert(strcmp(state.SizeGroup.SelectedObject.Tag, 'studycount'));
 assert(~any(contains(string(state.SizeNote.String), ...
-    'Select all to size them by reporting studies.')));
+    'Select all to size them by number of studies.')));
 assertAreaLabelsFixed(state, originalLabels, 'human study count restored');
 end
 
@@ -604,6 +609,7 @@ function verifyMacaqueCount(fig)
 state = getappdata(fig, 'StudySelectorState');
 originalLabels = areaLabelPositions(state);
 assert(strcmp(state.UniformButton.String, 'No scaling'));
+assert(strcmp(state.CountButton.String, 'Number of studies'));
 assert(isequal(state.Note.Parent, state.SizeGroup) && ...
     isequal(state.Guidance.Parent, state.SizeGroup) && ...
     isequal(state.StrengthLegend.Parent, state.SizeGroup) && ...
@@ -613,7 +619,7 @@ assert(isequal(state.Note.Parent, state.SizeGroup) && ...
 assert(strcmp(state.Guidance.String, ...
     'Select one study to size dots by connection strength.'), ...
     'The one-study instruction is missing.');
-legendPanels = [state.StrengthLegend, state.CountLegend];
+legendPanels = state.StrengthLegend;
 for legendPanel = legendPanels
     assert(state.Guidance.Position(2) + state.Guidance.Position(4) < ...
         legendPanel.Position(2) && ...
@@ -675,6 +681,9 @@ assert(~any(contains(string(state.Note.String), ...
     'The redundant study-count sentence should be removed.');
 assertAreaLabelsFixed(state, originalLabels, 'macaque study count');
 assert(strcmp(state.CountLegend.Visible, 'on'));
+assertCountLegendNearButton(state.CountLegend, state.CountButton);
+assert(strcmp(state.Note.Visible, 'off'), ...
+    'The empty macaque count note must not cover the raised legend.');
 for label = ["basalfore", "SC", "pulvinar", "TRN"]
     index = find(state.NodeLabels == label, 1);
     assert(~isempty(index) && strcmp(state.NodeHandles(index).Visible, 'on') && ...
@@ -774,6 +783,15 @@ end
 function assertAreaLabelsFixed(state, originalPositions, mode)
 assert(isequal(areaLabelPositions(state), originalPositions), ...
     'Area labels moved when changing %s.', mode);
+end
+
+function assertCountLegendNearButton(legendPanel, countButton)
+gap = countButton.Position(2) - ...
+    (legendPanel.Position(2) + legendPanel.Position(4));
+assert(gap >= 0 && gap <= 15, ...
+    'The study-count legend must sit close below its radio button.');
+assert(isempty(findall(legendPanel, 'Type', 'uicontrol', 'Style', 'text')), ...
+    'The study-count legend repeats the Number of studies heading.');
 end
 
 function labels = legendText(legendPanel)
