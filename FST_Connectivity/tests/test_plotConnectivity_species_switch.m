@@ -262,12 +262,14 @@ end
 
 function verifyBoussaoudNumericStrength(fig)
 state = getappdata(fig, 'StudySelectorState');
+originalLabels = areaLabelPositions(state);
 studyIndex = find(state.Studies.code == "Bou90+Bou92", 1);
 assert(~isempty(studyIndex), 'Boussaoud grouped study is missing.');
 for k = 1:numel(state.CheckBoxes)
     state.CheckBoxes(k).Value = k == studyIndex;
 end
 runCallback(state.CheckBoxes(studyIndex));
+assertAreaLabelsFixed(state, originalLabels, 'Boussaoud study selection');
 labels = string(state.NodeLabels);
 isVisible = @(name) strcmp(state.NodeHandles(find(labels == name, 1)).Visible, 'on');
 assert(isVisible("basalfore") && isVisible("striatum") && ...
@@ -276,8 +278,10 @@ assert(isVisible("basalfore") && isVisible("striatum") && ...
 state.SizeGroup.SelectedObject = state.StrengthButtons(2); % efferent
 callback = state.SizeGroup.SelectionChangedFcn;
 callback(state.SizeGroup, []);
+assertAreaLabelsFixed(state, originalLabels, 'efferent strength');
 assert(strcmp(state.NumericStrengthLegend.Visible, 'on'));
 assert(strcmp(state.StrengthLegend.Visible, 'off'));
+assertLegendTextFits(state.NumericStrengthLegend);
 for area = ["TRN", "pulvinar", "claustrum", "striatum", ...
         "pretectum", "pons"]
     assert(isVisible(area), 'Missing efferent Bou92 area %s.', area);
@@ -294,6 +298,7 @@ assert(isequal(state.NodeHandles(find(labels == "TRN", 1)).MarkerFaceColor, 'non
 
 state.SizeGroup.SelectedObject = state.StrengthButtons(1); % afferent
 callback(state.SizeGroup, []);
+assertAreaLabelsFixed(state, originalLabels, 'afferent strength');
 for area = ["basalfore", "pulvinar", "claustrum"]
     assert(isVisible(area), 'Missing afferent Bou92 area %s.', area);
 end
@@ -309,6 +314,7 @@ for k = 1:numel(state.CheckBoxes)
 end
 runCallback(state.CheckBoxes(1));
 assert(strcmp(state.SizeGroup.SelectedObject.Tag, 'uniform'));
+assertAreaLabelsFixed(state, originalLabels, 'return to no scaling');
 end
 
 function verifyConflictColorToggle(fig, stateName)
@@ -458,14 +464,15 @@ end
 
 function verifyHumanCount(fig, view)
 state = getappdata(fig, 'HumanStudySelectorState');
+originalLabels = areaLabelPositions(state);
 assert(strcmp(state.CountButton.Enable, 'on'));
 assert(strcmp(state.SizeGroup.SelectedObject.Tag, 'uniform'));
 index = find(string(state.NodeLabels) == "LO1-3", 1);
 uniformSize = state.NodeHandles(index).SizeData;
-uniformLabelY = state.TextHandles(index).Position(2);
 state.SizeGroup.SelectedObject = state.CountButton;
 callback = state.SizeGroup.SelectionChangedFcn;
 callback(state.SizeGroup, []);
+assertAreaLabelsFixed(state, originalLabels, 'human study count');
 assert(strcmp(state.CountLegend.Visible, 'on'));
 assert(~isequal(state.NodeHandles(index).MarkerFaceColor, 'none'));
 legendMarkers = findall(state.CountLegend, 'Type', 'scatter');
@@ -475,9 +482,9 @@ assert(~isempty(legendMarkers) && all(arrayfun(@(h) ...
 assert(state.NodeHandles(index).SizeData == (0.75 * 10)^2, ...
     'LO1-3 should count Baker and Rolls once each.');
 assert(state.NodeHandles(index).SizeData > uniformSize);
-assert(state.TextHandles(index).Position(2) < uniformLabelY);
 state.CheckBoxes(1).Value = 0;
 runCallback(state.CheckBoxes(1));
+assertAreaLabelsFixed(state, originalLabels, 'human study subset');
 assert(strcmp(state.CountButton.Enable, 'off'));
 assert(strcmp(state.SizeGroup.SelectedObject.Tag, 'uniform'));
 assert(strcmp(state.CountLegend.Visible, 'off'));
@@ -485,16 +492,23 @@ runCallback(findButton(view, 'Select all'));
 state.SizeGroup.SelectedObject = state.CountButton;
 callback(state.SizeGroup, []);
 assert(strcmp(state.SizeGroup.SelectedObject.Tag, 'studycount'));
+assertAreaLabelsFixed(state, originalLabels, 'human study count restored');
 end
 
 function verifyMacaqueCount(fig)
 state = getappdata(fig, 'StudySelectorState');
+originalLabels = areaLabelPositions(state);
 assert(strcmp(state.UniformButton.String, 'No scaling'));
 assert(isequal(state.Note.Parent, state.SizeGroup) && ...
     isequal(state.StrengthLegend.Parent, state.SizeGroup) && ...
     isequal(state.NumericStrengthLegend.Parent, state.SizeGroup) && ...
     isequal(state.CountLegend.Parent, state.SizeGroup), ...
     'Macaque dot-size guidance and legends must be inside one box.');
+for key = [state.StrengthLegend, state.NumericStrengthLegend]
+    assert(any(legendText(key) == "No connection strength reported (open)"), ...
+        'The MATLAB strength legend must use the full open-circle description.');
+end
+assertLegendTextFits(state.StrengthLegend);
 combined = find(state.Studies.code == "mixed_tracer", 1);
 assert(~isempty(combined) && ...
     strcmp(state.Studies.label(combined), "Combined tracer evidence"));
@@ -509,6 +523,7 @@ assert(isscalar(detail) && ...
 state.SizeGroup.SelectedObject = state.CountButton;
 callback = state.SizeGroup.SelectionChangedFcn;
 callback(state.SizeGroup, []);
+assertAreaLabelsFixed(state, originalLabels, 'macaque study count');
 assert(strcmp(state.CountLegend.Visible, 'on'));
 for label = ["basalfore", "SC", "pulvinar", "TRN"]
     index = find(state.NodeLabels == label, 1);
@@ -522,6 +537,55 @@ assert(~isempty(legendMarkers) && all(arrayfun(@(h) ...
     'Macaque study-count legend dots must be filled.');
 state.SizeGroup.SelectedObject = state.UniformButton;
 callback(state.SizeGroup, []);
+assertAreaLabelsFixed(state, originalLabels, 'macaque no scaling');
+end
+
+function positions = areaLabelPositions(state)
+positions = struct;
+positions.Text = zeros(numel(state.TextHandles), 3);
+for k = 1:numel(state.TextHandles)
+    positions.Text(k, :) = state.TextHandles(k).Position;
+end
+ax = ancestor(state.TextHandles(1), 'axes');
+positions.AxisPosition = ax.Position;
+positions.XLim = ax.XLim;
+positions.YLim = ax.YLim;
+positions.XDir = ax.XDir;
+positions.YDir = ax.YDir;
+positions.DataAspectRatio = ax.DataAspectRatio;
+end
+
+function assertAreaLabelsFixed(state, originalPositions, mode)
+assert(isequal(areaLabelPositions(state), originalPositions), ...
+    'Area labels moved when changing %s.', mode);
+end
+
+function labels = legendText(legendPanel)
+textHandles = findall(legendPanel, 'Type', 'text');
+labels = strings(numel(textHandles), 1);
+for k = 1:numel(textHandles)
+    labels(k) = string(textHandles(k).String);
+end
+end
+
+function assertLegendTextFits(legendPanel)
+drawnow;
+textHandles = findall(legendPanel, 'Type', 'text');
+for k = 1:numel(textHandles)
+    label = textHandles(k);
+    if strlength(string(label.String)) == 0
+        continue
+    end
+    ax = ancestor(label, 'axes');
+    bounds = label.Extent;
+    xBounds = xlim(ax);
+    yBounds = ylim(ax);
+    assert(bounds(1) >= xBounds(1) - 1 && ...
+        bounds(1) + bounds(3) <= xBounds(2) + 1 && ...
+        bounds(2) >= yBounds(1) - 1 && ...
+        bounds(2) + bounds(4) <= yBounds(2) + 1, ...
+        'Legend text "%s" is clipped by its axes.', string(label.String));
+end
 end
 
 function verifyStudyFilters(fig, view, stateName)

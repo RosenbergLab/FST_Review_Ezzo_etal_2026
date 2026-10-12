@@ -440,7 +440,7 @@ if paperMode
     nodeAlpha(:) = 1;
 elseif nodeSizeSource == "tracer_strength"
     legendLabels = ["Weak (small)"; "Moderate (medium)"; ...
-        "Strong (large)"; "No connection strength (open)"];
+        "Strong (large)"; "No connection strength reported (open)"];
     legendSizes = [11; 18; 26; 6];
     tracerRows = lower(cleanColumn(evidence, "study_type")) == "tracer";
     for k = 1:height(nodes)
@@ -1547,9 +1547,6 @@ for k = 1:numel(state.NodeLabels)
         marker.LineWidth = 1.8;
     end
     marker.MarkerEdgeColor = markerColor;
-    position = state.TextHandles(k).Position;
-    position(2) = labelPositionY(state.NodeY(k), size, state.Scale);
-    state.TextHandles(k).Position = position;
     state.NodeHandles(k).DataTipTemplate.DataTipRows = ...
         wrappedDataTipRows(displayAreaLabel(label), description);
 end
@@ -1650,9 +1647,9 @@ noteControl = uicontrol('Parent', sizeGroup, 'Style', 'text', ...
     'String', 'Select one study to size dots by connection strength.', ...
     'HorizontalAlignment', 'left', 'BackgroundColor', [0.975, 0.985, 1]);
 strengthLegend = addDotSizeLegend(sizeGroup, ...
-    [10, 10, panelWidth - 44, 82], false);
+    [10, 5, panelWidth - 44, 90], false);
 numericStrengthLegend = addDotSizeLegend(sizeGroup, ...
-    [10, 10, panelWidth - 44, 82], false, "numeric");
+    [10, 5, panelWidth - 44, 90], false, "numeric");
 numericStrengthLegend.Visible = 'off';
 countLegend = addDotSizeLegend(sizeGroup, ...
     [10, 10, panelWidth - 44, 82], false, "count");
@@ -1987,9 +1984,6 @@ for k = 1:numel(state.NodeLabels)
     end
     marker.DataTipTemplate.DataTipRows = ...
         wrappedDataTipRows(displayAreaLabel(label), description);
-    position = state.TextHandles(k).Position;
-    position(2) = labelPositionY(state.NodeY(k), size, state.Scale);
-    state.TextHandles(k).Position = position;
 end
 for k = 1:numel(state.EdgeHandles)
     target = state.EdgeTargets(k);
@@ -2215,14 +2209,14 @@ elseif kind == "numeric"
     legendTitle = 'Tracer score (1–3)';
     legendTag = 'NumericStrengthLegend';
     labels = ["1 (weak)", "1.5", "2 (moderate)", ...
-        "2.5", "3 (strong)", "No connection strength (open)"];
+        "2.5", "3 (strong)", "No connection strength reported (open)"];
     diameters = [9, 12, 15, 18.5, 22, 9];
     openIndex = numel(labels);
 else
     legendTitle = 'Dot size legend';
     legendTag = 'DotSizeLegend';
     labels = ["Weak (small)", "Moderate (medium)", ...
-        "Strong (large)", "No connection strength (open)"];
+        "Strong (large)", "No connection strength reported (open)"];
     diameters = [9, 15, 22, 9];
     openIndex = numel(labels);
 end
@@ -2247,18 +2241,26 @@ if kind == "numeric"
         labelX = repmat(40, 1, 6);
         rowY = linspace(plotHeight - 8, 8, 6);
     else
-        markerX = [18, 230, 18, 230, 18, 230];
-        labelX = [40, 252, 40, 252, 40, 252];
-        rowY = [46, 46, 28, 28, 10, 10];
+        % The open-circle explanation needs its own full-width row.
+        markerX = [18, 230, 18, 230, 18, 18];
+        labelX = [40, 252, 40, 252, 40, 40];
+        rowY = [52, 52, 37, 37, 22, 8];
     end
 elseif singleColumn
     markerX = [18, 18, 18, 18];
     labelX = [40, 40, 40, 40];
     rowY = [91, 64, 37, 10];
 else
-    markerX = [18, 248, 18, 248];
-    labelX = [40, 272, 40, 272];
-    rowY = [42, 42, 14, 14];
+    if kind == "count"
+        markerX = [18, 248, 18, 248];
+        labelX = [40, 272, 40, 272];
+        rowY = [42, 42, 14, 14];
+    else
+        % Keep the longer no-strength label inside the legend panel.
+        markerX = [18, 230, 18, 18];
+        labelX = [40, 252, 40, 40];
+        rowY = [52, 52, 34, 10];
+    end
 end
 hold(keyAx, 'on');
 for k = 1:numel(labels)
@@ -2292,8 +2294,5 @@ for k = 1:numel(state.NodeHandles)
         continue
     end
     state.NodeHandles(k).SizeData = (0.75 * sizes(k))^2;
-    position = state.TextHandles(k).Position;
-    position(2) = labelPositionY(state.NodeY(k), sizes(k), state.Scale);
-    state.TextHandles(k).Position = position;
 end
 end

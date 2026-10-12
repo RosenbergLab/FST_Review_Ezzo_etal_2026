@@ -63,10 +63,25 @@ function selectRadio(root, radio) {
     el.name === radio.name)) item.checked = item === radio;
   radio.listeners.change();
 }
+function areaLabelPositions(root) {
+  return all(root, el => el.tag === 'text' &&
+    el.attributes['pointer-events'] === 'none')
+    .map(label => [label.textContent, label.attributes.x, label.attributes.y]);
+}
 
 const frame = elements.frame;
 assert.equal(frame.children.length, 2);
 const [macaque, human] = frame.children;
+const macaqueLabels = areaLabelPositions(macaque);
+const humanLabels = areaLabelPositions(human);
+for (const [root, species] of [[macaque, 'macaque'], [human, 'human']]) {
+  const labels = areaLabelPositions(root);
+  config[species].nodes.forEach((node, index) => {
+    assert.equal(Number(labels[index][1]), node.x);
+    assert.equal(Number(labels[index][2]), node.y -
+      (9 / 2 + 8) * config[species].view_box[3] / config[species].plot_size[1]);
+  });
+}
 if (config.initial_species === 'human') {
   assert.equal(human.hidden, false);
   const select = one(human, el => el.className === 'species-choice');
@@ -130,6 +145,7 @@ assert.equal(blackMT.attributes.stroke, '#B3E4F8');
 const countRadio = one(macaque, el => el.tag === 'input' && el.value === 'studycount');
 assert.equal(countRadio.disabled, false);
 selectRadio(macaque, countRadio);
+assert.deepEqual(areaLabelPositions(macaque), macaqueLabels);
 assert.equal(one(macaque, el => el.className === 'legend-title').textContent,
   'Number of studies');
 for (const circle of all(macaque, el => el.tag === 'circle' &&
@@ -196,6 +212,7 @@ assert.match(greyPMd._tooltip, /A study explicitly reports no connection, wherea
 selectRadio(human, humanPathway);
 assert.equal(ph.attributes.stroke, '#F9F384');
 selectRadio(human, humanCount);
+assert.deepEqual(areaLabelPositions(human), humanLabels);
 assertHumanConnectionDotsFilled();
 selectRadio(human, humanColor);
 assertHumanConnectionDotsFilled();
@@ -231,6 +248,8 @@ const strength = all(macaque, el => el.tag === 'input' &&
   ['afferent', 'efferent', 'unspecified'].includes(el.value) && !el.disabled)[0];
 assert.ok(strength, 'A single graded study should enable a strength mode');
 selectRadio(macaque, strength);
+assert.equal(all(macaque, el => el.tag === 'span' &&
+  el.textContent === 'No connection strength reported (open)').length, 1);
 const activeMarkers = all(macaque, el => el.tag === 'circle')
   .filter(circle => circle.style.display !== 'none' &&
     circle.attributes['aria-label'] !== 'FST');
@@ -255,9 +274,12 @@ assert.match(bouMarker('pulvinar')._tooltip, /FST ↔ pulvinar/);
 const efferent = one(macaque, el => el.tag === 'input' && el.value === 'efferent');
 assert.equal(efferent.disabled, false);
 selectRadio(macaque, efferent);
+assert.deepEqual(areaLabelPositions(macaque), macaqueLabels);
 assert.equal(one(macaque, el => el.className === 'legend-title').textContent,
   'Tracer score (1–3)');
 assert.equal(all(macaque, el => el.className === 'legend-entry').length, 6);
+assert.equal(all(macaque, el => el.tag === 'span' &&
+  el.textContent === 'No connection strength reported (open)').length, 1);
 assert.deepEqual(visibleSubcortical(),
   ['TRN', 'pulvinar', 'claustrum', 'striatum', 'pretectum', 'pons'].sort());
 assert.ok(Number(bouMarker('MT').attributes.r) > Number(bouMarker('VIP').attributes.r));
@@ -267,6 +289,7 @@ assert.equal(bouMarker('CITd').attributes.fill, 'none');
 assert.equal(bouMarker('TRN').attributes.fill, 'none');
 const afferent = one(macaque, el => el.tag === 'input' && el.value === 'afferent');
 selectRadio(macaque, afferent);
+assert.deepEqual(areaLabelPositions(macaque), macaqueLabels);
 assert.deepEqual(visibleSubcortical(), ['pulvinar', 'claustrum', 'basalfore'].sort());
 assert.notEqual(bouMarker('MT').style.display, 'none');
 assert.match(bouMarker('MT')._tooltip, /2\.5\/3/);

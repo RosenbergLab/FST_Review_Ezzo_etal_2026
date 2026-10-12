@@ -66,6 +66,7 @@
     .legend-title { font-size: 13px; font-weight: 600; }
     .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 7px;
       padding: 4px 7px; font-size: 12px; }
+    .legend:not(.numeric) .legend-grid { grid-template-columns: .9fr 1.1fr; }
     .legend-entry { height: 20px; display: flex; align-items: center; gap: 11px; }
     .legend.numeric .legend-grid { gap: 1px 7px; padding: 2px 7px; font-size: 11px; }
     .legend.numeric .legend-entry { height: 18px; }
@@ -198,8 +199,11 @@
         circle.addEventListener('blur', hideTooltip);
         markers[node.label] = {circle, node};
       }
+      // Anchor labels at the initial 9 px dot position for every size mode.
+      const dataPerPixel = payload.view_box[3] / payload.plot_size[1];
+      const labelOffset = (9/2 + 8) * dataPerPixel;
       for (const node of payload.nodes) {
-        const label = svgElement('text', {x:node.x, y:node.y-5,
+        const label = svgElement('text', {x:node.x, y:node.y-labelOffset,
           'text-anchor':'middle', 'font-size':font, fill:'#2A3F5F',
           'pointer-events':'none'}, svg);
         label.textContent = node.display_label;
@@ -229,9 +233,9 @@
         ? [['1 study', 9], ['2 studies', 10], ['3 studies', 15], ['4 studies', 20]]
         : numericMode
           ? [['1 (weak)', 9], ['1.5', 12], ['2 (moderate)', 15],
-             ['2.5', 18.5], ['3 (strong)', 22], ['No connection strength (open)', 9, true]]
+             ['2.5', 18.5], ['3 (strong)', 22], ['No connection strength reported (open)', 9, true]]
         : [['Weak (small)', 9], ['Moderate (medium)', 15],
-           ['Strong (large)', 22], ['No connection strength (open)', 9, true]];
+           ['Strong (large)', 22], ['No connection strength reported (open)', 9, true]];
       if (countMode && view.data.species === 'human')
         entries = entries.slice(0, Math.min(4, view.data.source_studies.length));
       for (const [label, size, open] of entries) {
@@ -486,8 +490,6 @@
         circle.setAttribute('fill', open ? 'none' : dotColor);
         circle.setAttribute('stroke', dotColor);
         circle.setAttribute('stroke-width', String((open ? 1.8 : 1) / plot.ratio));
-        const dataPerPixel = payload.view_box[3] / payload.plot_size[1];
-        label.setAttribute('y', String(node.y - (diameter/2 + 8) * dataPerPixel));
         circle._tooltip = node.display_label + '\n' + description;
       }
       if (payload.species === 'human') {
