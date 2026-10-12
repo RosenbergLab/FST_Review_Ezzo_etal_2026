@@ -3,7 +3,7 @@
 This repository provides the two resources described in the paper:
 
 1. [Interactive connectivity figure for macaques and humans](FST_Connectivity/)
-2. [Four GIFs of structure-from-motion stimuli](MotionStimuli/)
+2. [GIFs of structure-from-motion stimuli](MotionStimuli/)
 
 ## FST Connectivity
 
@@ -77,13 +77,11 @@ The [prebuilt wheel](FST_Connectivity/dist/fst_connectivity-0.1.22-py3-none-any.
 
 ## Motion stimuli
 
-The [MotionStimuli](MotionStimuli/) folder contains four animated examples illustrating **structure from motion**: moving points or contours reveal the organization of a figure over time.
+The [MotionStimuli](MotionStimuli/) folder contains GIFs illustrating **structure from motion**: moving points or contours reveal the organization of a figure over time.
 
 - [Point-light walker](MotionStimuli/SfM_PointLightWalker.gif)
 - [Rotating cylinder](MotionStimuli/SfM_RotatingCylinder.gif)
 - [Wire-frame form](MotionStimuli/SfM_WireFrame.gif)
 - [Stereokinetic circles](MotionStimuli/SfM_stereokinetic_circles.gif)
-
-Two `Frames_` GIFs provide brief frame examples for the point-light walker and wire-frame animations.
 
 OpenAI Codex was used to help build this resource. 
