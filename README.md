@@ -17,7 +17,7 @@ Although the figure focuses on FST, the accompanying evidence tables also cover 
 | Option | How to use it |
 | --- | --- |
 | **Browser — easiest** | Download [FST_connectivity_explorer_python.html](FST_Connectivity/FST_connectivity_explorer_python.html) and open it in a browser. **No Python or MATLAB installation is needed.** |
-| **MATLAB** | Set MATLAB's current folder to `FST_Connectivity` and run `plotConnectivity`. The **Species** menu switches between macaque and human in the same window. |
+| **MATLAB** | Set MATLAB's current folder to `FST_Connectivity` and run `plotConnectivity`. |
 | **Python package** | Use the package to generate your own browser file. See the [Python package guide](FST_Connectivity/PYTHON_PACKAGE.md) for installation, command-line use, and the Python API. |
 
 ### Read the figure
