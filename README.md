@@ -63,8 +63,6 @@ In generated `edges.csv`, `evidencecount` counts positive evidence rows, with a 
 
 For Boussaoud et al. (1990), four extra columns in `macaque/evidence.csv` give the median positive tracer-label score (1–3) and positive/evaluable case count for each projection direction. `+ to ++` is 1.5 and `++ to +++` is 2.5. The numeric score sets dot size for that study; the original descriptive evidence remains in its existing columns. Areas without a single score in the supplied Table 1 summary, and Boussaoud et al. (1992), remain open in strength mode.
 
-Two existing macaque display interpretations differ from literal source cells: Barone et al. (2000) V1/V4 are shown as ungraded FST-to-area reports, and Ungerleider et al. (2008) V4 is shown without a strength grade. The original `evidence.csv` rows are retained for review; these choices are applied when the figures load.
-
 ### Rebuild the browser file with Python
 
 Python 3.10 or newer is needed only to generate a new offline HTML file. From the repository root, enter `FST_Connectivity`, install the package, and render the current CSV data with:
