@@ -85,3 +85,5 @@ The [MotionStimuli](MotionStimuli/) folder contains four animated examples illus
 - [Stereokinetic circles](MotionStimuli/SfM_stereokinetic_circles.gif)
 
 Two `Frames_` GIFs provide brief frame examples for the point-light walker and wire-frame animations.
+
+OpenAI Codex was used to help build this resource. 
