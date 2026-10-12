@@ -63,7 +63,9 @@ For Boussaoud et al. (1990), four extra columns in `macaque/evidence.csv` give t
 
 ### Rebuild the browser file with Python
 
-Python 3.10 or newer is needed only to generate a new offline HTML file. From the repository root, enter `FST_Connectivity`, install the package, and render the current CSV data with:
+Python 3.10 or newer is needed only to generate a new offline HTML file. Check your version with `py --version` in Windows PowerShell (or `python --version` if `py` is unavailable), or `python3 --version` in a macOS/Linux terminal. If Python is missing or older than 3.10, install a currently supported release from [Python.org](https://www.python.org/downloads/) on Windows or macOS, or through your Linux distribution. Open a new terminal and check again. Use the command that showed the correct version in place of `python` below if needed.
+
+From the repository root, enter `FST_Connectivity`, install the package, and render the current CSV data with:
 
 ```bash
 cd FST_Connectivity
