@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 const html = fs.readFileSync(process.argv[2], 'utf8');
+assert.equal(html.includes('Counts distinct papers with a positive connection.'), false);
 const payload = html.match(/<script id="connectivity-data"[^>]*>([\s\S]*?)<\/script>/)[1];
 const config = JSON.parse(payload);
 const script = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].at(-1)[1];
@@ -72,6 +73,19 @@ function areaLabelPositions(root) {
 const frame = elements.frame;
 assert.equal(frame.children.length, 2);
 const [macaque, human] = frame.children;
+const macSizeField = one(macaque, el => el.className === 'size-group');
+const macLegend = one(macSizeField, el => el.className === 'legend');
+const macGuidance = one(macSizeField, el => el.className === 'size-guidance');
+assert.equal(macGuidance.textContent,
+  'Select one study to size dots by connection strength.');
+assert.ok(macSizeField.children.indexOf(macLegend) <
+  macSizeField.children.indexOf(macGuidance));
+assert.notEqual(macGuidance.style.display, 'none');
+assert.equal(one(macSizeField, el => el.className === 'size-note').textContent, '');
+for (const root of [macaque, human]) {
+  assert.equal(one(root, el => el.className === 'color-note').textContent,
+    'Grey: A study explicitly reports no connection, whereas another reports a connection.');
+}
 const macaqueLabels = areaLabelPositions(macaque);
 const humanLabels = areaLabelPositions(human);
 for (const [root, species] of [[macaque, 'macaque'], [human, 'human']]) {
@@ -142,14 +156,15 @@ const macFST = one(macaque, el => el.tag === 'circle' &&
 assert.equal(greyFEF.attributes.stroke, '#A6A6A6');
 assert.equal(blackMT.attributes.stroke, '#000000');
 assert.equal(macFST.attributes.fill, '#000000');
-assert.match(greyFEF._tooltip, /A study explicitly reports no connection, whereas another reports a connection/);
-assert.match(blackMT._tooltip, /Black dot: no conflict is marked/);
+assert.doesNotMatch(greyFEF._tooltip, /Grey:|A study explicitly reports no connection/);
+assert.doesNotMatch(blackMT._tooltip, /Black dot:|no conflict is marked/);
 selectRadio(macaque, macPathway);
 assert.equal(greyFEF.attributes.stroke, '#000000');
 assert.equal(blackMT.attributes.stroke, '#B3E4F8');
 const countRadio = one(macaque, el => el.tag === 'input' && el.value === 'studycount');
 assert.equal(countRadio.disabled, false);
 selectRadio(macaque, countRadio);
+assert.notEqual(macGuidance.style.display, 'none');
 assert.deepEqual(areaLabelPositions(macaque), macaqueLabels);
 assert.equal(one(macaque, el => el.className === 'legend-title').textContent,
   'Number of studies');
@@ -213,10 +228,12 @@ const greyPMd = one(human, el => el.tag === 'circle' &&
   el.attributes['aria-label'] === 'PMd');
 assert.equal(greyPMd.attributes.stroke, '#A6A6A6');
 assert.equal(ph.attributes.stroke, '#000000');
-assert.match(greyPMd._tooltip, /A study explicitly reports no connection, whereas another reports a connection/);
+assert.doesNotMatch(greyPMd._tooltip, /Grey:|A study explicitly reports no connection/);
 selectRadio(human, humanPathway);
 assert.equal(ph.attributes.stroke, '#F9F384');
 selectRadio(human, humanCount);
+assert.equal(one(human, el => el.className === 'size-note').textContent,
+  'Baker et al. (2018) counts once across methods.');
 assert.deepEqual(areaLabelPositions(human), humanLabels);
 assertHumanConnectionDotsFilled();
 selectRadio(human, humanColor);
@@ -246,6 +263,7 @@ assert.equal(macSpecies.value, 'macaque');
 assert.equal(countRadio.checked, true);
 const firstOnly = all(macaque, el => el.className === 'only-button')[0];
 firstOnly.listeners.click();
+assert.notEqual(macGuidance.style.display, 'none');
 assert.equal(countRadio.disabled, true);
 assert.equal(macColor.disabled, true);
 assert.equal(macPathway.checked, true);
@@ -253,6 +271,7 @@ const strength = all(macaque, el => el.tag === 'input' &&
   ['afferent', 'efferent', 'unspecified'].includes(el.value) && !el.disabled)[0];
 assert.ok(strength, 'A single graded study should enable a strength mode');
 selectRadio(macaque, strength);
+assert.notEqual(macGuidance.style.display, 'none');
 assert.equal(all(macaque, el => el.tag === 'span' &&
   el.textContent === 'No connection strength reported (open)').length, 1);
 const activeMarkers = all(macaque, el => el.tag === 'circle')

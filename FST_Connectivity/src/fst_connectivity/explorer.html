@@ -61,6 +61,7 @@
     .size-group label.disabled { color: #aeb4bb; }
     .size-note { min-height: 30px; margin: 6px 0 3px;
       white-space: pre-line; line-height: 1.2; }
+    .size-note:empty { display: none; }
     .legend { height: 82px; margin-top: 6px;
       border-top: 1px solid #d6dce1; padding: 4px 0 0; }
     .legend-title { font-size: 13px; font-weight: 600; }
@@ -73,6 +74,7 @@
     .legend.numeric .legend-entry { height: 22px; white-space: nowrap; }
     .legend-dot { display: inline-block; flex: none; border-radius: 50%; background: #444; }
     .legend-dot.open { background: transparent; border: 1.5px solid #444; }
+    .size-guidance { margin: 8px 0 0; }
     .status { position: absolute; top: 751px; left: 12px; right: 12px;
       min-height: 40px; font-weight: 600; }
     .human-note { position: absolute; top: 226px; left: 12px; right: 12px;
@@ -309,7 +311,7 @@
       }
       htmlElement('div', 'color-note', colorField,
         'Grey: A study explicitly reports no connection, whereas another reports a connection.');
-      let sizeMode = null, sizeInputs = {}, sizeNote = null, legend = null;
+      let sizeInputs = {}, sizeNote = null, legend = null;
       if (payload.species === 'macaque') {
         const field = htmlElement('fieldset', 'size-group', panel);
         htmlElement('legend', '', field, 'Dot size');
@@ -331,6 +333,8 @@
         }
         sizeNote = htmlElement('div', 'size-note', field);
         legend = addLegend(field);
+        htmlElement('div', 'size-guidance', field,
+          'Select one study to size dots by connection strength.');
       } else {
         htmlElement('div', 'human-note', panel,
           'Choose studies to show their FST connections.');
@@ -393,9 +397,9 @@
         const numericMode = !countMode && mode !== 'uniform' &&
           checkedGroups.length === 1 && checkedGroups[0].codes.includes('Bou90');
         controls.sizeNote.textContent = countMode
-          ? 'Counts distinct papers with a positive connection.'
+          ? ''
           : mode === 'uniform'
-            ? 'Select one study to size dots by connection strength.'
+            ? ''
             : numericMode
               ? '1990 tracer score: 1–3, with intermediate sizes.\n1992 subcortical dots: selected direction only; open = no connection strength.'
             : 'Dots remain visible for all selected studies.\nFilled dots show graded connection strength.';
@@ -408,7 +412,7 @@
         }
         controls.legend.legend.style.display = mode === 'studycount' ? '' : 'none';
         controls.sizeNote.textContent = mode === 'studycount'
-          ? 'Counts distinct papers with a positive connection.\nBaker et al. (2018) counts once across methods.'
+          ? 'Baker et al. (2018) counts once across methods.'
           : 'Select all to size dots by number of reporting studies.';
         if (mode === 'studycount') updateLegend(view, true);
       }
@@ -480,9 +484,6 @@
               : node.display_label + ' → FST';
             description += '\nBoussaoud et al. (1992) projection: ' + direction;
           }
-          if (conflictColor) description += node.conflict
-            ? '\nGrey: A study explicitly reports no connection, whereas another reports a connection.'
-            : '\nBlack dot: no conflict is marked for this area in the paper figure.';
         }
         const radius = .75 * diameter / (2 * plot.ratio);
         const dotColor = conflictColor
