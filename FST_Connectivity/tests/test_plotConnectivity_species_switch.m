@@ -1,7 +1,8 @@
 %TEST_PLOTCONNECTIVITY_SPECIES_SWITCH Check the two cached FST views.
-% Run from the repository root: run('tests/test_plotConnectivity_species_switch.m')
+% Run from the repository root:
+%   run('FST_Connectivity/tests/test_plotConnectivity_species_switch.m')
 % Uses temporary output and closes its figures. When testing staged code,
-% set FST_CONNECTIVITY_DATA_PATH to the repository containing the CSV/TIFFs.
+% set FST_CONNECTIVITY_DATA_PATH to the FST_Connectivity folder.
 
 scriptDir = fileparts(mfilename('fullpath'));
 sourceDir = fileparts(scriptDir);

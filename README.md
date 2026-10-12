@@ -2,8 +2,8 @@
 
 This repository provides the two resources described in the paper:
 
-1. [Interactive connectivity figure for macaques and humans](#corticalconnectivity)
-2. [Four GIFs of structure-from-motion stimuli](#motion-stimuli)
+1. [Interactive connectivity figure for macaques and humans](FST_Connectivity/)
+2. [Four GIFs of structure-from-motion stimuli](MotionStimuli/)
 
 ## CorticalConnectivity
 
@@ -16,9 +16,9 @@ Although the figure focuses on FST, the accompanying evidence tables also cover 
 
 | Option | How to use it |
 | --- | --- |
-| **Browser — easiest** | Download [FST_connectivity_explorer_python.html](FST_connectivity_explorer_python.html) and open it in a browser. **No Python or MATLAB installation is needed.** |
-| **MATLAB** | Set MATLAB's current folder to this repository and open [FST_connectivity_explorer.fig](FST_connectivity_explorer.fig). |
-| **Python package** | Use the package to generate your own browser file. See the [Python package guide](PYTHON_PACKAGE.md) for installation, command-line use, and the Python API. |
+| **Browser — easiest** | Download [FST_connectivity_explorer_python.html](FST_Connectivity/FST_connectivity_explorer_python.html) and open it in a browser. **No Python or MATLAB installation is needed.** |
+| **MATLAB** | Set MATLAB's current folder to `FST_Connectivity` and open [FST_connectivity_explorer.fig](FST_Connectivity/FST_connectivity_explorer.fig). |
+| **Python package** | Use the package to generate your own browser file. See the [Python package guide](FST_Connectivity/PYTHON_PACKAGE.md) for installation, command-line use, and the Python API. |
 
 ### Read the figure
 
@@ -33,28 +33,28 @@ Although the figure focuses on FST, the accompanying evidence tables also cover 
 
 ### MATLAB: open or rebuild
 
-To use the saved interactive figure, open [FST_connectivity_explorer.fig](FST_connectivity_explorer.fig) from MATLAB with this repository as the current folder. To rebuild a species view from the current CSV files, run:
+To use the saved interactive figure, set MATLAB's current folder to `FST_Connectivity` and open [FST_connectivity_explorer.fig](FST_Connectivity/FST_connectivity_explorer.fig). To rebuild a species view from the current CSV files, run:
 
 ```matlab
 plotConnectivity(Species="macaque");
 plotConnectivity(Species="human");
 ```
 
-Each call saves a species-named `.fig` with the menu to switch between both species, plus a `.pdf` showing the selected species. Only [FST_connectivity_explorer.fig](FST_connectivity_explorer.fig) is distributed as a prebuilt MATLAB figure. The calls also update `<species>/edges.csv` and `<species>/selectnodes.csv`, which are generated tables. Use `WriteTables=false` to rebuild the figures without rewriting those tables. The source code is [plotConnectivity.m](plotConnectivity.m), with display positions in [paperConnectivityLayout.m](paperConnectivityLayout.m) and [paperHumanConnectivityLayout.m](paperHumanConnectivityLayout.m).
+Each call saves a species-named `.fig` with the menu to switch between both species, plus a `.pdf` showing the selected species. Only [FST_connectivity_explorer.fig](FST_Connectivity/FST_connectivity_explorer.fig) is distributed as a prebuilt MATLAB figure. The calls also update `<species>/edges.csv` and `<species>/selectnodes.csv` inside `FST_Connectivity`, which are generated tables. Use `WriteTables=false` to rebuild the figures without rewriting those tables. The source code is [plotConnectivity.m](FST_Connectivity/plotConnectivity.m), with display positions in [paperConnectivityLayout.m](FST_Connectivity/paperConnectivityLayout.m) and [paperHumanConnectivityLayout.m](FST_Connectivity/paperHumanConnectivityLayout.m).
 
 ### Evidence and source files
 
-The `human/` and `macaque/` folders hold the literature review data and brain images. These files are the sources used to build the FST views:
+Inside `FST_Connectivity`, the `human/` and `macaque/` folders hold the literature review data and brain images. These files are the sources used to build the FST views:
 
 | File | Purpose |
 | --- | --- |
-| [human/evidence.csv](human/evidence.csv), [macaque/evidence.csv](macaque/evidence.csv) | One row per literature finding. `Main` is the seed area and `Affiliate` is the partner. Columns record study method, reports and grades for `Main → Affiliate` and `Affiliate → Main`, reference codes, and notes. For FST, those directions are efferent and afferent, respectively. |
-| [human/nodes.csv](human/nodes.csv), [macaque/nodes.csv](macaque/nodes.csv) | Area labels, native coordinates, and pathway colors. MATLAB and Python map these to the paper-style display positions for FST. |
-| [paper_conflict_dots.json](src/fst_connectivity/data/paper_conflict_dots.json) | Grey area labels transcribed from the supplied Figure 3 for the optional grey/black view. The figure uses this fixed list; it does not recompute conflicts from the CSVs. |
-| `human/citations.txt`, `macaque/citations.txt` | Full citations for the reference codes in the evidence tables. |
-| `human/abbreviations.csv`, `macaque/abbreviations.csv` | Expansions of area abbreviations. |
-| [human/surface_snapshots/veryinflated_lat_white.tif](human/surface_snapshots/veryinflated_lat_white.tif), [macaque/surface_snapshots/veryinflated_lat_white.tif](macaque/surface_snapshots/veryinflated_lat_white.tif) | The only TIFF retained in each species folder, used as the lateral background in MATLAB. The Python package contains matching PNG backgrounds. |
-| [macaque/fel91_fst_connections.csv](macaque/fel91_fst_connections.csv) | FST pathways transcribed from Felleman and Van Essen (1991). |
+| [human/evidence.csv](FST_Connectivity/human/evidence.csv), [macaque/evidence.csv](FST_Connectivity/macaque/evidence.csv) | One row per literature finding. `Main` is the seed area and `Affiliate` is the partner. Columns record study method, reports and grades for `Main → Affiliate` and `Affiliate → Main`, reference codes, and notes. For FST, those directions are efferent and afferent, respectively. |
+| [human/nodes.csv](FST_Connectivity/human/nodes.csv), [macaque/nodes.csv](FST_Connectivity/macaque/nodes.csv) | Area labels, native coordinates, and pathway colors. MATLAB and Python map these to the paper-style display positions for FST. |
+| [paper_conflict_dots.json](FST_Connectivity/src/fst_connectivity/data/paper_conflict_dots.json) | Grey area labels transcribed from the supplied Figure 3 for the optional grey/black view. The figure uses this fixed list; it does not recompute conflicts from the CSVs. |
+| [human/citations.txt](FST_Connectivity/human/citations.txt), [macaque/citations.txt](FST_Connectivity/macaque/citations.txt) | Full citations for the reference codes in the evidence tables. |
+| [human/abbreviations.csv](FST_Connectivity/human/abbreviations.csv), [macaque/abbreviations.csv](FST_Connectivity/macaque/abbreviations.csv) | Expansions of area abbreviations. |
+| [human/surface_snapshots/veryinflated_lat_white.tif](FST_Connectivity/human/surface_snapshots/veryinflated_lat_white.tif), [macaque/surface_snapshots/veryinflated_lat_white.tif](FST_Connectivity/macaque/surface_snapshots/veryinflated_lat_white.tif) | The only TIFF retained in each species folder, used as the lateral background in MATLAB. The Python package contains matching PNG backgrounds. |
+| [macaque/fel91_fst_connections.csv](FST_Connectivity/macaque/fel91_fst_connections.csv) | FST pathways transcribed from Felleman and Van Essen (1991). |
 | `<species>/edges.csv`, `<species>/selectnodes.csv` | Generated summaries from MATLAB; edit `evidence.csv` and `nodes.csv` as source data instead. |
 
 The `evidence.xlsm` files are working review spreadsheets. The CSV files are the inputs used to build the figures.
@@ -67,14 +67,15 @@ Two existing macaque display interpretations differ from literal source cells: B
 
 ### Rebuild the browser file with Python
 
-Python 3.10 or newer is needed only to generate a new offline HTML file. From this repository, install the package and render the current CSV data with:
+Python 3.10 or newer is needed only to generate a new offline HTML file. From the repository root, enter `FST_Connectivity`, install the package, and render the current CSV data with:
 
 ```bash
+cd FST_Connectivity
 python -m pip install .
 python -m fst_connectivity --data-dir . --output FST_connectivity_explorer_python.html --no-open
 ```
 
-The [prebuilt wheel](dist/fst_connectivity-0.1.21-py3-none-any.whl) is an alternative to installing from source. It bundles the repository evidence for use outside this folder. See [PYTHON_PACKAGE.md](PYTHON_PACKAGE.md) for more options.
+The [prebuilt wheel](FST_Connectivity/dist/fst_connectivity-0.1.21-py3-none-any.whl) is an alternative to installing from source. It bundles the repository evidence for use outside this folder. See [PYTHON_PACKAGE.md](FST_Connectivity/PYTHON_PACKAGE.md) for more options.
 
 ## Motion stimuli
 

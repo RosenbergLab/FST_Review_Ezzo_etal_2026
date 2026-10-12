@@ -4,14 +4,15 @@ This package opens a macaque and human FST connectivity explorer in a browser. I
 
 ## Install and open
 
-From a downloaded copy of this repository:
+From a downloaded copy of this repository, enter the connectivity folder first:
 
 ```bash
+cd FST_Connectivity
 python -m pip install .
 fst-connectivity
 ```
 
-If you received only the built wheel, install it with `python -m pip install fst_connectivity-0.1.21-py3-none-any.whl` and then run `fst-connectivity`.
+Alternatively, from `FST_Connectivity/`, install the included wheel with `python -m pip install dist/fst_connectivity-0.1.21-py3-none-any.whl`, then run `fst-connectivity`.
 
 You can also run `python -m fst_connectivity`. Both commands create one self-contained HTML file and open it in your default browser. The **Species** menu switches views without reloading. Study selections are kept separately for macaques and humans.
 
@@ -31,7 +32,7 @@ from fst_connectivity import render_html
 path = render_html("FST_connectivity_explorer.html", initial_species="human")
 ```
 
-Use `--data-dir PATH` or `render_html(..., data_dir=PATH)` to read updated `human/` and `macaque/` CSVs from another folder. The original source files are read only. When that folder contains the review's TIFFs without PNGs, the package uses its included pixel-identical PNG backgrounds.
+Use `--data-dir PATH` or `render_html(..., data_dir=PATH)` to read updated `human/` and `macaque/` CSVs from another folder. For the CSVs in this repository, pass `--data-dir .` when working in `FST_Connectivity/` or `--data-dir FST_Connectivity` when working in the repository root. The original source files are read only. When that folder contains the review's TIFFs without PNGs, the package uses its included pixel-identical PNG backgrounds.
 
 ## What the figure shows
 
