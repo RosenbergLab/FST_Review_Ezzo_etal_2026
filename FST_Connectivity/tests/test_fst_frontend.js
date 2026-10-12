@@ -6,6 +6,8 @@ const vm = require('node:vm');
 
 const html = fs.readFileSync(process.argv[2], 'utf8');
 assert.equal(html.includes('Counts distinct papers with a positive connection.'), false);
+assert.equal(html.includes('1990 tracer score: 1–3, with intermediate sizes.'), false);
+assert.equal(html.includes('1992 subcortical dots: selected direction only; open = no connection strength.'), false);
 const payload = html.match(/<script id="connectivity-data"[^>]*>([\s\S]*?)<\/script>/)[1];
 const config = JSON.parse(payload);
 const script = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].at(-1)[1];
@@ -339,6 +341,7 @@ const efferent = one(macaque, el => el.tag === 'input' && el.value === 'efferent
 assert.equal(efferent.disabled, false);
 selectRadio(macaque, efferent);
 assert.equal(macLegend.style.display, '');
+assert.equal(one(macSizeField, el => el.className === 'size-note').textContent, '');
 assert.deepEqual(areaLabelPositions(macaque), macaqueLabels);
 assert.equal(one(macaque, el => el.className === 'legend-title').textContent,
   'Tracer score (1–3)');
@@ -357,6 +360,7 @@ assert.equal(bouMarker('CITd').attributes.fill, 'none');
 assert.equal(bouMarker('TRN').attributes.fill, 'none');
 const afferent = one(macaque, el => el.tag === 'input' && el.value === 'afferent');
 selectRadio(macaque, afferent);
+assert.equal(one(macSizeField, el => el.className === 'size-note').textContent, '');
 assert.deepEqual(areaLabelPositions(macaque), macaqueLabels);
 assert.deepEqual(visibleSubcortical(), ['pulvinar', 'claustrum', 'basalfore'].sort());
 assert.notEqual(bouMarker('MT').style.display, 'none');

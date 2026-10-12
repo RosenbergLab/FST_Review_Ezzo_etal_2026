@@ -1670,7 +1670,7 @@ noteControl = uicontrol('Parent', sizeGroup, 'Style', 'text', ...
 strengthLegend = addDotSizeLegend(sizeGroup, ...
     [10, 31, panelWidth - 44, 90], false);
 numericStrengthLegend = addDotSizeLegend(sizeGroup, ...
-    [10, 31, panelWidth - 44, 90], false, "numeric");
+    [10, 34, panelWidth - 44, 118], false, "numeric");
 numericStrengthLegend.Visible = 'off';
 countLegend = addDotSizeLegend(sizeGroup, ...
     [10, 35, panelWidth - 44, 82], false, "count");
@@ -1842,6 +1842,7 @@ if ~isempty(selectedModeIndex) && nnz(checked) == 1
     numericMode = any(state.Studies.codes{selectedStudy} == "Bou90");
 end
 directionFilter = numericMode && ismember(sizeMode, ["afferent", "efferent"]);
+state.Note.Visible = 'on';
 if sizeMode == "studycount"
     state.StrengthLegend.Visible = 'off';
     state.NumericStrengthLegend.Visible = 'off';
@@ -1855,8 +1856,8 @@ else
         state.Note.String = '';
     elseif numericMode
         state.NumericStrengthLegend.Visible = 'on';
-        state.Note.String = sprintf(['1990 tracer score: 1–3, with intermediate sizes.\n' ...
-            '1992 subcortical dots: selected direction only; open = ungraded.']);
+        state.Note.String = '';
+        state.Note.Visible = 'off';
     else
         state.StrengthLegend.Visible = 'on';
         state.Note.String = sprintf(['Dots remain visible for all selected studies.\n' ...
@@ -2270,7 +2271,7 @@ if kind == "numeric"
         % explanation each get a separate row with enough vertical space.
         markerX = [18, 230, 18, 18];
         labelX = [40, 252, 40, 40];
-        rowY = [50, 50, 30, 10];
+        rowY = [75, 75, 47, 16];
     end
 elseif singleColumn
     markerX = [18, 18, 18, 18];
