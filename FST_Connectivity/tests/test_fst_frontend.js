@@ -277,7 +277,10 @@ selectRadio(macaque, efferent);
 assert.deepEqual(areaLabelPositions(macaque), macaqueLabels);
 assert.equal(one(macaque, el => el.className === 'legend-title').textContent,
   'Tracer score (1–3)');
-assert.equal(all(macaque, el => el.className === 'legend-entry').length, 6);
+assert.deepEqual(all(macaque, el => el.className === 'legend-entry')
+  .map(entry => entry.children.at(-1).textContent),
+  ['1 (weak)', '2 (moderate)', '3 (strong)',
+   'No connection strength reported (open)']);
 assert.equal(all(macaque, el => el.tag === 'span' &&
   el.textContent === 'No connection strength reported (open)').length, 1);
 assert.deepEqual(visibleSubcortical(),

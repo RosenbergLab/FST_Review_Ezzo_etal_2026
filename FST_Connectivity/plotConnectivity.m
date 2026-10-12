@@ -2208,9 +2208,9 @@ if kind == "count"
 elseif kind == "numeric"
     legendTitle = 'Tracer score (1–3)';
     legendTag = 'NumericStrengthLegend';
-    labels = ["1 (weak)", "1.5", "2 (moderate)", ...
-        "2.5", "3 (strong)", "No connection strength reported (open)"];
-    diameters = [9, 12, 15, 18.5, 22, 9];
+    labels = ["1 (weak)", "2 (moderate)", "3 (strong)", ...
+        "No connection strength reported (open)"];
+    diameters = [9, 15, 22, 9];
     openIndex = numel(labels);
 else
     legendTitle = 'Dot size legend';
@@ -2237,14 +2237,15 @@ keyAx = axes('Parent', key, 'Units', 'pixels', ...
     'HitTest', 'off');
 if kind == "numeric"
     if singleColumn
-        markerX = repmat(18, 1, 6);
-        labelX = repmat(40, 1, 6);
-        rowY = linspace(plotHeight - 8, 8, 6);
+        markerX = repmat(18, 1, 4);
+        labelX = repmat(40, 1, 4);
+        rowY = linspace(plotHeight - 11, 11, 4);
     else
-        % The open-circle explanation needs its own full-width row.
-        markerX = [18, 230, 18, 230, 18, 18];
-        labelX = [40, 252, 40, 252, 40, 40];
-        rowY = [52, 52, 37, 37, 22, 8];
+        % Two scores share the top row; the large marker and open-circle
+        % explanation each get a separate row with enough vertical space.
+        markerX = [18, 230, 18, 18];
+        labelX = [40, 252, 40, 40];
+        rowY = [50, 50, 30, 10];
     end
 elseif singleColumn
     markerX = [18, 18, 18, 18];

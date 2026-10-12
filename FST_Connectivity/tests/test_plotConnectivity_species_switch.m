@@ -282,6 +282,7 @@ assertAreaLabelsFixed(state, originalLabels, 'efferent strength');
 assert(strcmp(state.NumericStrengthLegend.Visible, 'on'));
 assert(strcmp(state.StrengthLegend.Visible, 'off'));
 assertLegendTextFits(state.NumericStrengthLegend);
+assertNumericLegendReadable(state.NumericStrengthLegend);
 for area = ["TRN", "pulvinar", "claustrum", "striatum", ...
         "pretectum", "pons"]
     assert(isVisible(area), 'Missing efferent Bou92 area %s.', area);
@@ -585,6 +586,55 @@ for k = 1:numel(textHandles)
         bounds(2) >= yBounds(1) - 1 && ...
         bounds(2) + bounds(4) <= yBounds(2) + 1, ...
         'Legend text "%s" is clipped by its axes.', string(label.String));
+end
+end
+
+function assertNumericLegendReadable(legendPanel)
+% The three anchor scores and the open-circle explanation must fit without
+% touching one another. Intermediate scores still size real data points.
+expected = sort(["1 (weak)"; "2 (moderate)"; "3 (strong)"; ...
+    "No connection strength reported (open)"]);
+actual = legendText(legendPanel);
+actual(strlength(actual) == 0) = [];
+assert(isequal(sort(actual), expected), ...
+    'The numeric legend should list only scores 1, 2, 3, and no strength.');
+ax = findall(legendPanel, 'Type', 'axes');
+assert(isscalar(ax));
+markers = findall(ax, 'Type', 'scatter');
+assert(numel(markers) == 4, 'Expected four numeric legend markers.');
+drawnow;
+scaleX = ax.Position(3) / diff(ax.XLim);
+scaleY = ax.Position(4) / diff(ax.YLim);
+pixelsPerPoint = get(groot, 'ScreenPixelsPerInch') / 72;
+radii = arrayfun(@(h) sqrt(h.SizeData) * pixelsPerPoint / 2, markers);
+for k = 1:numel(markers)
+    x = markers(k).XData;
+    y = markers(k).YData;
+    radius = radii(k);
+    assert(x * scaleX - radius >= 0 && ...
+        (ax.XLim(2) - x) * scaleX - radius >= 0 && ...
+        y * scaleY - radius >= 0 && ...
+        (ax.YLim(2) - y) * scaleY - radius >= 0, ...
+        'A numeric legend marker is clipped by the axes.');
+    for j = k + 1:numel(markers)
+        distance = hypot((x - markers(j).XData) * scaleX, ...
+            (y - markers(j).YData) * scaleY);
+        assert(distance >= radius + radii(j) + 2, ...
+            'Numeric legend marker circles overlap.');
+    end
+end
+labels = findall(ax, 'Type', 'text');
+labels = labels(arrayfun(@(h) strlength(string(h.String)) > 0, labels));
+for k = 1:numel(labels)
+    one = labels(k).Extent;
+    for j = k + 1:numel(labels)
+        two = labels(j).Extent;
+        separated = one(1) + one(3) + 1 < two(1) || ...
+            two(1) + two(3) + 1 < one(1) || ...
+            one(2) + one(4) + 1 < two(2) || ...
+            two(2) + two(4) + 1 < one(2);
+        assert(separated, 'Numeric legend labels overlap.');
+    end
 end
 end
 

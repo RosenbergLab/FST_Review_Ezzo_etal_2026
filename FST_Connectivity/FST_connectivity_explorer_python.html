@@ -68,8 +68,9 @@
       padding: 4px 7px; font-size: 12px; }
     .legend:not(.numeric) .legend-grid { grid-template-columns: .9fr 1.1fr; }
     .legend-entry { height: 20px; display: flex; align-items: center; gap: 11px; }
-    .legend.numeric .legend-grid { gap: 1px 7px; padding: 2px 7px; font-size: 11px; }
-    .legend.numeric .legend-entry { height: 18px; }
+    .legend.numeric .legend-grid { grid-template-columns: 140px minmax(0, 1fr);
+      gap: 4px 9px; padding: 4px 7px; font-size: 12px; }
+    .legend.numeric .legend-entry { height: 22px; white-space: nowrap; }
     .legend-dot { display: inline-block; flex: none; border-radius: 50%; background: #444; }
     .legend-dot.open { background: transparent; border: 1.5px solid #444; }
     .status { position: absolute; top: 751px; left: 12px; right: 12px;
@@ -232,8 +233,8 @@
       let entries = countMode
         ? [['1 study', 9], ['2 studies', 10], ['3 studies', 15], ['4 studies', 20]]
         : numericMode
-          ? [['1 (weak)', 9], ['1.5', 12], ['2 (moderate)', 15],
-             ['2.5', 18.5], ['3 (strong)', 22], ['No connection strength reported (open)', 9, true]]
+          ? [['1 (weak)', 9], ['2 (moderate)', 15],
+             ['3 (strong)', 22], ['No connection strength reported (open)', 9, true]]
         : [['Weak (small)', 9], ['Moderate (medium)', 15],
            ['Strong (large)', 22], ['No connection strength reported (open)', 9, true]];
       if (countMode && view.data.species === 'human')
